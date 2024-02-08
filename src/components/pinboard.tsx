@@ -75,7 +75,7 @@ function NodesContainer({ nodes }: { nodes?: Array<string> }) {
 		>
 			{nodes?.map((s, i) => (
 				<Draggable key={i}>
-					<div className="inline-block border-2 border-black p-2 bg-white">
+					<div className="inline-block border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black">
 						<h1>{s}</h1>
 					</div>
 				</Draggable>
@@ -90,20 +90,31 @@ export function Background() {
 	} = useContext(PinboardContext);
 
 	return (
-		<svg className="absolute inset-0 w-full h-full z-0 pointer-events-none">
-			<pattern
-				id="dots-pattern"
-				x={x}
-				y={y}
-				width="10"
-				height="10"
-				patternUnits="userSpaceOnUse"
-				patternTransform="translate(-3, -3)"
-			>
-				<circle cx="4" cy="4" r="1" fill="#ccc" />
-			</pattern>
+		<span className="pointer-events-none">
+			{/* Border Fade */}
+			<span className="absolute inset-0 z-10 shadow-[0_0_0_16px,inset_0_0_8px_16px] shadow-white/80 rounded-[32px]" />
 
-			<rect x="0" y="0" width="100%" height="100%" fill="url(#dots-pattern)" />
-		</svg>
+			{/* Dots Pattern */}
+			<svg className="absolute inset-0 w-full h-full z-0">
+				<pattern
+					id="dots-pattern"
+					x={x}
+					y={y}
+					width="10"
+					height="10"
+					patternUnits="userSpaceOnUse"
+					patternTransform="translate(0, 0)"
+				>
+					<circle cx="1" cy="1" r="1" fill="#ccc" shapeRendering="crispEdges" />
+				</pattern>
+				<rect
+					x="0"
+					y="0"
+					width="100%"
+					height="100%"
+					fill="url(#dots-pattern)"
+				/>
+			</svg>
+		</span>
 	);
 }
