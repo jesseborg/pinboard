@@ -8,6 +8,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { Draggable } from "./draggable";
 
 // const initialNodes = [
 // 	{
@@ -70,11 +71,16 @@ function NodesContainer({ nodes }: { nodes?: Array<string> }) {
 	}
 
 	return (
-		<div style={{ transform: `translate(${x}px, ${y}px)` }} className="z-10">
+		<div
+			style={{ transform: `translate(${x}px, ${y}px)` }}
+			className="z-10 w-fit pointer-events-none"
+		>
 			{nodes?.map((s, i) => (
-				<h1 className="bg-red-500" key={i}>
-					{s}
-				</h1>
+				<Draggable key={i}>
+					<div className="inline-block border-2 border-black p-2 bg-white">
+						<h1>{s}</h1>
+					</div>
+				</Draggable>
 			))}
 		</div>
 	);
