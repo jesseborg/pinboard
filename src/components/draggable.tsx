@@ -8,9 +8,17 @@ export function Draggable({ children }: PropsWithChildren<DraggableProps>) {
 
 	const [[x, y], setXY] = useState<Tuple<number>>([0, 0]);
 
-	useDrag(ref, ({ offset }) => {
-		setXY(offset);
-	});
+	useDrag(
+		ref,
+		({ gridOffset }) => {
+			setXY(gridOffset);
+		},
+		{
+			grid: {
+				step: [10, 10],
+			},
+		}
+	);
 
 	return (
 		<div

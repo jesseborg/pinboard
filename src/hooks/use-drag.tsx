@@ -1,3 +1,4 @@
+import { snap } from "@/utils/snap";
 import { RefObject, useEffect, useState } from "react";
 
 enum MouseButtons {
@@ -18,11 +19,16 @@ type BaseDragEvent = {
 	movement: Tuple<number>; // displacement between offset and lastOffset
 };
 
-type DragEvent = BaseDragEvent;
+type DragEvent = BaseDragEvent & {
+	gridOffset: Tuple<number>;
+};
 type DragStartEvent = BaseDragEvent;
 type DragEndEvent = BaseDragEvent;
 
 type UseDragOptionsProps = {
+	grid?: {
+		step?: Tuple<number>;
+	};
 	onDragStart?: (event: DragStartEvent) => void;
 	onDragEnd?: (event: DragEndEvent) => void;
 };
@@ -68,6 +74,13 @@ function useDrag(
 					offsetInitial[1] + movement[1],
 				] as Tuple<number>;
 
+				const gridOffset = options?.grid?.step
+					? ([
+							snap(offset[0], options.grid.step[0]),
+							snap(offset[1], options.grid.step[1]),
+					  ] as Tuple<number>)
+					: offset;
+
 				setOffset(offset);
 
 				onDrag?.({
@@ -76,6 +89,7 @@ function useDrag(
 					movement,
 					initial: dragInitial,
 					offset,
+					gridOffset,
 				});
 			}
 		}
