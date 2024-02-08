@@ -8,10 +8,8 @@ export function Draggable({ children }: PropsWithChildren<DraggableProps>) {
 
 	const [[x, y], setXY] = useState<Tuple<number>>([0, 0]);
 
-	useDrag(ref, {
-		onDrag: ({ offset }) => {
-			setXY(offset);
-		},
+	useDrag(ref, ({ offset }) => {
+		setXY(offset);
 	});
 
 	return (

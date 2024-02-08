@@ -45,10 +45,8 @@ export function PinBoard({
 
 	const [xy, setXY] = useState<Tuple<number>>([0, 0]);
 
-	const { down } = useDrag(ref, {
-		onDrag: ({ offset }) => {
-			setXY(offset);
-		},
+	const { down } = useDrag(ref, ({ offset }) => {
+		setXY(offset);
 	});
 
 	return (
@@ -100,18 +98,12 @@ export function Background() {
 				width="10"
 				height="10"
 				patternUnits="userSpaceOnUse"
-				patternTransform="translate(0, 0)"
+				patternTransform="translate(-3, -3)"
 			>
 				<circle cx="4" cy="4" r="1" fill="#ccc" />
 			</pattern>
 
-			<rect
-				x="0"
-				y="0"
-				width="100%"
-				height="100%"
-				fill="url(#dots-pattern)"
-			></rect>
+			<rect x="0" y="0" width="100%" height="100%" fill="url(#dots-pattern)" />
 		</svg>
 	);
 }

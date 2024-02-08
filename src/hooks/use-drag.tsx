@@ -23,12 +23,15 @@ type DragStartEvent = BaseDragEvent;
 type DragEndEvent = BaseDragEvent;
 
 type UseDragOptionsProps = {
-	onDrag?: (event: DragEvent) => any;
 	onDragStart?: (event: DragStartEvent) => void;
 	onDragEnd?: (event: DragEndEvent) => void;
 };
 
-function useDrag(ref: RefObject<Element>, options?: UseDragOptionsProps) {
+function useDrag(
+	ref: RefObject<Element>,
+	onDrag?: (event: DragEvent) => void,
+	options?: UseDragOptionsProps
+) {
 	if (process.env.NODE_ENV === "development") {
 		if (typeof ref !== "object" || typeof ref.current === "undefined") {
 			console.error("useDrag expects a single ref argument.");
@@ -67,7 +70,7 @@ function useDrag(ref: RefObject<Element>, options?: UseDragOptionsProps) {
 
 				setOffset(offset);
 
-				options?.onDrag?.({
+				onDrag?.({
 					event,
 					xy: [event.clientX, event.clientY],
 					movement,
@@ -141,7 +144,7 @@ function useDrag(ref: RefObject<Element>, options?: UseDragOptionsProps) {
 			element.removeEventListener("mousedown", handleMouseDown);
 			element.removeEventListener("mouseup", handleMouseUp);
 		};
-	}, [ref, options, down, dragInitial, offset, offsetInitial]);
+	}, [ref, options, onDrag, down, dragInitial, offset, offsetInitial]);
 
 	return { down };
 }
