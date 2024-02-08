@@ -40,15 +40,17 @@ function useDrag(ref: RefObject<Element>, options?: UseDragOptionsProps) {
 	const [dragInitial, setDragInitial] = useState<Tuple<number>>([0, 0]);
 
 	const [offset, setOffset] = useState<Tuple<number>>([0, 0]);
-	const [initialOffset, setInitialOffset] = useState<Tuple<number>>([0, 0]);
+	const [offsetInitial, setOffsetInitial] = useState<Tuple<number>>([0, 0]);
 
 	useEffect(() => {
-		function handleMouseMove(event: MouseEvent) {
-			if (event.button !== MouseButtons.LEFT) {
-				return;
-			}
+		if (!ref.current) {
+			return;
+		}
 
-			if (!ref.current) {
+		function handleMouseMove(event: MouseEvent) {
+			event.stopPropagation();
+
+			if (event.button !== MouseButtons.LEFT) {
 				return;
 			}
 
@@ -59,8 +61,8 @@ function useDrag(ref: RefObject<Element>, options?: UseDragOptionsProps) {
 				] as Tuple<number>;
 
 				const offset = [
-					initialOffset[0] + movement[0],
-					initialOffset[1] + movement[1],
+					offsetInitial[0] + movement[0],
+					offsetInitial[1] + movement[1],
 				] as Tuple<number>;
 
 				setOffset(offset);
@@ -76,6 +78,8 @@ function useDrag(ref: RefObject<Element>, options?: UseDragOptionsProps) {
 		}
 
 		function handleMouseDown(event: MouseEvent) {
+			event.stopPropagation();
+
 			if (event.button !== MouseButtons.LEFT) {
 				return;
 			}
@@ -90,7 +94,7 @@ function useDrag(ref: RefObject<Element>, options?: UseDragOptionsProps) {
 			setDragInitial(initial);
 
 			// Reset the initial offset to the current offset on mouse down.
-			setInitialOffset(offset);
+			setOffsetInitial(offset);
 
 			options?.onDragStart?.({
 				event,
@@ -102,6 +106,8 @@ function useDrag(ref: RefObject<Element>, options?: UseDragOptionsProps) {
 		}
 
 		function handleMouseUp(event: MouseEvent) {
+			event.stopPropagation();
+
 			if (event.button !== MouseButtons.LEFT) {
 				return;
 			}
@@ -110,7 +116,7 @@ function useDrag(ref: RefObject<Element>, options?: UseDragOptionsProps) {
 
 			const { x, y } = (event.target as HTMLElement).getBoundingClientRect();
 			const offset = [x, y] as Tuple<number>;
-			setInitialOffset(offset);
+			setOffsetInitial(offset);
 
 			// TODO: Add an option for how many pixels the mouse must move before it's considered a drag.
 			options?.onDragEnd?.({
@@ -125,16 +131,17 @@ function useDrag(ref: RefObject<Element>, options?: UseDragOptionsProps) {
 			});
 		}
 
+		const element = ref.current as HTMLElement;
 		document.addEventListener("mousemove", handleMouseMove);
-		document.addEventListener("mousedown", handleMouseDown);
-		document.addEventListener("mouseup", handleMouseUp);
+		element.addEventListener("mousedown", handleMouseDown);
+		element.addEventListener("mouseup", handleMouseUp);
 
 		return () => {
 			document.removeEventListener("mousemove", handleMouseMove);
-			document.removeEventListener("mousedown", handleMouseDown);
-			document.removeEventListener("mouseup", handleMouseUp);
+			element.removeEventListener("mousedown", handleMouseDown);
+			element.removeEventListener("mouseup", handleMouseUp);
 		};
-	}, [ref, options, down, dragInitial, offset, initialOffset]);
+	}, [ref, options, down, dragInitial, offset, offsetInitial]);
 
 	return { down };
 }
