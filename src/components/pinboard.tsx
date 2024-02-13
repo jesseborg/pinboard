@@ -43,11 +43,15 @@ export function PinBoard({
 }: PropsWithChildren<PinBoardProps>) {
 	const ref = useRef<HTMLDivElement>(null);
 
-	const [xy, setXY] = useState<Tuple<number>>([0, 0]);
+	const [xy, setXY] = useState<Tuple<number>>([50, 50]);
 
-	const { down } = useDrag(ref, ({ offset }) => {
-		setXY(offset);
-	});
+	const { down } = useDrag(
+		ref,
+		({ offset }) => {
+			setXY(offset);
+		},
+		{ offset: xy }
+	);
 
 	return (
 		<PinboardContext.Provider value={{ xy, down }}>

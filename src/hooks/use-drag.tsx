@@ -26,6 +26,7 @@ type DragStartEvent = BaseDragEvent;
 type DragEndEvent = BaseDragEvent;
 
 type UseDragOptionsProps = {
+	offset?: Tuple<number>;
 	grid?: {
 		step?: Tuple<number>;
 	};
@@ -48,8 +49,10 @@ function useDrag(
 
 	const [dragInitial, setDragInitial] = useState<Tuple<number>>([0, 0]);
 
-	const [offset, setOffset] = useState<Tuple<number>>([0, 0]);
-	const [offsetInitial, setOffsetInitial] = useState<Tuple<number>>([0, 0]);
+	const [offset, setOffset] = useState<Tuple<number>>(
+		options?.offset ?? [0, 0]
+	);
+	const [offsetInitial, setOffsetInitial] = useState<Tuple<number>>(offset);
 
 	useEffect(() => {
 		if (!ref.current) {
