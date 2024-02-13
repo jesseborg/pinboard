@@ -9,20 +9,7 @@ import {
 	useState,
 } from "react";
 import { Draggable } from "./draggable";
-
-// const initialNodes = [
-// 	{
-// 		id: "1",
-// 		data: { label: "Hello" },
-// 		position: { x: 0, y: 0 },
-// 		type: "input",
-// 	},
-// 	{
-// 		id: "2",
-// 		data: { label: "World" },
-// 		position: { x: 100, y: 100 },
-// 	},
-// ];
+import { Node, renderNode } from "./node";
 
 type PinBoardContextProps = {
 	xy: Tuple<number>;
@@ -34,7 +21,7 @@ const PinboardContext = createContext<PinBoardContextProps>({
 });
 
 type PinBoardProps = {
-	nodes?: Array<string>;
+	nodes?: Array<Node>;
 };
 
 export function PinBoard({
@@ -63,7 +50,7 @@ export function PinBoard({
 	);
 }
 
-function NodesContainer({ nodes }: { nodes?: Array<string> }) {
+function NodesContainer({ nodes }: { nodes?: PinBoardProps["nodes"] }) {
 	const {
 		xy: [x, y],
 	} = useContext(PinboardContext);
@@ -75,12 +62,12 @@ function NodesContainer({ nodes }: { nodes?: Array<string> }) {
 	return (
 		<div
 			style={{ transform: `translate(${x}px, ${y}px)` }}
-			className="z-10 w-fit pointer-events-none"
+			className="z-10 pointer-events-none"
 		>
-			{nodes?.map((s, i) => (
-				<Draggable key={i}>
-					<div className="inline-block border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black">
-						<h1>{s}</h1>
+			{nodes?.map((node, i) => (
+				<Draggable key={node.id} position={node.position}>
+					<div className="border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black">
+						{renderNode(node)}
 					</div>
 				</Draggable>
 			))}

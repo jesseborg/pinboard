@@ -13,6 +13,16 @@ main {
 	overflow: hidden;
 }
 
+@layer components {
+	.draggable {
+		pointer-events: auto;
+	}
+
+	.draggable > * {
+		pointer-events: none;
+	}
+}
+
 @layer utilities {
 	.text-balance {
 		text-wrap: balance;
