@@ -1,5 +1,5 @@
 import { snap } from "@/utils/snap";
-import { RefObject, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 enum MouseButtons {
 	LEFT = 0,
@@ -12,64 +12,119 @@ enum MouseButtons {
 export type Tuple<T> = [T, T];
 
 type BaseDragEvent = {
+	/** The base mouse event */
 	event: MouseEvent;
-	xy: Tuple<number>; // [x,y] values (pointer position or scroll offset)
-	offset: Tuple<number>; // offset since the first gesture
-	initial: Tuple<number>; // xy value when the gesture started
-	movement: Tuple<number>; // displacement between offset and lastOffset
+	/** [x,y] values (pointer position or scroll offset) */
+	xy: Tuple<number>; //
+	/** Offset since the first gesture */
+	offset: Tuple<number>;
+	/** xy value when the gesture started */
+	initial: Tuple<number>;
+	/** Displacement between offset and lastOffset */
+	movement: Tuple<number>;
+	/** The element being dragged */
+	target: HTMLElement | null;
 };
 
 type DragEvent = BaseDragEvent & {
+	/** The current offset position snapped to the grid step */
 	gridOffset: Tuple<number>;
 };
-type DragStartEvent = BaseDragEvent;
+type DragStartEvent = BaseDragEvent | { event: React.MouseEvent };
 type DragEndEvent = BaseDragEvent;
 
 type UseDragOptionsProps = {
+	/** Offset the drag by [x,y] pixels */
 	offset?: Tuple<number>;
 	grid?: {
+		/** [x,y] values for the grid stepping */
 		step?: Tuple<number>;
 	};
+	/** Only accept drag events from the elements that match this CSS selector */
+	selectors?: string;
+	children?: {
+		/** Ignore drag events from children of the `bind` consumer */
+		ignore?: boolean;
+	};
 	onDragStart?: (event: DragStartEvent) => void;
-	onDragEnd?: (event: DragEndEvent) => void;
 };
 
-function useDrag(
-	ref: RefObject<Element>,
-	onDrag?: (event: DragEvent) => void,
+function useDrag<T extends HTMLElement>(
+	onDrag?: ((event: DragEvent) => void) | null,
 	options?: UseDragOptionsProps
 ) {
-	if (process.env.NODE_ENV === "development") {
-		if (typeof ref !== "object" || typeof ref.current === "undefined") {
-			console.error("useDrag expects a single ref argument.");
-		}
-	}
+	// Main element that holds all the events
+	const ref = useRef<T | null>(null);
 
+	// Reference to the element being dragged
+	const dragTarget = useRef<HTMLElement | null>(null);
+
+	// Pressed state of the pointer
 	const [down, setDown] = useState(false);
 
-	const [dragInitial, setDragInitial] = useState<Tuple<number>>([0, 0]);
+	// Initial position of the pointer when the gesture started
+	const [pointerInitial, setPointerInitial] = useState<Tuple<number>>([0, 0]);
 
-	const [offset, setOffset] = useState<Tuple<number>>(
-		options?.offset ?? [0, 0]
-	);
+	// Current position of the element
+	const [offset, setOffset] = useState<Tuple<number>>([0, 0]);
+
+	// Initial position of the element when the gesture started
 	const [offsetInitial, setOffsetInitial] = useState<Tuple<number>>(offset);
 
-	useEffect(() => {
-		if (!ref.current) {
-			return;
-		}
+	const onMouseDown = useCallback(
+		(event: React.MouseEvent) => {
+			// Target needs to be an HTMLElement
+			const target = event.target as HTMLElement;
 
-		function handleMouseMove(event: MouseEvent) {
-			event.stopPropagation();
+			// If the selector option is set, make sure the target matches it
+			if (options?.selectors && !target.matches(options.selectors)) {
+				return;
+			}
 
-			if (event.button !== MouseButtons.LEFT) {
+			// If the ignore children option is true, ignore anything that is not the 'ref'
+			if (options?.children?.ignore && target !== ref.current) {
+				return;
+			}
+
+			// After all checks have passed, set the target
+			dragTarget.current = target;
+
+			const initial = [event.clientX, event.clientY] as Tuple<number>;
+			setPointerInitial(initial);
+
+			if (options?.offset) {
+				// Get the position relative to the offset
+				const { x, y } = target.getBoundingClientRect();
+				const [ox, oy] = options.offset;
+				setOffsetInitial([x - ox, y - oy]);
+			} else {
+				setOffsetInitial(offset);
+			}
+
+			setDown(true);
+
+			options?.onDragStart?.({
+				event,
+				target,
+				xy: [event.clientX, event.clientY],
+				movement: [event.clientX - initial[0], event.clientY - initial[1]],
+				initial,
+				offset,
+			});
+		},
+		[offset, options]
+	);
+
+	const onMouseMove = useCallback(
+		(event: MouseEvent) => {
+			if (!ref.current || !dragTarget.current) {
 				return;
 			}
 
 			if (down) {
 				const movement = [
-					event.clientX - dragInitial[0],
-					event.clientY - dragInitial[1],
+					event.clientX - pointerInitial[0],
+					event.clientY - pointerInitial[1],
 				] as Tuple<number>;
 
 				const offset = [
@@ -88,82 +143,70 @@ function useDrag(
 
 				onDrag?.({
 					event,
+					target: dragTarget.current,
 					xy: [event.clientX, event.clientY],
 					movement,
-					initial: dragInitial,
+					initial: pointerInitial,
 					offset,
 					gridOffset,
 				});
 			}
+		},
+		[down, offsetInitial, onDrag, options?.grid?.step, pointerInitial]
+	);
+
+	const onMouseUp = useCallback((_: MouseEvent) => {
+		if (!ref.current || !dragTarget.current) {
+			return;
 		}
 
-		function handleMouseDown(event: MouseEvent) {
+		dragTarget.current = null;
+		setDown(false);
+	}, []);
+
+	const handleMouseEvent = useCallback(
+		(event: MouseEvent | React.MouseEvent) => {
 			event.stopPropagation();
 
 			if (event.button !== MouseButtons.LEFT) {
 				return;
 			}
 
-			if (event.target !== ref.current) {
-				return;
+			switch (event.type) {
+				case "mousedown": {
+					onMouseDown(event as React.MouseEvent);
+					break;
+				}
+
+				case "mousemove": {
+					onMouseMove(event as MouseEvent);
+					break;
+				}
+
+				case "mouseup": {
+					onMouseUp(event as MouseEvent);
+					break;
+				}
 			}
+		},
+		[onMouseDown, onMouseMove, onMouseUp]
+	);
 
-			setDown(true);
-
-			const initial = [event.clientX, event.clientY] as Tuple<number>;
-			setDragInitial(initial);
-
-			// Reset the initial offset to the current offset on mouse down.
-			setOffsetInitial(offset);
-
-			options?.onDragStart?.({
-				event,
-				xy: [event.clientX, event.clientY],
-				movement: [event.clientX - initial[0], event.clientY - initial[1]],
-				initial,
-				offset,
-			});
-		}
-
-		function handleMouseUp(event: MouseEvent) {
-			event.stopPropagation();
-
-			if (event.button !== MouseButtons.LEFT) {
-				return;
-			}
-
-			setDown(false);
-
-			const { x, y } = (event.target as HTMLElement).getBoundingClientRect();
-			const offset = [x, y] as Tuple<number>;
-			setOffsetInitial(offset);
-
-			// TODO: Add an option for how many pixels the mouse must move before it's considered a drag.
-			options?.onDragEnd?.({
-				event,
-				xy: [event.clientX, event.clientY],
-				movement: [
-					event.clientX - dragInitial[0],
-					event.clientY - dragInitial[1],
-				],
-				initial: dragInitial,
-				offset,
-			});
-		}
-
-		const element = ref.current as HTMLElement;
-		document.addEventListener("mousemove", handleMouseMove);
-		element.addEventListener("mousedown", handleMouseDown);
-		element.addEventListener("mouseup", handleMouseUp);
+	useEffect(() => {
+		document.addEventListener("mousemove", handleMouseEvent);
+		document.addEventListener("mouseup", handleMouseEvent);
 
 		return () => {
-			document.removeEventListener("mousemove", handleMouseMove);
-			element.removeEventListener("mousedown", handleMouseDown);
-			element.removeEventListener("mouseup", handleMouseUp);
+			document.removeEventListener("mousemove", handleMouseEvent);
+			document.removeEventListener("mouseup", handleMouseEvent);
 		};
-	}, [ref, options, onDrag, down, dragInitial, offset, offsetInitial]);
+	}, [handleMouseEvent]);
 
-	return { down };
+	return {
+		bind: { ref, onMouseDown: handleMouseEvent },
+		target: dragTarget,
+		offset,
+	};
 }
 
 export default useDrag;

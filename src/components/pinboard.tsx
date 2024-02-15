@@ -1,14 +1,7 @@
 "use client";
 
 import useDrag, { Tuple } from "@/hooks/use-drag";
-import {
-	PropsWithChildren,
-	createContext,
-	useContext,
-	useRef,
-	useState,
-} from "react";
-import { Draggable } from "./draggable";
+import { PropsWithChildren, createContext, useContext } from "react";
 import { Node, renderNode } from "./node";
 
 type PinBoardContextProps = {
@@ -28,21 +21,15 @@ export function PinBoard({
 	nodes,
 	children,
 }: PropsWithChildren<PinBoardProps>) {
-	const ref = useRef<HTMLDivElement>(null);
-
-	const [xy, setXY] = useState<Tuple<number>>([50, 50]);
-
-	const { down } = useDrag(
-		ref,
-		({ offset }) => {
-			setXY(offset);
+	const { bind, offset: xy } = useDrag<HTMLDivElement>(null, {
+		children: {
+			ignore: true,
 		},
-		{ offset: xy }
-	);
+	});
 
 	return (
-		<PinboardContext.Provider value={{ xy, down }}>
-			<div ref={ref} className="w-full h-full relative overflow-hidden">
+		<PinboardContext.Provider value={{ xy, down: false }}>
+			<div {...bind} className="w-full h-full relative overflow-hidden">
 				{children}
 				<NodesContainer nodes={nodes} />
 			</div>
@@ -55,21 +42,44 @@ function NodesContainer({ nodes }: { nodes?: PinBoardProps["nodes"] }) {
 		xy: [x, y],
 	} = useContext(PinboardContext);
 
+	const { bind } = useDrag<HTMLDivElement>(
+		({ gridOffset: [ox, oy], target }) => {
+			if (!target) {
+				return;
+			}
+
+			target.style.transform = `translate(${ox}px, ${oy}px)`;
+		},
+		{
+			selectors: "[data-draggable=true]",
+			offset: [x, y],
+			grid: {
+				step: [10, 10],
+			},
+		}
+	);
+
 	if (!Boolean(nodes?.length)) {
 		return null;
 	}
 
 	return (
 		<div
+			{...bind}
 			style={{ transform: `translate(${x}px, ${y}px)` }}
-			className="z-10 pointer-events-none"
+			className="z-10 pointer-events-none relative"
 		>
-			{nodes?.map((node, i) => (
-				<Draggable key={node.id} position={node.position}>
-					<div className="border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black">
-						{renderNode(node)}
-					</div>
-				</Draggable>
+			{nodes?.map((node) => (
+				<div
+					key={node.id}
+					data-draggable
+					style={{
+						transform: `translate(${node.position.x}px, ${node.position.y}px)`,
+					}}
+					className="absolute border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black"
+				>
+					{renderNode(node)}
+				</div>
 			))}
 		</div>
 	);
