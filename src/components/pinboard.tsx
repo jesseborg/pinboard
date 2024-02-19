@@ -15,10 +15,12 @@ const PinboardContext = createContext<PinBoardContextProps>({
 
 type PinBoardProps = {
 	nodes?: Array<Node>;
+	onNodesChange?: (nodes: Array<Node>) => void;
 };
 
 export function PinBoard({
 	nodes,
+	onNodesChange,
 	children,
 }: PropsWithChildren<PinBoardProps>) {
 	const { bind, offset: xy } = useDrag<HTMLDivElement>(null, {
@@ -31,24 +33,28 @@ export function PinBoard({
 		<PinboardContext.Provider value={{ xy, down: false }}>
 			<div {...bind} className="w-full h-full relative overflow-hidden">
 				{children}
-				<NodesContainer nodes={nodes} />
+				<NodesContainer nodes={nodes} onNodesChange={onNodesChange} />
 			</div>
 		</PinboardContext.Provider>
 	);
 }
 
-function NodesContainer({ nodes }: { nodes?: PinBoardProps["nodes"] }) {
+function NodesContainer({ nodes, onNodesChange }: PinBoardProps) {
 	const {
 		xy: [x, y],
 	} = useContext(PinboardContext);
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
-			if (!target) {
-				return;
-			}
-
 			target.style.transform = `translate(${ox}px, ${oy}px)`;
+
+			const id = Number(target.id);
+			const node = nodes?.[id];
+
+			if (node) {
+				node.position = { x: ox, y: oy };
+				onNodesChange?.(nodes);
+			}
 		},
 		{
 			selectors: "[data-draggable=true]",
@@ -72,6 +78,7 @@ function NodesContainer({ nodes }: { nodes?: PinBoardProps["nodes"] }) {
 			{nodes?.map((node) => (
 				<div
 					key={node.id}
+					id={node.id}
 					data-draggable
 					style={{
 						transform: `translate(${node.position.x}px, ${node.position.y}px)`,

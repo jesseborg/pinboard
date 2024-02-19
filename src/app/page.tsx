@@ -1,43 +1,14 @@
-import { Node } from "@/components/node";
+"use client";
+
 import { Background, PinBoard } from "@/components/pinboard";
-
-// const nodes: Array<Node> = [
-// 	{
-// 		id: "1",
-// 		position: { x: 0, y: 0 },
-// 		type: "text",
-// 		data: {
-// 			label: "Hello World",
-// 		},
-// 	},
-// 	{
-// 		id: "2",
-// 		position: { x: 0, y: 0 },
-// 		type: "text",
-// 		data: {
-// 			label: "Hello World",
-// 		},
-// 	},
-// ];
-
-const nodes = new Array(2).fill(0).map(
-	(_, i) =>
-		({
-			id: `${i}`,
-			position: { x: 0, y: 0 },
-			type: "text",
-			data: {
-				label: `Hello World (${i})`,
-			},
-		} as Node)
-);
-
-console.log(nodes);
+import { useNodes } from "@/hooks/use-nodes";
 
 export default function Home() {
+	const { nodes, setNodes } = useNodes();
+
 	return (
 		<main>
-			<PinBoard nodes={nodes}>
+			<PinBoard nodes={nodes} onNodesChange={setNodes}>
 				<Background />
 			</PinBoard>
 		</main>

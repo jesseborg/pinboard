@@ -26,7 +26,12 @@ export type Node = TextNode | ImageNode;
 export function renderNode(node: Node) {
 	switch (node.type) {
 		case "text":
-			return <p>{node.data.label}</p>;
+			return (
+				<div>
+					<p>{node.data.label}</p>
+					{JSON.stringify(node.position)}
+				</div>
+			);
 
 		case "image":
 			return <img src={node.data.src} alt={node.data.alt} />;

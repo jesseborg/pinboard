@@ -23,7 +23,7 @@ type BaseDragEvent = {
 	/** Displacement between offset and lastOffset */
 	movement: Tuple<number>;
 	/** The element being dragged */
-	target: HTMLElement | null;
+	target: HTMLElement;
 };
 
 type DragEvent = BaseDragEvent & {
