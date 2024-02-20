@@ -1,4 +1,4 @@
-import { snap } from "@/utils/snap";
+import { snap } from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 enum MouseButtons {
