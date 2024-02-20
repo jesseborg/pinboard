@@ -2,7 +2,7 @@
 
 import useDrag, { Tuple } from "@/hooks/use-drag";
 import { PropsWithChildren, createContext, useContext } from "react";
-import { Node, renderNode } from "./node";
+import { Node, Point, renderNode } from "./node";
 
 type PinBoardContextProps = {
 	xy: Tuple<number>;
@@ -18,16 +18,31 @@ type PinBoardProps = {
 	onNodesChange?: (nodes: Array<Node>) => void;
 };
 
+type PinboardSettings = {
+	position?: Point;
+};
+
 export function PinBoard({
 	nodes,
 	onNodesChange,
 	children,
 }: PropsWithChildren<PinBoardProps>) {
-	const { bind, offset: xy } = useDrag<HTMLDivElement>(null, {
-		children: {
-			ignore: true,
+	// Obviously not the safest way to do this, potentially use zod and a custom hook later
+	const settings = JSON.parse(
+		localStorage.getItem("settings") ?? "{}"
+	) as PinboardSettings;
+
+	const { bind, offset: xy } = useDrag<HTMLDivElement>(
+		({ offset: [x, y] }) => {
+			localStorage.setItem("settings", JSON.stringify({ position: { x, y } }));
 		},
-	});
+		{
+			initialPosition: [settings.position?.x ?? 0, settings.position?.y ?? 0],
+			children: {
+				ignore: true,
+			},
+		}
+	);
 
 	return (
 		<PinboardContext.Provider value={{ xy, down: false }}>

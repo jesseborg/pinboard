@@ -34,6 +34,8 @@ type DragStartEvent = BaseDragEvent | { event: React.MouseEvent };
 type DragEndEvent = BaseDragEvent;
 
 type UseDragOptionsProps = {
+	/** Initial position of the element */
+	initialPosition?: Tuple<number>;
 	/** Offset the drag by [x,y] pixels */
 	offset?: Tuple<number>;
 	grid?: {
@@ -66,7 +68,9 @@ function useDrag<T extends HTMLElement>(
 	const [pointerInitial, setPointerInitial] = useState<Tuple<number>>([0, 0]);
 
 	// Current position of the element
-	const [offset, setOffset] = useState<Tuple<number>>([0, 0]);
+	const [offset, setOffset] = useState<Tuple<number>>(
+		options?.initialPosition ?? [0, 0]
+	);
 
 	// Initial position of the element when the gesture started
 	const [offsetInitial, setOffsetInitial] = useState<Tuple<number>>(offset);
