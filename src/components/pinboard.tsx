@@ -2,7 +2,7 @@
 
 import useDrag, { Tuple } from "@/hooks/use-drag";
 import { PropsWithChildren, createContext, useContext } from "react";
-import { Node, Point, renderNode } from "./node";
+import { Node, Point } from "./node";
 
 type PinBoardContextProps = {
 	xy: Tuple<number>;
@@ -91,17 +91,7 @@ function NodesContainer({ nodes, onNodesChange }: PinBoardProps) {
 			className="z-10 pointer-events-none relative"
 		>
 			{nodes?.map((node) => (
-				<div
-					key={node.id}
-					id={node.id}
-					data-draggable
-					style={{
-						transform: `translate(${node.position.x}px, ${node.position.y}px)`,
-					}}
-					className="absolute border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black"
-				>
-					{renderNode(node)}
-				</div>
+				<Node key={node.id} data-draggable className="absolute" node={node} />
 			))}
 		</div>
 	);
