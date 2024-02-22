@@ -1,16 +1,15 @@
 "use client";
 
 import useDrag, { Tuple } from "@/hooks/use-drag";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { PropsWithChildren, createContext, useContext } from "react";
 import { Node, Point } from "./node";
 
 type PinBoardContextProps = {
 	xy: Tuple<number>;
-	down: boolean;
 };
 const PinboardContext = createContext<PinBoardContextProps>({
 	xy: [0, 0],
-	down: false,
 });
 
 type PinBoardProps = {
@@ -27,17 +26,14 @@ export function PinBoard({
 	onNodesChange,
 	children,
 }: PropsWithChildren<PinBoardProps>) {
-	// Obviously not the safest way to do this, potentially use zod and a custom hook later
-	const settings = JSON.parse(
-		localStorage.getItem("settings") ?? "{}"
-	) as PinboardSettings;
+	const [settings, setSettings] = useLocalStorage<PinboardSettings>("settings");
 
 	const { bind, offset: xy } = useDrag<HTMLDivElement>(
 		({ offset: [x, y] }) => {
-			localStorage.setItem("settings", JSON.stringify({ position: { x, y } }));
+			setSettings({ position: { x, y } });
 		},
 		{
-			initialPosition: [settings.position?.x ?? 0, settings.position?.y ?? 0],
+			initialPosition: [settings?.position?.x ?? 0, settings?.position?.y ?? 0],
 			children: {
 				ignore: true,
 			},
@@ -45,7 +41,7 @@ export function PinBoard({
 	);
 
 	return (
-		<PinboardContext.Provider value={{ xy, down: false }}>
+		<PinboardContext.Provider value={{ xy }}>
 			<div {...bind} className="w-full h-full relative overflow-hidden">
 				{children}
 				<NodesContainer nodes={nodes} onNodesChange={onNodesChange} />
