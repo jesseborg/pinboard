@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { HTMLAttributes, memo } from "react";
+import { HTMLAttributes, memo, useRef } from "react";
 
 export type Point = {
 	x: number;
@@ -29,10 +29,36 @@ type ImageNode = BaseNode & {
 export type Node = MDXNode | ImageNode;
 
 function MDXNode(node: MDXNode) {
+	const ref = useRef<HTMLTextAreaElement>(null);
+
+	function autoResize() {
+		if (!ref.current) {
+			return;
+		}
+
+		ref.current.style.height = "auto";
+		ref.current.style.height = ref.current.scrollHeight + 2 + "px"; // 2px to account for padding
+	}
+
+	function handleInput() {
+		autoResize();
+	}
+
 	return (
-		<div>
-			<p>{node.data.label}</p>
-			{JSON.stringify(node.position)}
+		<div className="">
+			<textarea
+				ref={ref}
+				autoComplete="off"
+				autoCapitalize="off"
+				autoCorrect="off"
+				spellCheck="true"
+				className="pointer-events-auto outline-none resize-none overflow-hidden min-h-0"
+				cols={12}
+				rows={1}
+				defaultValue={node.data.label}
+				placeholder="Type anything..."
+				onInput={handleInput}
+			/>
 		</div>
 	);
 }
@@ -64,7 +90,7 @@ export function Node({ node, className, ...props }: NodeProps) {
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
 			}}
 			className={cn(
-				"border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black",
+				"border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black min-h-32",
 				className
 			)}
 		>
