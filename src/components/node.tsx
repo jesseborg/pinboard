@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { HTMLAttributes } from "react";
+import { HTMLAttributes, memo } from "react";
 
 export type Point = {
 	x: number;
@@ -42,7 +42,7 @@ function ImageNode(node: ImageNode) {
 	return <img src={node.data.src} alt={node.data.alt} />;
 }
 
-function NodeSelector(node: Node) {
+const NodeRenderer = memo((node: Node) => {
 	switch (node.type) {
 		case "mdx":
 			return <MDXNode {...node} />;
@@ -51,13 +51,11 @@ function NodeSelector(node: Node) {
 		default:
 			return null;
 	}
-}
+});
+NodeRenderer.displayName = "NodeRenderer";
 
-export function Node({
-	node,
-	className,
-	...props
-}: { node: Node } & HTMLAttributes<HTMLDivElement>) {
+type NodeProps = { node: Node } & HTMLAttributes<HTMLDivElement>;
+export function Node({ node, className, ...props }: NodeProps) {
 	return (
 		<div
 			{...props}
@@ -70,7 +68,7 @@ export function Node({
 				className
 			)}
 		>
-			<NodeSelector {...node} />
+			<NodeRenderer {...node} />
 		</div>
 	);
 }
