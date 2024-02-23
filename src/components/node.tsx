@@ -1,31 +1,21 @@
 import { cn } from "@/lib/utils";
 import {
-	HTMLAttributes,
+	FormEvent,
 	forwardRef,
-	memo,
 	useImperativeHandle,
 	useRef,
 	useState,
 } from "react";
+import { NodeProps } from "./pinboard/pinboard";
 
-export type Point = {
-	x: number;
-	y: number;
-};
-
-export type BaseNode = {
-	id: string;
-	position: Point;
-};
-
-export type MDXNode = BaseNode & {
+export type MDXNode = NodeProps & {
 	type: "mdx";
 	data: {
 		label: string;
 	};
 };
 
-export type ImageNode = BaseNode & {
+export type ImageNode = NodeProps & {
 	type: "image";
 	data: {
 		alt: string;
@@ -39,7 +29,7 @@ export type NodeHandle = {
 	handleDoubleClick: () => void;
 };
 
-const MDXNode = forwardRef<NodeHandle, MDXNode>((node, ref) => {
+export const MDXNode = forwardRef<NodeHandle, MDXNode>((node, ref) => {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const [editing, setEditing] = useState(false);
@@ -67,7 +57,7 @@ const MDXNode = forwardRef<NodeHandle, MDXNode>((node, ref) => {
 			textareaRef.current.scrollHeight + 2 + "px"; // 2px to account for padding
 	}
 
-	function handleInput() {
+	function handleInput(_: FormEvent<HTMLTextAreaElement>) {
 		autoResize();
 	}
 
@@ -80,7 +70,7 @@ const MDXNode = forwardRef<NodeHandle, MDXNode>((node, ref) => {
 	}
 
 	return (
-		<div>
+		<>
 			<textarea
 				ref={textareaRef}
 				autoComplete="off"
@@ -101,53 +91,13 @@ const MDXNode = forwardRef<NodeHandle, MDXNode>((node, ref) => {
 				onInput={handleInput}
 				onBlur={handleBlur}
 			/>
-		</div>
+		</>
 	);
 });
 MDXNode.displayName = "MDXNode";
 
-const ImageNode = forwardRef<NodeHandle, ImageNode>((node) => {
+export const ImageNode = forwardRef<NodeHandle, ImageNode>((node, _) => {
 	// eslint-disable-next-line @next/next/no-img-element
 	return <img src={node.data.src} alt={node.data.alt} />;
 });
 ImageNode.displayName = "ImageNode";
-
-const NodeRenderer = memo(
-	forwardRef<NodeHandle, Node>((node, ref) => {
-		switch (node.type) {
-			case "mdx":
-				return <MDXNode ref={ref} {...node} />;
-			case "image":
-				return <ImageNode ref={ref} {...node} />;
-			default:
-				return null;
-		}
-	})
-);
-NodeRenderer.displayName = "NodeRenderer";
-
-type NodeProps = { node: Node } & HTMLAttributes<HTMLDivElement>;
-export function Node({ node, className, ...props }: NodeProps) {
-	const nodeRef = useRef<NodeHandle>(null);
-
-	function handleDoubleClick() {
-		nodeRef.current?.handleDoubleClick();
-	}
-
-	return (
-		<div
-			{...props}
-			id={node.id}
-			style={{
-				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
-			}}
-			className={cn(
-				"pointer-events-auto border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black size-[250px]",
-				className
-			)}
-			onDoubleClick={handleDoubleClick}
-		>
-			<NodeRenderer ref={nodeRef} {...node} />
-		</div>
-	);
-}

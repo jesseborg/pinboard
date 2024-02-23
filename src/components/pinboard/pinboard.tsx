@@ -2,18 +2,40 @@
 
 import useDrag, { Tuple } from "@/hooks/use-drag";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { PropsWithChildren, createContext, useContext } from "react";
-import { Node, Point } from "./node";
+import {
+	ComponentType,
+	PropsWithChildren,
+	createContext,
+	memo,
+	useContext,
+	useRef,
+} from "react";
+import { NodeHandle, type Node } from "../node";
 
 type PinBoardContextProps = {
 	xy: Tuple<number>;
+	nodeTypes?: NodeTypes | null;
 };
-const PinboardContext = createContext<PinBoardContextProps>({
+export const PinboardContext = createContext<PinBoardContextProps>({
 	xy: [0, 0],
+	nodeTypes: null,
 });
+
+export type Point = {
+	x: number;
+	y: number;
+};
+
+export type NodeProps = {
+	id: string;
+	position: Point;
+};
+
+type NodeTypes<T extends NodeProps = any> = Record<string, ComponentType<T>>;
 
 type PinBoardProps = {
 	nodes?: Array<Node>;
+	nodeTypes?: NodeTypes;
 	onNodesChange?: (nodes: Array<Node>) => void;
 };
 
@@ -23,6 +45,7 @@ type PinboardSettings = {
 
 export function PinBoard({
 	nodes,
+	nodeTypes,
 	onNodesChange,
 	children,
 }: PropsWithChildren<PinBoardProps>) {
@@ -41,7 +64,7 @@ export function PinBoard({
 	);
 
 	return (
-		<PinboardContext.Provider value={{ xy }}>
+		<PinboardContext.Provider value={{ xy, nodeTypes }}>
 			<div {...bind} className="w-full h-full relative overflow-hidden">
 				{children}
 				<NodesContainer nodes={nodes} onNodesChange={onNodesChange} />
@@ -49,6 +72,38 @@ export function PinBoard({
 		</PinboardContext.Provider>
 	);
 }
+
+type NodeRendererProps = { node: Node };
+const NodeRenderer = memo(({ node }: NodeRendererProps) => {
+	const { nodeTypes } = useContext(PinboardContext);
+
+	const nodeRef = useRef<NodeHandle>(null);
+
+	const Node = nodeTypes?.[node.type];
+	if (Node === undefined) {
+		return null;
+	}
+
+	function handleDoubleClick() {
+		nodeRef.current?.handleDoubleClick();
+	}
+
+	return (
+		<div
+			data-draggable
+			key={node.id}
+			id={node.id}
+			style={{
+				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
+			}}
+			className="pointer-events-auto absolute border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black size-[250px]"
+			onDoubleClick={handleDoubleClick}
+		>
+			<Node ref={nodeRef} {...node} />
+		</div>
+	);
+});
+NodeRenderer.displayName = "NodeRenderer";
 
 function NodesContainer({ nodes, onNodesChange }: PinBoardProps) {
 	const {
@@ -87,43 +142,8 @@ function NodesContainer({ nodes, onNodesChange }: PinBoardProps) {
 			className="z-10 pointer-events-none relative"
 		>
 			{nodes?.map((node) => (
-				<Node key={node.id} data-draggable className="absolute" node={node} />
+				<NodeRenderer key={node.id} node={node} />
 			))}
 		</div>
-	);
-}
-
-export function Background() {
-	const {
-		xy: [x, y],
-	} = useContext(PinboardContext);
-
-	return (
-		<span className="pointer-events-none">
-			{/* Border Fade */}
-			<span className="absolute inset-0 z-10 shadow-[0_0_0_16px,inset_0_0_8px_16px] shadow-white/80 rounded-[32px]" />
-
-			{/* Dots Pattern */}
-			<svg className="absolute inset-0 w-full h-full z-0">
-				<pattern
-					id="dots-pattern"
-					x={x}
-					y={y}
-					width="10"
-					height="10"
-					patternUnits="userSpaceOnUse"
-					patternTransform="translate(0, 0)"
-				>
-					<circle cx="1" cy="1" r="1" fill="#ccc" shapeRendering="crispEdges" />
-				</pattern>
-				<rect
-					x="0"
-					y="0"
-					width="100%"
-					height="100%"
-					fill="url(#dots-pattern)"
-				/>
-			</svg>
-		</span>
 	);
 }
