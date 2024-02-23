@@ -1,24 +1,31 @@
 import { cn } from "@/lib/utils";
-import { HTMLAttributes, memo, useRef } from "react";
+import {
+	HTMLAttributes,
+	forwardRef,
+	memo,
+	useImperativeHandle,
+	useRef,
+	useState,
+} from "react";
 
 export type Point = {
 	x: number;
 	y: number;
 };
 
-type BaseNode = {
+export type BaseNode = {
 	id: string;
 	position: Point;
 };
 
-type MDXNode = BaseNode & {
+export type MDXNode = BaseNode & {
 	type: "mdx";
 	data: {
 		label: string;
 	};
 };
 
-type ImageNode = BaseNode & {
+export type ImageNode = BaseNode & {
 	type: "image";
 	data: {
 		alt: string;
@@ -28,60 +35,105 @@ type ImageNode = BaseNode & {
 
 export type Node = MDXNode | ImageNode;
 
-function MDXNode(node: MDXNode) {
-	const ref = useRef<HTMLTextAreaElement>(null);
+export type NodeHandle = {
+	handleDoubleClick: () => void;
+};
+
+const MDXNode = forwardRef<NodeHandle, MDXNode>((node, ref) => {
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+	const [editing, setEditing] = useState(false);
+
+	useImperativeHandle(
+		ref,
+		() => {
+			return {
+				handleDoubleClick: () => {
+					textareaRef.current?.focus();
+					setEditing(true);
+				},
+			};
+		},
+		[]
+	);
 
 	function autoResize() {
-		if (!ref.current) {
+		if (!textareaRef.current) {
 			return;
 		}
 
-		ref.current.style.height = "auto";
-		ref.current.style.height = ref.current.scrollHeight + 2 + "px"; // 2px to account for padding
+		textareaRef.current.style.height = "auto";
+		textareaRef.current.style.height =
+			textareaRef.current.scrollHeight + 2 + "px"; // 2px to account for padding
 	}
 
 	function handleInput() {
 		autoResize();
 	}
 
+	function handleBlur() {
+		setEditing(false);
+
+		if (window.getSelection()?.focusNode?.contains(textareaRef.current)) {
+			window.getSelection()?.empty();
+		}
+	}
+
 	return (
-		<div className="">
+		<div>
 			<textarea
-				ref={ref}
+				ref={textareaRef}
 				autoComplete="off"
 				autoCapitalize="off"
 				autoCorrect="off"
-				spellCheck="true"
-				className="pointer-events-auto outline-none resize-none overflow-hidden min-h-0"
-				cols={12}
+				readOnly={!editing}
+				spellCheck={editing}
+				className={cn(
+					"outline-none resize-none bg-transparent overflow-hidden w-full",
+					{
+						"pointer-events-auto": editing,
+					}
+				)}
+				cols={25}
 				rows={1}
 				defaultValue={node.data.label}
 				placeholder="Type anything..."
 				onInput={handleInput}
+				onBlur={handleBlur}
 			/>
 		</div>
 	);
-}
+});
+MDXNode.displayName = "MDXNode";
 
-function ImageNode(node: ImageNode) {
+const ImageNode = forwardRef<NodeHandle, ImageNode>((node) => {
 	// eslint-disable-next-line @next/next/no-img-element
 	return <img src={node.data.src} alt={node.data.alt} />;
-}
-
-const NodeRenderer = memo((node: Node) => {
-	switch (node.type) {
-		case "mdx":
-			return <MDXNode {...node} />;
-		case "image":
-			return <ImageNode {...node} />;
-		default:
-			return null;
-	}
 });
+ImageNode.displayName = "ImageNode";
+
+const NodeRenderer = memo(
+	forwardRef<NodeHandle, Node>((node, ref) => {
+		switch (node.type) {
+			case "mdx":
+				return <MDXNode ref={ref} {...node} />;
+			case "image":
+				return <ImageNode ref={ref} {...node} />;
+			default:
+				return null;
+		}
+	})
+);
 NodeRenderer.displayName = "NodeRenderer";
 
 type NodeProps = { node: Node } & HTMLAttributes<HTMLDivElement>;
 export function Node({ node, className, ...props }: NodeProps) {
+	const nodeRef = useRef<NodeHandle>(null);
+
+	function handleDoubleClick() {
+		nodeRef.current?.handleDoubleClick();
+	}
+
 	return (
 		<div
 			{...props}
@@ -90,11 +142,12 @@ export function Node({ node, className, ...props }: NodeProps) {
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
 			}}
 			className={cn(
-				"border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black min-h-32",
+				"pointer-events-auto border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black size-[250px]",
 				className
 			)}
+			onDoubleClick={handleDoubleClick}
 		>
-			<NodeRenderer {...node} />
+			<NodeRenderer ref={nodeRef} {...node} />
 		</div>
 	);
 }
