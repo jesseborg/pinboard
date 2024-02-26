@@ -1,5 +1,6 @@
 "use client";
 
+import { Node, NodeHandle } from "@/components/nodes/types";
 import useDrag, { Tuple } from "@/hooks/use-drag";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
@@ -10,7 +11,6 @@ import {
 	useContext,
 	useRef,
 } from "react";
-import { NodeHandle, type Node } from "../node";
 
 type PinBoardContextProps = {
 	xy: Tuple<number>;
