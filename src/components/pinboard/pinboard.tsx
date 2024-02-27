@@ -9,12 +9,13 @@ import {
 	PropsWithChildren,
 	Ref,
 	createContext,
-	memo,
 	useRef,
 } from "react";
 
 type PinBoardContextProps = {
 	xy: Tuple<number>;
+	nodes?: Array<Node>;
+	setNodes?: (nodes: Array<Node>) => void;
 	nodeTypes?: NodeTypes | null;
 };
 export const PinboardContext = createContext<PinBoardContextProps>({
@@ -73,7 +74,9 @@ export function PinBoard({
 	);
 
 	return (
-		<PinboardContext.Provider value={{ xy, nodeTypes }}>
+		<PinboardContext.Provider
+			value={{ xy, nodes, setNodes: onNodesChange, nodeTypes }}
+		>
 			<div {...bind} className="w-full h-full relative overflow-hidden">
 				{children}
 				<NodesContainer nodes={nodes} onNodesChange={onNodesChange} />
@@ -83,7 +86,7 @@ export function PinBoard({
 }
 
 type NodeRendererProps = { node: Node };
-const NodeRenderer = memo(({ node }: NodeRendererProps) => {
+const NodeRenderer = ({ node }: NodeRendererProps) => {
 	const { nodeTypes } = usePinboard();
 
 	const handleRef = useRef<NodeHandle>(null);
@@ -111,8 +114,7 @@ const NodeRenderer = memo(({ node }: NodeRendererProps) => {
 			<Node handleRef={handleRef} node={node} />
 		</div>
 	);
-});
-NodeRenderer.displayName = "NodeRenderer";
+};
 
 function NodesContainer({ nodes, onNodesChange }: PinBoardProps) {
 	const {

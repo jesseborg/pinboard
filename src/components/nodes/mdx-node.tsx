@@ -1,5 +1,13 @@
+import { usePinboard } from "@/hooks/use-pinboard";
 import { cn } from "@/lib/utils";
-import { FormEvent, useImperativeHandle, useRef, useState } from "react";
+import {
+	FormEvent,
+	memo,
+	useEffect,
+	useImperativeHandle,
+	useRef,
+	useState,
+} from "react";
 import { CustomNode, NodeProps } from "../pinboard/pinboard";
 import { BaseNode } from "./base-node";
 
@@ -10,8 +18,10 @@ export type MDXNode = NodeProps<{
 	};
 }>;
 
-export function MDXNode({ node, handleRef }: CustomNode<MDXNode>) {
+export function MDXNodee({ node, handleRef }: CustomNode<MDXNode>) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+	const { nodes, setNodes } = usePinboard();
 
 	const [editing, setEditing] = useState(false);
 
@@ -40,6 +50,17 @@ export function MDXNode({ node, handleRef }: CustomNode<MDXNode>) {
 
 	function handleInput(_: FormEvent<HTMLTextAreaElement>) {
 		autoResize();
+
+		/* TODO: refactor this... */
+		if (!textareaRef.current || !nodes || !node) {
+			return;
+		}
+
+		nodes[Number(node.id)].data = {
+			...node.data,
+			label: textareaRef.current.value,
+		};
+		setNodes?.(nodes);
 	}
 
 	function handleBlur() {
@@ -49,6 +70,10 @@ export function MDXNode({ node, handleRef }: CustomNode<MDXNode>) {
 			window.getSelection()?.empty();
 		}
 	}
+
+	useEffect(() => {
+		autoResize();
+	}, []);
 
 	return (
 		<BaseNode className="min-h-[250px] w-[250px]">
@@ -66,7 +91,6 @@ export function MDXNode({ node, handleRef }: CustomNode<MDXNode>) {
 					}
 				)}
 				cols={25}
-				rows={1}
 				defaultValue={node.data.label}
 				placeholder="Type anything..."
 				onInput={handleInput}
@@ -75,3 +99,5 @@ export function MDXNode({ node, handleRef }: CustomNode<MDXNode>) {
 		</BaseNode>
 	);
 }
+
+export const MDXNode = memo(MDXNodee);
