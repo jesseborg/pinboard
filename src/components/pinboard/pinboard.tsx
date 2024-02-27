@@ -3,12 +3,12 @@
 import { Node, NodeHandle } from "@/components/nodes/types";
 import useDrag, { Tuple } from "@/hooks/use-drag";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { usePinboard } from "@/hooks/use-pinboard";
 import {
 	ComponentType,
 	PropsWithChildren,
 	createContext,
 	memo,
-	useContext,
 	useRef,
 } from "react";
 
@@ -75,7 +75,7 @@ export function PinBoard({
 
 type NodeRendererProps = { node: Node };
 const NodeRenderer = memo(({ node }: NodeRendererProps) => {
-	const { nodeTypes } = useContext(PinboardContext);
+	const { nodeTypes } = usePinboard();
 
 	const nodeRef = useRef<NodeHandle>(null);
 
@@ -108,7 +108,7 @@ NodeRenderer.displayName = "NodeRenderer";
 function NodesContainer({ nodes, onNodesChange }: PinBoardProps) {
 	const {
 		xy: [x, y],
-	} = useContext(PinboardContext);
+	} = usePinboard();
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
