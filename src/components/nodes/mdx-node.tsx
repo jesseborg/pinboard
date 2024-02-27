@@ -1,29 +1,22 @@
 import { cn } from "@/lib/utils";
-import {
-	FormEvent,
-	forwardRef,
-	useImperativeHandle,
-	useRef,
-	useState,
-} from "react";
-import { NodeProps } from "../pinboard/pinboard";
+import { FormEvent, useImperativeHandle, useRef, useState } from "react";
+import { CustomNode, NodeProps } from "../pinboard/pinboard";
 import { BaseNode } from "./base-node";
-import { NodeHandle } from "./types";
 
-export type MDXNode = NodeProps & {
+export type MDXNode = NodeProps<{
 	type: "mdx";
 	data: {
 		label: string;
 	};
-};
+}>;
 
-export const MDXNode = forwardRef<NodeHandle, MDXNode>((node, ref) => {
+export function MDXNode({ node, handleRef }: CustomNode<MDXNode>) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const [editing, setEditing] = useState(false);
 
 	useImperativeHandle(
-		ref,
+		handleRef,
 		() => {
 			return {
 				handleDoubleClick: () => {
@@ -81,5 +74,4 @@ export const MDXNode = forwardRef<NodeHandle, MDXNode>((node, ref) => {
 			/>
 		</BaseNode>
 	);
-});
-MDXNode.displayName = "MDXNode";
+}

@@ -7,6 +7,7 @@ import { usePinboard } from "@/hooks/use-pinboard";
 import {
 	ComponentType,
 	PropsWithChildren,
+	Ref,
 	createContext,
 	memo,
 	useRef,
@@ -26,12 +27,20 @@ export type Point = {
 	y: number;
 };
 
-export type NodeProps = {
+export type NodeProps<T = {}> = {
 	id: string;
 	position: Point;
-};
+} & T;
 
-type NodeTypes<T extends NodeProps = any> = Record<string, ComponentType<T>>;
+type NodeTypes<T extends NodeProps = any> = Record<
+	string,
+	ComponentType<CustomNode<T>>
+>;
+
+export type CustomNode<T extends NodeProps> = {
+	node: T;
+	handleRef: Ref<NodeHandle>;
+};
 
 type PinBoardProps = {
 	nodes?: Array<Node>;
@@ -77,7 +86,7 @@ type NodeRendererProps = { node: Node };
 const NodeRenderer = memo(({ node }: NodeRendererProps) => {
 	const { nodeTypes } = usePinboard();
 
-	const nodeRef = useRef<NodeHandle>(null);
+	const handleRef = useRef<NodeHandle>(null);
 
 	const Node = nodeTypes?.[node.type];
 	if (Node === undefined) {
@@ -85,7 +94,7 @@ const NodeRenderer = memo(({ node }: NodeRendererProps) => {
 	}
 
 	function handleDoubleClick() {
-		nodeRef.current?.handleDoubleClick();
+		handleRef.current?.handleDoubleClick();
 	}
 
 	return (
@@ -99,7 +108,7 @@ const NodeRenderer = memo(({ node }: NodeRendererProps) => {
 			className="pointer-events-auto absolute"
 			onDoubleClick={handleDoubleClick}
 		>
-			<Node ref={nodeRef} {...node} />
+			<Node handleRef={handleRef} node={node} />
 		</div>
 	);
 });
