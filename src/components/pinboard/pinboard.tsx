@@ -96,7 +96,7 @@ const NodeRenderer = memo(({ node }: NodeRendererProps) => {
 			style={{
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
 			}}
-			className="pointer-events-auto absolute border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black size-[250px]"
+			className="pointer-events-auto absolute"
 			onDoubleClick={handleDoubleClick}
 		>
 			<Node ref={nodeRef} {...node} />

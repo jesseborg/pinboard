@@ -7,6 +7,7 @@ import {
 	useState,
 } from "react";
 import { NodeProps } from "../pinboard/pinboard";
+import { BaseNode } from "./base-node";
 import { NodeHandle } from "./types";
 
 export type MDXNode = NodeProps & {
@@ -57,7 +58,7 @@ export const MDXNode = forwardRef<NodeHandle, MDXNode>((node, ref) => {
 	}
 
 	return (
-		<>
+		<BaseNode>
 			<textarea
 				ref={textareaRef}
 				autoComplete="off"
@@ -66,7 +67,7 @@ export const MDXNode = forwardRef<NodeHandle, MDXNode>((node, ref) => {
 				readOnly={!editing}
 				spellCheck={editing}
 				className={cn(
-					"outline-none resize-none bg-transparent overflow-hidden w-full",
+					"outline-none resize-none bg-transparent overflow-hidden w-full size-[250px]",
 					{
 						"pointer-events-auto": editing,
 					}
@@ -78,7 +79,7 @@ export const MDXNode = forwardRef<NodeHandle, MDXNode>((node, ref) => {
 				onInput={handleInput}
 				onBlur={handleBlur}
 			/>
-		</>
+		</BaseNode>
 	);
 });
 MDXNode.displayName = "MDXNode";
