@@ -51,7 +51,7 @@ export function MDXNode({ node, handleRef }: CustomNode<MDXNode>) {
 	}
 
 	return (
-		<BaseNode>
+		<BaseNode className="min-h-[250px] w-[250px]">
 			<textarea
 				ref={textareaRef}
 				autoComplete="off"
@@ -60,7 +60,7 @@ export function MDXNode({ node, handleRef }: CustomNode<MDXNode>) {
 				readOnly={!editing}
 				spellCheck={editing}
 				className={cn(
-					"outline-none resize-none bg-transparent overflow-hidden w-full size-[250px]",
+					"outline-none resize-none bg-transparent overflow-hidden w-full",
 					{
 						"pointer-events-auto": editing,
 					}
