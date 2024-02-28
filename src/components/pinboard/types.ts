@@ -9,6 +9,7 @@ export type Point = {
 export type NodeProps<T = {}> = {
 	id: number;
 	position: Point;
+	type: string;
 } & T;
 
 export type NodeTypes<T extends NodeProps = any> = Record<

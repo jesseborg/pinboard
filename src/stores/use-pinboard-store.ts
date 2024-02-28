@@ -1,20 +1,22 @@
-import { Node } from "@/components/nodes/types";
-import { NodeTypes } from "@/components/pinboard/types";
+import { NodeProps, NodeTypes } from "@/components/pinboard/types";
 import { Tuple } from "@/hooks/use-drag";
 import { create } from "zustand";
 
+export type Node<T extends NodeProps = NodeProps> = T;
+export type Nodes = Array<Node>;
+
 export type PinBoardState = {
 	xy: Tuple<number>;
-	nodes: Array<Node> | null;
+	nodes: Nodes | null;
 	nodeTypes?: NodeTypes | null;
-	onNodesChange?: (nodes: Array<Node> | null) => void;
+	onNodesChange?: (nodes: Nodes | null) => void;
 };
 
 type PinBoardStore = PinBoardState & {
 	actions: {
 		setState: (state: Partial<PinBoardState>) => void;
 		setXY: (xy: Tuple<number>) => void;
-		setNodes: (nodes: Array<Node>) => void;
+		setNodes: (nodes: Nodes) => void;
 		setNodeTypes: (nodeTypes?: NodeTypes) => void;
 	};
 };

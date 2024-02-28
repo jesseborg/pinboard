@@ -1,9 +1,10 @@
 "use client";
 
-import { Node, NodeHandle } from "@/components/nodes/types";
+import { NodeHandle } from "@/components/nodes/types";
 import useDrag from "@/hooks/use-drag";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
+	Node,
 	PinBoardState,
 	usePinBoardActions,
 	usePinBoardNodeTypes,
@@ -61,8 +62,7 @@ export function PinBoard({
 	);
 }
 
-type NodeRendererProps = { node: Node };
-function NodeRenderer({ node }: NodeRendererProps) {
+function NodeRenderer({ node }: { node: Node }) {
 	const nodeTypes = usePinBoardNodeTypes();
 
 	const handleRef = useRef<NodeHandle>(null);
@@ -80,7 +80,7 @@ function NodeRenderer({ node }: NodeRendererProps) {
 		<div
 			data-draggable
 			key={node.id}
-			id={node.id}
+			id={`${node.id}`}
 			style={{
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
 			}}
