@@ -27,7 +27,7 @@ export function PinBoard({
 	onNodesChange,
 	children,
 }: PropsWithChildren<PinBoardProps>) {
-	const { setXY, setNodeTypes } = usePinBoardActions();
+	const { setState, setXY } = usePinBoardActions();
 	const [settings, setSettings] = useLocalStorage<PinboardSettings>("settings");
 
 	const { bind } = useDrag<HTMLDivElement>(
@@ -47,8 +47,11 @@ export function PinBoard({
 	);
 
 	useEffect(() => {
-		setXY([settings?.position?.x ?? 0, settings?.position?.y ?? 0]);
-		setNodeTypes(nodeTypes);
+		setState({
+			xy: [settings?.position?.x ?? 0, settings?.position?.y ?? 0],
+			nodes,
+			nodeTypes,
+		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 

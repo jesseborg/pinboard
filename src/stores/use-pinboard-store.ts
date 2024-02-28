@@ -11,8 +11,9 @@ type PinBoardState = {
 
 type PinBoardStore = PinBoardState & {
 	actions: {
+		setState: (state: Partial<PinBoardState>) => void;
 		setXY: (xy: Tuple<number>) => void;
-		setNodes: (nodes: Array<Node>) => void;
+		setNodes: (nodes?: Array<Node>) => void;
 		setNodeTypes: (nodeTypes?: NodeTypes) => void;
 	};
 };
@@ -26,6 +27,7 @@ const initialState: PinBoardState = {
 const usePinboardStore = create<PinBoardStore>((set) => ({
 	...initialState,
 	actions: {
+		setState: (state) => set((prev) => ({ ...prev, ...state })),
 		setXY: (xy) => set({ xy }),
 		setNodes: (nodes) => set({ nodes }),
 		setNodeTypes: (nodeTypes) => set({ nodeTypes }),
