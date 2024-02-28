@@ -7,7 +7,7 @@ export type Point = {
 };
 
 export type NodeProps<T = {}> = {
-	id: string;
+	id: number;
 	position: Point;
 } & T;
 

@@ -55,15 +55,11 @@ export function MDXNodee({ node, handleRef }: CustomNode<MDXNode>) {
 	function handleInput(_: FormEvent<HTMLTextAreaElement>) {
 		autoResize();
 
-		/* TODO: refactor this... */
-		if (!textareaRef.current || !nodes || !node) {
+		if (!nodes || !node || !textareaRef.current) {
 			return;
 		}
 
-		nodes[Number(node.id)].data = {
-			...node.data,
-			label: textareaRef.current.value,
-		};
+		(nodes[node.id] as MDXNode).data.label = textareaRef.current?.value;
 		setNodes?.(nodes);
 	}
 
