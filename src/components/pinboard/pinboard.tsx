@@ -1,6 +1,5 @@
 "use client";
 
-import { NodeHandle } from "@/components/nodes/types";
 import useDrag from "@/hooks/use-drag";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
@@ -11,7 +10,7 @@ import {
 	usePinBoardXY,
 } from "@/stores/use-pinboard-store";
 import { PropsWithChildren, useEffect, useRef } from "react";
-import { Point } from "./types";
+import { NodeHandle, Point } from "./types";
 
 type PinBoardProps = Omit<PinBoardState, "xy">;
 
@@ -72,10 +71,6 @@ function NodeRenderer({ node }: { node: Node }) {
 		return null;
 	}
 
-	function handleDoubleClick() {
-		handleRef.current?.handleDoubleClick();
-	}
-
 	return (
 		<div
 			data-draggable
@@ -85,7 +80,7 @@ function NodeRenderer({ node }: { node: Node }) {
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
 			}}
 			className="pointer-events-auto absolute"
-			onDoubleClick={handleDoubleClick}
+			onDoubleClick={() => handleRef.current?.onDoubleClick()}
 		>
 			<Node handleRef={handleRef} node={node} />
 		</div>

@@ -33,7 +33,7 @@ export function MDXNodee({ node, handleRef }: CustomNode<MDXNode>) {
 		handleRef,
 		() => {
 			return {
-				handleDoubleClick: () => {
+				onDoubleClick: () => {
 					textareaRef.current?.focus();
 					setEditing(true);
 				},

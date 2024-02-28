@@ -1,5 +1,4 @@
 import { ComponentType, Ref } from "react";
-import { NodeHandle } from "../nodes/types";
 
 export type Point = {
 	x: number;
@@ -20,4 +19,8 @@ export type NodeTypes<T extends NodeProps = any> = Record<
 export type CustomNode<T extends NodeProps> = {
 	node: T;
 	handleRef: Ref<NodeHandle>;
+};
+
+export type NodeHandle = {
+	onDoubleClick: () => void;
 };
