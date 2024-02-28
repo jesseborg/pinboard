@@ -1,13 +1,13 @@
-import { CustomNode, NodeProps } from "../pinboard/pinboard";
+import { CustomNode, NodeProps } from "../pinboard/types";
 import { BaseNode } from "./base-node";
 
-export type ImageNode = NodeProps & {
+export type ImageNode = NodeProps<{
 	type: "image";
 	data: {
 		alt: string;
 		src: string;
 	};
-};
+}>;
 
 export function ImageNode({ node }: CustomNode<ImageNode>) {
 	return (
