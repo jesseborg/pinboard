@@ -1,47 +1,15 @@
 "use client";
 
 import { Node, NodeHandle } from "@/components/nodes/types";
-import useDrag, { Tuple } from "@/hooks/use-drag";
+import useDrag from "@/hooks/use-drag";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { usePinboard } from "@/hooks/use-pinboard";
 import {
-	ComponentType,
-	PropsWithChildren,
-	Ref,
-	createContext,
-	useRef,
-} from "react";
-
-type PinBoardContextProps = {
-	xy: Tuple<number>;
-	nodes?: Array<Node>;
-	setNodes?: (nodes: Array<Node>) => void;
-	nodeTypes?: NodeTypes | null;
-};
-export const PinboardContext = createContext<PinBoardContextProps>({
-	xy: [0, 0],
-	nodeTypes: null,
-});
-
-export type Point = {
-	x: number;
-	y: number;
-};
-
-export type NodeProps<T = {}> = {
-	id: string;
-	position: Point;
-} & T;
-
-type NodeTypes<T extends NodeProps = any> = Record<
-	string,
-	ComponentType<CustomNode<T>>
->;
-
-export type CustomNode<T extends NodeProps> = {
-	node: T;
-	handleRef: Ref<NodeHandle>;
-};
+	usePinBoardActions,
+	usePinBoardNodeTypes,
+	usePinBoardXY,
+} from "@/stores/use-pinboard-store";
+import { PropsWithChildren, useEffect, useRef } from "react";
+import { NodeTypes, Point } from "./types";
 
 type PinBoardProps = {
 	nodes?: Array<Node>;
@@ -59,11 +27,16 @@ export function PinBoard({
 	onNodesChange,
 	children,
 }: PropsWithChildren<PinBoardProps>) {
+	const { setXY, setNodeTypes } = usePinBoardActions();
 	const [settings, setSettings] = useLocalStorage<PinboardSettings>("settings");
 
-	const { bind, offset: xy } = useDrag<HTMLDivElement>(
+	const { bind } = useDrag<HTMLDivElement>(
 		({ offset: [x, y] }) => {
+			// Update settings in localStorage
 			setSettings({ position: { x, y } });
+
+			// Update pinboard store state
+			setXY([x, y]);
 		},
 		{
 			initialPosition: [settings?.position?.x ?? 0, settings?.position?.y ?? 0],
@@ -73,21 +46,23 @@ export function PinBoard({
 		}
 	);
 
+	useEffect(() => {
+		setXY([settings?.position?.x ?? 0, settings?.position?.y ?? 0]);
+		setNodeTypes(nodeTypes);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
 	return (
-		<PinboardContext.Provider
-			value={{ xy, nodes, setNodes: onNodesChange, nodeTypes }}
-		>
-			<div {...bind} className="w-full h-full relative overflow-hidden">
-				{children}
-				<NodesContainer nodes={nodes} onNodesChange={onNodesChange} />
-			</div>
-		</PinboardContext.Provider>
+		<div {...bind} className="w-full h-full relative overflow-hidden">
+			{children}
+			<NodesContainer nodes={nodes} onNodesChange={onNodesChange} />
+		</div>
 	);
 }
 
 type NodeRendererProps = { node: Node };
-const NodeRenderer = ({ node }: NodeRendererProps) => {
-	const { nodeTypes } = usePinboard();
+function NodeRenderer({ node }: NodeRendererProps) {
+	const nodeTypes = usePinBoardNodeTypes();
 
 	const handleRef = useRef<NodeHandle>(null);
 
@@ -114,12 +89,10 @@ const NodeRenderer = ({ node }: NodeRendererProps) => {
 			<Node handleRef={handleRef} node={node} />
 		</div>
 	);
-};
+}
 
 function NodesContainer({ nodes, onNodesChange }: PinBoardProps) {
-	const {
-		xy: [x, y],
-	} = usePinboard();
+	const [x, y] = usePinBoardXY();
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {

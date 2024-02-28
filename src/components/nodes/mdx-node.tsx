@@ -1,5 +1,8 @@
-import { usePinboard } from "@/hooks/use-pinboard";
 import { cn } from "@/lib/utils";
+import {
+	usePinBoardActions,
+	usePinBoardNodes,
+} from "@/stores/use-pinboard-store";
 import {
 	FormEvent,
 	memo,
@@ -8,7 +11,7 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { CustomNode, NodeProps } from "../pinboard/pinboard";
+import { CustomNode, NodeProps } from "../pinboard/types";
 import { BaseNode } from "./base-node";
 
 export type MDXNode = NodeProps<{
@@ -21,7 +24,8 @@ export type MDXNode = NodeProps<{
 export function MDXNodee({ node, handleRef }: CustomNode<MDXNode>) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-	const { nodes, setNodes } = usePinboard();
+	const nodes = usePinBoardNodes();
+	const { setNodes } = usePinBoardActions();
 
 	const [editing, setEditing] = useState(false);
 

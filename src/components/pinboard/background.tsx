@@ -1,10 +1,7 @@
-import { useContext } from "react";
-import { PinboardContext } from "./pinboard";
+import { usePinBoardXY } from "@/stores/use-pinboard-store";
 
 export function Background() {
-	const {
-		xy: [x, y],
-	} = useContext(PinboardContext);
+	const [x, y] = usePinBoardXY();
 
 	return (
 		<span className="pointer-events-none">
