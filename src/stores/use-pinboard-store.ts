@@ -3,17 +3,18 @@ import { NodeTypes } from "@/components/pinboard/types";
 import { Tuple } from "@/hooks/use-drag";
 import { create } from "zustand";
 
-type PinBoardState = {
+export type PinBoardState = {
 	xy: Tuple<number>;
-	nodes?: Array<Node> | null;
+	nodes: Array<Node> | null;
 	nodeTypes?: NodeTypes | null;
+	onNodesChange?: (nodes: Array<Node> | null) => void;
 };
 
 type PinBoardStore = PinBoardState & {
 	actions: {
 		setState: (state: Partial<PinBoardState>) => void;
 		setXY: (xy: Tuple<number>) => void;
-		setNodes: (nodes?: Array<Node>) => void;
+		setNodes: (nodes: Array<Node>) => void;
 		setNodeTypes: (nodeTypes?: NodeTypes) => void;
 	};
 };
@@ -22,6 +23,7 @@ const initialState: PinBoardState = {
 	xy: [0, 0],
 	nodes: null,
 	nodeTypes: null,
+	onNodesChange: () => {},
 };
 
 const usePinboardStore = create<PinBoardStore>((set) => ({
@@ -29,7 +31,11 @@ const usePinboardStore = create<PinBoardStore>((set) => ({
 	actions: {
 		setState: (state) => set((prev) => ({ ...prev, ...state })),
 		setXY: (xy) => set({ xy }),
-		setNodes: (nodes) => set({ nodes }),
+		setNodes: (nodes) =>
+			set((state) => {
+				state.onNodesChange?.(nodes);
+				return { ...state, nodes };
+			}),
 		setNodeTypes: (nodeTypes) => set({ nodeTypes }),
 	},
 }));

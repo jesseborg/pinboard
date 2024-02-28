@@ -42,10 +42,7 @@ function getLocalStorageServerSnapshot<T>(): T {
 	throw Error("useLocalStorage is a client-only hook");
 }
 
-export function useLocalStorage<T>(
-	key: string,
-	initialValue: T | undefined = undefined
-) {
+export function useLocalStorage<T>(key: string, initialValue: T | null = null) {
 	const snapshot = useMemo(() => getLocalStorageItem(key), [key]);
 
 	const store = useSyncExternalStore<string | null>(

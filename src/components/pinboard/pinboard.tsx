@@ -4,18 +4,15 @@ import { Node, NodeHandle } from "@/components/nodes/types";
 import useDrag from "@/hooks/use-drag";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
+	PinBoardState,
 	usePinBoardActions,
 	usePinBoardNodeTypes,
 	usePinBoardXY,
 } from "@/stores/use-pinboard-store";
 import { PropsWithChildren, useEffect, useRef } from "react";
-import { NodeTypes, Point } from "./types";
+import { Point } from "./types";
 
-type PinBoardProps = {
-	nodes?: Array<Node>;
-	nodeTypes?: NodeTypes;
-	onNodesChange?: (nodes: Array<Node>) => void;
-};
+type PinBoardProps = Omit<PinBoardState, "xy">;
 
 type PinboardSettings = {
 	position?: Point;
@@ -51,6 +48,7 @@ export function PinBoard({
 			xy: [settings?.position?.x ?? 0, settings?.position?.y ?? 0],
 			nodes,
 			nodeTypes,
+			onNodesChange,
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);

@@ -13,7 +13,7 @@ const nodeTypes = {
 };
 
 export function App() {
-	const [nodes, setNodes] = useLocalStorage<Array<Node>>("nodes");
+	const [nodes, setNodes] = useLocalStorage<Array<Node> | null>("nodes");
 
 	return (
 		<PinBoard nodes={nodes} onNodesChange={setNodes} nodeTypes={nodeTypes}>
