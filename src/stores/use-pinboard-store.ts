@@ -4,16 +4,19 @@ import { persist } from "zustand/middleware";
 
 export type PinBoardState = {
 	xy: Tuple<number>;
+	name: string;
 };
 
 type PinBoardStore = PinBoardState & {
 	actions: {
 		setXY: (xy: Tuple<number>) => void;
+		setName: (name: string) => void;
 	};
 };
 
 const initialState: PinBoardState = {
 	xy: [0, 0],
+	name: "My Awesome PinBoard",
 };
 
 const usePinBoardStore = create(
@@ -22,6 +25,7 @@ const usePinBoardStore = create(
 			...initialState,
 			actions: {
 				setXY: (xy) => set({ xy }),
+				setName: (name) => set({ name }),
 			},
 		}),
 		{
@@ -35,6 +39,7 @@ const usePinBoardStore = create(
 );
 
 export const usePinBoardXY = () => usePinBoardStore((state) => state.xy);
+export const usePinBoardName = () => usePinBoardStore((state) => state.name);
 
 export const usePinBoardActions = () =>
 	usePinBoardStore((state) => state.actions);

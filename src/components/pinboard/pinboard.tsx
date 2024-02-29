@@ -2,13 +2,13 @@
 
 import useDrag from "@/hooks/use-drag";
 import { Node, Nodes, useNodesActions } from "@/stores/use-nodes-store";
-import { usePinBoardActions, usePinBoardXY } from "@/stores/use-pinboard-store";
+import {
+	usePinBoardActions,
+	usePinBoardName,
+	usePinBoardXY,
+} from "@/stores/use-pinboard-store";
 import { PropsWithChildren, useEffect, useRef } from "react";
-import { NodeHandle, NodeTypes, Point } from "./types";
-
-type PinboardSettings = {
-	position?: Point;
-};
+import { NodeHandle, NodeTypes } from "./types";
 
 type PinBoardProps = {
 	nodes: Nodes | null;
@@ -26,6 +26,7 @@ export function PinBoard({
 	const { setXY } = usePinBoardActions();
 
 	const xy = usePinBoardXY();
+	const name = usePinBoardName();
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ offset: [x, y] }) => {
@@ -51,6 +52,11 @@ export function PinBoard({
 	return (
 		<div {...bind} className="w-full h-full relative overflow-hidden">
 			{children}
+			<div className="absolute flex w-full justify-center pt-6 z-50">
+				<p className="px-4 py-2 bg-white text-sm font-light shadow-sm">
+					{name}
+				</p>
+			</div>
 			<NodesContainer
 				nodes={nodes}
 				nodeTypes={nodeTypes}
@@ -120,7 +126,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		<div
 			{...bind}
 			style={{ transform: `translate(${x}px, ${y}px)` }}
-			className="z-10 pointer-events-none relative"
+			className="pointer-events-none relative z-10"
 		>
 			{nodes?.map((node) => (
 				<NodeRenderer key={node.id} node={node} nodeTypes={nodeTypes} />
