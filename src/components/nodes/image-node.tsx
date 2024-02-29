@@ -13,7 +13,7 @@ export function ImageNode({ node }: CustomNode<ImageNode>) {
 	return (
 		<BaseNode>
 			{/* eslint-disable-next-line @next/next/no-img-element */}
-			<img src={node.data.src} alt={node.data.alt} />;
+			<img src={node.data.src} alt={node.data.alt} />
 		</BaseNode>
 	);
 }
