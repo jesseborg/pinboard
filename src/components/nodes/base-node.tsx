@@ -12,7 +12,7 @@ export function BaseNode({
 	return (
 		<div
 			className={cn(
-				"border-2 border-black p-2 bg-white shadow-[2px_2px] shadow-black",
+				"border-2 border-black bg-white shadow-[2px_2px] shadow-black",
 				className
 			)}
 		>
