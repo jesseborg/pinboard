@@ -1,21 +1,19 @@
 "use client";
 
 import useDrag from "@/hooks/use-drag";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import {
-	Node,
-	PinBoardState,
-	usePinBoardActions,
-	usePinBoardNodeTypes,
-	usePinBoardXY,
-} from "@/stores/use-pinboard-store";
+import { Node, Nodes, useNodesActions } from "@/stores/use-nodes-store";
+import { usePinBoardActions, usePinBoardXY } from "@/stores/use-pinboard-store";
 import { PropsWithChildren, useEffect, useRef } from "react";
-import { NodeHandle, Point } from "./types";
-
-type PinBoardProps = Omit<PinBoardState, "xy">;
+import { NodeHandle, NodeTypes, Point } from "./types";
 
 type PinboardSettings = {
 	position?: Point;
+};
+
+type PinBoardProps = {
+	nodes: Nodes | null;
+	nodeTypes: NodeTypes;
+	onNodesChange?: (nodes: Nodes | null) => void;
 };
 
 export function PinBoard({
@@ -24,19 +22,18 @@ export function PinBoard({
 	onNodesChange,
 	children,
 }: PropsWithChildren<PinBoardProps>) {
-	const { setState, setXY } = usePinBoardActions();
-	const [settings, setSettings] = useLocalStorage<PinboardSettings>("settings");
+	const { setState } = useNodesActions();
+	const { setXY } = usePinBoardActions();
+
+	const xy = usePinBoardXY();
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ offset: [x, y] }) => {
-			// Update settings in localStorage
-			setSettings({ position: { x, y } });
-
 			// Update pinboard store state
 			setXY([x, y]);
 		},
 		{
-			initialPosition: [settings?.position?.x ?? 0, settings?.position?.y ?? 0],
+			initialPosition: xy,
 			children: {
 				ignore: true,
 			},
@@ -45,9 +42,7 @@ export function PinBoard({
 
 	useEffect(() => {
 		setState({
-			xy: [settings?.position?.x ?? 0, settings?.position?.y ?? 0],
 			nodes,
-			nodeTypes,
 			onNodesChange,
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,14 +51,20 @@ export function PinBoard({
 	return (
 		<div {...bind} className="w-full h-full relative overflow-hidden">
 			{children}
-			<NodesContainer nodes={nodes} onNodesChange={onNodesChange} />
+			<NodesContainer
+				nodes={nodes}
+				nodeTypes={nodeTypes}
+				onNodesChange={onNodesChange}
+			/>
 		</div>
 	);
 }
 
-function NodeRenderer({ node }: { node: Node }) {
-	const nodeTypes = usePinBoardNodeTypes();
-
+type NodeRendererProps = {
+	node: Node;
+	nodeTypes: NodeTypes;
+};
+function NodeRenderer({ node, nodeTypes }: NodeRendererProps) {
 	const handleRef = useRef<NodeHandle>(null);
 
 	const Node = nodeTypes?.[node.type];
@@ -87,7 +88,7 @@ function NodeRenderer({ node }: { node: Node }) {
 	);
 }
 
-function NodesContainer({ nodes, onNodesChange }: PinBoardProps) {
+function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	const [x, y] = usePinBoardXY();
 
 	const { bind } = useDrag<HTMLDivElement>(
@@ -122,7 +123,7 @@ function NodesContainer({ nodes, onNodesChange }: PinBoardProps) {
 			className="z-10 pointer-events-none relative"
 		>
 			{nodes?.map((node) => (
-				<NodeRenderer key={node.id} node={node} />
+				<NodeRenderer key={node.id} node={node} nodeTypes={nodeTypes} />
 			))}
 		</div>
 	);

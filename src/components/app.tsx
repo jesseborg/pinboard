@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { Nodes } from "@/stores/use-pinboard-store";
+import { Nodes } from "@/stores/use-nodes-store";
 import { ImageNode } from "./nodes/image-node";
 import { MDXNode } from "./nodes/mdx-node";
 import { Background } from "./pinboard/background";
