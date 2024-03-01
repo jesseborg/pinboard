@@ -6,7 +6,7 @@ export function Background() {
 	return (
 		<span className="pointer-events-none">
 			{/* Dots Pattern */}
-			<svg className="absolute inset-0 w-full h-full z-0">
+			<svg className="absolute inset-0 w-full h-full -z-10">
 				<pattern
 					id="dots-pattern"
 					x={x}
@@ -28,7 +28,7 @@ export function Background() {
 			</svg>
 
 			{/* Border Fade */}
-			<span className="absolute inset-0 z-20 shadow-[0_0_0_16px,inset_0_0_8px_16px] shadow-white/80 rounded-[32px]" />
+			{/* <span className="absolute inset-0 z-20 shadow-[0_0_0_16px,inset_0_0_8px_16px] shadow-white/80 rounded-[32px]" /> */}
 		</span>
 	);
 }
