@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@million/lint": "^0.0.56",
     "clsx": "^2.1.0",
-    "million": "^3.0.3",
     "next": "14.1.0",
     "react": "^18",
     "react-dom": "^18",
