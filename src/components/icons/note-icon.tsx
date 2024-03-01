@@ -8,8 +8,8 @@ export function NoteIcon() {
 			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
-				fill-rule="evenodd"
-				clip-rule="evenodd"
+				fillRule="evenodd"
+				clipRule="evenodd"
 				d="M3 7C3 4.79086 4.79086 3 7 3H17C19.2091 3 21 4.79086 21 7V14H18C15.7909 14 14 15.7909 14 18V21H7C4.79086 21 3 19.2091 3 17V7Z"
 				fill="currentColor"
 			/>
