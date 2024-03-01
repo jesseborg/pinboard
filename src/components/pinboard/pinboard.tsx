@@ -86,7 +86,6 @@ function NodeRenderer({ node, nodeTypes }: NodeRendererProps) {
 	return (
 		<div
 			data-draggable
-			key={node.id}
 			id={`${node.id}`}
 			style={{
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
