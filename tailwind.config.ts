@@ -6,7 +6,11 @@ const config: Config = {
 		"./src/components/**/*.{ts,tsx,mdx}",
 		"./src/app/**/*.{ts,tsx,mdx}",
 	],
-	theme: {},
+	theme: {
+		fontFamily: {
+			mono: ["JetBrains Mono", "monospace"],
+		},
+	},
 	plugins: [],
 };
 export default config;

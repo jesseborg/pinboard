@@ -73,7 +73,7 @@ export function MDXNodee({ node, handleRef }: CustomNode<MDXNode>) {
 	}, []);
 
 	return (
-		<BaseNode className="p-2 min-h-[250px] w-[250px]">
+		<BaseNode className="p-2 min-h-[250px] w-[250px] text-sm">
 			<textarea
 				ref={textareaRef}
 				autoComplete="off"
