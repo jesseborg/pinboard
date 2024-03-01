@@ -26,7 +26,6 @@ export function PinBoard({
 	const { setXY } = usePinBoardActions();
 
 	const xy = usePinBoardXY();
-	const name = usePinBoardName();
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ offset: [x, y] }) => {
@@ -52,16 +51,22 @@ export function PinBoard({
 	return (
 		<div {...bind} className="w-full h-full relative overflow-hidden">
 			{children}
-			<div className="absolute flex w-full justify-center pt-6 z-50">
-				<p className="px-4 py-2 bg-white text-sm font-light shadow-sm">
-					{name}
-				</p>
-			</div>
+			<NameContainer />
 			<NodesContainer
 				nodes={nodes}
 				nodeTypes={nodeTypes}
 				onNodesChange={onNodesChange}
 			/>
+		</div>
+	);
+}
+
+function NameContainer() {
+	const name = usePinBoardName();
+
+	return (
+		<div className="absolute flex w-full justify-center pt-6 z-50">
+			<p className="px-4 py-2 bg-white text-sm font-light shadow-sm">{name}</p>
 		</div>
 	);
 }
