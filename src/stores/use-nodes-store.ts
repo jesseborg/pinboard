@@ -35,6 +35,14 @@ const useNodesStore = create(
 				setNodes: (nodes) => set({ nodes }),
 				removeNode: (id) =>
 					set((state) => {
+						if (!state.nodes || !Boolean(state.nodes.length)) {
+							return state;
+						}
+
+						if (!state.nodes[id]) {
+							return state;
+						}
+
 						const nodes = state.nodes?.filter((node) => node.id !== id);
 						return { nodes };
 					}),
