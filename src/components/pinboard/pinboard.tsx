@@ -4,6 +4,7 @@ import useDrag from "@/hooks/use-drag";
 import { Node, Nodes, useNodesActions } from "@/stores/use-nodes-store";
 import {
 	usePinBoardActions,
+	usePinBoardHydrated,
 	usePinBoardName,
 	usePinBoardXY,
 } from "@/stores/use-pinboard-store";
@@ -17,13 +18,23 @@ type PinBoardProps = {
 };
 
 export function PinBoard({
-	nodes,
-	nodeTypes,
-	onNodesChange,
 	children,
+	...props
+}: PropsWithChildren<PinBoardProps>) {
+	const hydrated = usePinBoardHydrated();
+
+	if (!hydrated) {
+		return;
+	}
+
+	return <DraggablePinBoard {...props}>{children}</DraggablePinBoard>;
+}
+
+function DraggablePinBoard({
+	children,
+	...props
 }: PropsWithChildren<PinBoardProps>) {
 	const { setXY } = usePinBoardActions();
-
 	const xy = usePinBoardXY();
 
 	const { bind } = useDrag<HTMLDivElement>(
@@ -43,11 +54,7 @@ export function PinBoard({
 		<div {...bind} className="w-full h-full relative overflow-hidden">
 			{children}
 			<NameContainer />
-			<NodesContainer
-				nodes={nodes}
-				nodeTypes={nodeTypes}
-				onNodesChange={onNodesChange}
-			/>
+			<NodesContainer {...props} />
 		</div>
 	);
 }

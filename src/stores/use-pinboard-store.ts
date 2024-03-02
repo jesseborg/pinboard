@@ -1,6 +1,7 @@
 "use client";
 
 import { Tuple } from "@/hooks/use-drag";
+import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -39,6 +40,32 @@ export const usePinBoardStore = create(
 		}
 	)
 );
+
+// https://docs.pmnd.rs/zustand/integrations/persisting-store-data#how-can-i-check-if-my-store-has-been-hydrated
+export const usePinBoardHydrated = () => {
+	const [hydrated, setHydrated] = useState(false);
+
+	useEffect(() => {
+		// Note: This is just in case you want to take into account manual rehydration.
+		// You can remove the following line if you don't need it.
+		const unsubHydrate = usePinBoardStore.persist.onHydrate(() =>
+			setHydrated(false)
+		);
+
+		const unsubFinishHydration = usePinBoardStore.persist.onFinishHydration(
+			() => setHydrated(true)
+		);
+
+		setHydrated(usePinBoardStore.persist.hasHydrated());
+
+		return () => {
+			unsubHydrate();
+			unsubFinishHydration();
+		};
+	}, []);
+
+	return hydrated;
+};
 
 export const usePinBoardXY = () => usePinBoardStore((state) => state.xy);
 export const usePinBoardName = () => usePinBoardStore((state) => state.name);
