@@ -14,6 +14,7 @@ export type NodesState = {
 };
 
 type NodeActions<T extends NodeTypes = {}> = {
+	setNode: <N extends NodeProps>(id: string, node: Partial<N>) => void;
 	setNodes: (nodes: Nodes | null) => void;
 	removeNode: (id: string) => void;
 	addNode: <K extends keyof T>(
@@ -35,6 +36,21 @@ const useNodesStore = create(
 		(set) => ({
 			...initialState,
 			actions: {
+				setNode: (id, data) =>
+					set((state) => {
+						if (!state.nodes || !Boolean(state.nodes.length)) {
+							return state;
+						}
+
+						const nodes = state.nodes.map((node) => {
+							if (node.id === id) {
+								return { ...node, ...data };
+							}
+							return node;
+						});
+
+						return { nodes };
+					}),
 				setNodes: (nodes) => set({ nodes }),
 				removeNode: (id) =>
 					set((state) => {

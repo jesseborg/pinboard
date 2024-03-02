@@ -22,7 +22,7 @@ export function MDXNodee({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const nodes = useNodes();
-	const { setNodes } = useNodesActions();
+	const { setNode } = useNodesActions();
 
 	const [editing, setEditing] = useState(false);
 
@@ -56,9 +56,9 @@ export function MDXNodee({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 			return;
 		}
 
-		(nodes.find((n) => n.id === node.id) as MDXNodeProps).data.label =
-			textareaRef.current.value;
-		setNodes(nodes);
+		setNode<MDXNodeProps>(node.id, {
+			data: { label: textareaRef.current.value },
+		});
 	}
 
 	function handleBlur() {
