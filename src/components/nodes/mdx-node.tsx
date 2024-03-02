@@ -52,12 +52,13 @@ export function MDXNodee({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 	function handleInput(_: FormEvent<HTMLTextAreaElement>) {
 		autoResize();
 
-		if (!nodes || !node || !textareaRef.current) {
+		if (!nodes || !textareaRef.current) {
 			return;
 		}
 
-		(nodes[node.id] as MDXNodeProps).data.label = textareaRef.current?.value;
-		setNodes?.(nodes);
+		(nodes.find((n) => n.id === node.id) as MDXNodeProps).data.label =
+			textareaRef.current.value;
+		setNodes(nodes);
 	}
 
 	function handleBlur() {
