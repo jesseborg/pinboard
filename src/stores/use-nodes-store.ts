@@ -47,7 +47,7 @@ const useNodesStore = create(
 					}),
 				addNode: (type, data) =>
 					set((state) => {
-						const nodes = state.nodes ?? [];
+						const nodes = [...(state.nodes ?? [])];
 						const node = {
 							id: uuid4(),
 							position: { x: 0, y: 0 },
