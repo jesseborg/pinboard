@@ -12,6 +12,7 @@ export type NodesState = {
 
 type NodeActions<T extends NodeTypes = {}> = {
 	setNodes: (nodes: Nodes | null) => void;
+	removeNode: (id: number) => void;
 	addNode: <K extends keyof T>(
 		type: K,
 		node?: Partial<ComponentProps<T[K]>["node"]>
@@ -32,6 +33,11 @@ const useNodesStore = create(
 			...initialState,
 			actions: {
 				setNodes: (nodes) => set({ nodes }),
+				removeNode: (id) =>
+					set((state) => {
+						const nodes = state.nodes?.filter((node) => node.id !== id);
+						return { nodes };
+					}),
 				addNode: (type, data) =>
 					set((state) => {
 						const nodes = state.nodes ?? [];

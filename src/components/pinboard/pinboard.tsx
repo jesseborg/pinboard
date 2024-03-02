@@ -1,13 +1,13 @@
 "use client";
 
 import useDrag from "@/hooks/use-drag";
-import { Node, Nodes } from "@/stores/use-nodes-store";
+import { Node, Nodes, useNodesActions } from "@/stores/use-nodes-store";
 import {
 	usePinBoardActions,
 	usePinBoardName,
 	usePinBoardXY,
 } from "@/stores/use-pinboard-store";
-import { PropsWithChildren, useRef } from "react";
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { NodeHandle, NodeTypes } from "./types";
 
 type PinBoardProps = {
@@ -91,6 +91,9 @@ function NodeRenderer({ node, nodeTypes }: NodeRendererProps) {
 
 function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	const [x, y] = usePinBoardXY();
+	const { removeNode } = useNodesActions();
+
+	const [targetId, setTargetId] = useState<number | null>(null);
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
@@ -105,6 +108,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 			}
 		},
 		{
+			onDragStart: ({ target }) => setTargetId(Number(target.id)),
 			selectors: "[data-draggable=true]",
 			offset: [x, y],
 			grid: {
@@ -112,6 +116,27 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 			},
 		}
 	);
+
+	useEffect(() => {
+		function handleKeyDown(event: KeyboardEvent) {
+			// Avoid collision with inputs, etc.
+			if (document.activeElement !== document.body) {
+				return;
+			}
+
+			if (event.key === "Delete") {
+				if (targetId === null) {
+					return;
+				}
+
+				removeNode(targetId);
+			}
+		}
+
+		window.addEventListener("keydown", handleKeyDown);
+
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [removeNode, targetId]);
 
 	if (!Boolean(nodes?.length)) {
 		return null;

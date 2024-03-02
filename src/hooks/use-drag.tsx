@@ -11,7 +11,7 @@ enum MouseButtons {
 
 export type Tuple<T> = [T, T];
 
-type BaseDragEvent = {
+type BaseDragEvent<T extends HTMLElement = HTMLElement> = {
 	/** The base mouse event */
 	event: MouseEvent;
 	/** [x,y] values (pointer position or scroll offset) */
@@ -23,17 +23,19 @@ type BaseDragEvent = {
 	/** Displacement between offset and lastOffset */
 	movement: Tuple<number>;
 	/** The element being dragged */
-	target: HTMLElement;
+	target: T;
 };
 
 type DragEvent = BaseDragEvent & {
 	/** The current offset position snapped to the grid step */
 	gridOffset: Tuple<number>;
 };
-type DragStartEvent = BaseDragEvent | { event: React.MouseEvent };
+type DragStartEvent<T extends HTMLElement> = Omit<BaseDragEvent<T>, "event"> & {
+	event: React.MouseEvent;
+};
 type DragEndEvent = BaseDragEvent;
 
-type UseDragOptionsProps = {
+type UseDragOptionsProps<T extends HTMLElement> = {
 	/** Initial position of the element */
 	initialPosition?: Tuple<number>;
 	/** Offset the drag by [x,y] pixels */
@@ -48,12 +50,12 @@ type UseDragOptionsProps = {
 		/** Ignore drag events from children of the `bind` consumer */
 		ignore?: boolean;
 	};
-	onDragStart?: (event: DragStartEvent) => void;
+	onDragStart?: (event: DragStartEvent<T>) => void;
 };
 
 function useDrag<T extends HTMLElement>(
 	onDrag?: ((event: DragEvent) => void) | null,
-	options?: UseDragOptionsProps
+	options?: UseDragOptionsProps<T>
 ) {
 	// Main element that holds all the events
 	const ref = useRef<T | null>(null);
@@ -78,7 +80,7 @@ function useDrag<T extends HTMLElement>(
 	const onMouseDown = useCallback(
 		(event: React.MouseEvent) => {
 			// Target needs to be an HTMLElement
-			const target = event.target as HTMLElement;
+			const target = event.target as T;
 
 			// If the selector option is set, make sure the target matches it
 			if (options?.selectors && !target.matches(options.selectors)) {
