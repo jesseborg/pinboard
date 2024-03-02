@@ -8,17 +8,17 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { CustomNode, NodeProps } from "../pinboard/types";
+import { CustomNodeProps, NodeProps } from "../pinboard/types";
 import { BaseNode } from "./base-node";
 
-export type MDXNode = NodeProps<{
+export type MDXNodeProps = NodeProps & {
 	type: "mdx";
 	data: {
 		label: string;
 	};
-}>;
+};
 
-export function MDXNodee({ node, handleRef }: CustomNode<MDXNode>) {
+export function MDXNodee({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const nodes = useNodes();
@@ -56,7 +56,7 @@ export function MDXNodee({ node, handleRef }: CustomNode<MDXNode>) {
 			return;
 		}
 
-		(nodes[node.id] as MDXNode).data.label = textareaRef.current?.value;
+		(nodes[node.id] as MDXNodeProps).data.label = textareaRef.current?.value;
 		setNodes?.(nodes);
 	}
 
@@ -88,7 +88,7 @@ export function MDXNodee({ node, handleRef }: CustomNode<MDXNode>) {
 					}
 				)}
 				cols={25}
-				defaultValue={node.data.label}
+				defaultValue={node.data.label ?? ""}
 				placeholder="Type anything..."
 				onInput={handleInput}
 				onBlur={handleBlur}

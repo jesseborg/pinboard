@@ -1,15 +1,15 @@
-import { CustomNode, NodeProps } from "../pinboard/types";
+import { CustomNodeProps, NodeProps } from "../pinboard/types";
 import { BaseNode } from "./base-node";
 
-export type ImageNode = NodeProps<{
+export type ImageNodeProps = NodeProps & {
 	type: "image";
 	data: {
 		alt: string;
 		src: string;
 	};
-}>;
+};
 
-export function ImageNode({ node }: CustomNode<ImageNode>) {
+export function ImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 	return (
 		<BaseNode>
 			{/* eslint-disable-next-line @next/next/no-img-element */}

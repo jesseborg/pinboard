@@ -1,7 +1,6 @@
 "use client";
 
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import { Nodes } from "@/stores/use-nodes-store";
+import { useNodes, useNodesActions } from "@/stores/use-nodes-store";
 import { Button } from "./button";
 import { ImageIcon } from "./icons/image-icon";
 import { NoteIcon } from "./icons/note-icon";
@@ -16,7 +15,8 @@ const nodeTypes = {
 };
 
 export function App() {
-	const [nodes, setNodes] = useLocalStorage<Nodes | null>("nodes");
+	const nodes = useNodes();
+	const { setNodes } = useNodesActions();
 
 	return (
 		<PinBoard nodes={nodes} onNodesChange={setNodes} nodeTypes={nodeTypes}>
@@ -27,13 +27,24 @@ export function App() {
 }
 
 function ToolBar() {
+	const { addNode } = useNodesActions<typeof nodeTypes>();
+
 	return (
 		<div className="absolute z-20 text-white h-full pl-6 flex">
 			<div className="flex self-center gap-1.5 flex-col bg-black p-1.5 rounded-md">
-				<Button>
+				<Button onClick={() => addNode("mdx", { data: { label: "" } })}>
 					<NoteIcon />
 				</Button>
-				<Button>
+				<Button
+					onClick={() =>
+						addNode("image", {
+							data: {
+								src: "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?q=80&w=240",
+								alt: "photo of a cat yawning",
+							},
+						})
+					}
+				>
 					<ImageIcon />
 				</Button>
 			</div>

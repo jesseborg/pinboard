@@ -19,7 +19,7 @@ const initialState: PinBoardState = {
 	name: "My Awesome PinBoard",
 };
 
-const usePinBoardStore = create(
+export const usePinBoardStore = create(
 	persist<PinBoardStore>(
 		(set) => ({
 			...initialState,

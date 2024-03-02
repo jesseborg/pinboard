@@ -5,18 +5,15 @@ export type Point = {
 	y: number;
 };
 
-export type NodeProps<T = {}> = {
+export type NodeProps = {
 	id: number;
 	position: Point;
 	type: string;
-} & T;
+};
 
-export type NodeTypes<T extends NodeProps = any> = Record<
-	string,
-	ComponentType<CustomNode<T>>
->;
+export type NodeTypes = Record<string, ComponentType<CustomNodeProps<any>>>;
 
-export type CustomNode<T extends NodeProps> = {
+export type CustomNodeProps<T extends NodeProps> = {
 	node: T;
 	handleRef: Ref<NodeHandle>;
 };

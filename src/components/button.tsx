@@ -1,7 +1,10 @@
-import { PropsWithChildren } from "react";
+import { HTMLAttributes, PropsWithChildren } from "react";
 
 type ButtonProps = {};
+type ButtonPropsWithChildren = PropsWithChildren<ButtonProps>;
+type ButtonPropsWithAttributes = ButtonPropsWithChildren &
+	HTMLAttributes<HTMLButtonElement>;
 
-export function Button({ children }: PropsWithChildren<ButtonProps>) {
-	return <button>{children}</button>;
+export function Button({ children, ...props }: ButtonPropsWithAttributes) {
+	return <button {...props}>{children}</button>;
 }

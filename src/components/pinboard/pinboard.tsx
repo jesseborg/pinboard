@@ -1,13 +1,13 @@
 "use client";
 
 import useDrag from "@/hooks/use-drag";
-import { Node, Nodes, useNodesActions } from "@/stores/use-nodes-store";
+import { Node, Nodes } from "@/stores/use-nodes-store";
 import {
 	usePinBoardActions,
 	usePinBoardName,
 	usePinBoardXY,
 } from "@/stores/use-pinboard-store";
-import { PropsWithChildren, useEffect, useRef } from "react";
+import { PropsWithChildren, useRef } from "react";
 import { NodeHandle, NodeTypes } from "./types";
 
 type PinBoardProps = {
@@ -22,7 +22,6 @@ export function PinBoard({
 	onNodesChange,
 	children,
 }: PropsWithChildren<PinBoardProps>) {
-	const { setState } = useNodesActions();
 	const { setXY } = usePinBoardActions();
 
 	const xy = usePinBoardXY();
@@ -39,14 +38,6 @@ export function PinBoard({
 			},
 		}
 	);
-
-	useEffect(() => {
-		setState({
-			nodes,
-			onNodesChange,
-		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	return (
 		<div {...bind} className="w-full h-full relative overflow-hidden">

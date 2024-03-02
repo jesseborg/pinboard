@@ -1,38 +1,64 @@
-import { NodeProps } from "@/components/pinboard/types";
+import { NodeProps, NodeTypes } from "@/components/pinboard/types";
+import { ComponentProps } from "react";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export type Node<T extends NodeProps = NodeProps> = T;
 export type Nodes = Array<Node>;
 
 export type NodesState = {
 	nodes: Nodes | null;
-	onNodesChange?: (nodes: Nodes | null) => void;
+};
+
+type NodeActions<T extends NodeTypes = {}> = {
+	setNodes: (nodes: Nodes | null) => void;
+	addNode: <K extends keyof T>(
+		type: K,
+		node?: Partial<ComponentProps<T[K]>["node"]>
+	) => void;
 };
 
 type NodesStore = NodesState & {
-	actions: {
-		setState: (state: Partial<NodesState>) => void;
-		setNodes: (nodes: Nodes) => void;
-	};
+	actions: NodeActions;
 };
 
 const initialState: NodesState = {
 	nodes: null,
-	onNodesChange: () => {},
 };
 
-const useNodesStore = create<NodesStore>((set) => ({
-	...initialState,
-	actions: {
-		setState: (state) => set((prev) => ({ ...prev, ...state })),
-		setNodes: (nodes) =>
-			set((state) => {
-				state.onNodesChange?.(nodes);
-				return { ...state, nodes };
-			}),
-	},
-}));
+const useNodesStore = create(
+	persist<NodesStore>(
+		(set) => ({
+			...initialState,
+			actions: {
+				setNodes: (nodes) => set({ nodes }),
+				addNode: (type, data) =>
+					set((state) => {
+						const nodes = state.nodes ?? [];
+						const node = {
+							id: nodes.length,
+							position: { x: 0, y: 0 },
+							type,
+							...data,
+						};
+
+						nodes.push(node);
+
+						return { nodes };
+					}),
+			},
+		}),
+		{
+			name: "nodes",
+			partialize: (state) =>
+				Object.fromEntries(
+					Object.entries(state).filter(([key]) => !["actions"].includes(key))
+				) as NodesStore,
+		}
+	)
+);
 
 export const useNodes = () => useNodesStore((state) => state.nodes);
 
-export const useNodesActions = () => useNodesStore((state) => state.actions);
+export const useNodesActions = <T extends NodeTypes = {}>() =>
+	useNodesStore((state) => state.actions as NodeActions<T>);
