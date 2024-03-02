@@ -77,12 +77,13 @@ function NodeRenderer({ node, nodeTypes }: NodeRendererProps) {
 	return (
 		<div
 			data-draggable
-			id={`${node.id}`}
+			id={node.id}
 			style={{
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
 			}}
 			className="pointer-events-auto absolute"
 			onDoubleClick={() => handleRef.current?.onDoubleClick()}
+			onClick={(e) => (e.target as HTMLElement).focus()}
 		>
 			<Node handleRef={handleRef} node={node} />
 		</div>
@@ -93,14 +94,13 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	const [x, y] = usePinBoardXY();
 	const { removeNode } = useNodesActions();
 
-	const [targetId, setTargetId] = useState<number | null>(null);
+	const [targetId, setTargetId] = useState<string | null>(null);
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
 			target.style.transform = `translate(${ox}px, ${oy}px)`;
 
-			const id = Number(target.id);
-			const node = nodes?.[id];
+			const node = nodes?.find((n) => n.id === target.id);
 
 			if (node) {
 				node.position = { x: ox, y: oy };
@@ -108,7 +108,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 			}
 		},
 		{
-			onDragStart: ({ target }) => setTargetId(Number(target.id)),
+			onDragStart: ({ target }) => setTargetId(target.id),
 			selectors: "[data-draggable=true]",
 			offset: [x, y],
 			grid: {

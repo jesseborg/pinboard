@@ -1,4 +1,7 @@
+"use client";
+
 import { NodeProps, NodeTypes } from "@/components/pinboard/types";
+import { uuid4 } from "@/lib/guid";
 import { ComponentProps } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -12,7 +15,7 @@ export type NodesState = {
 
 type NodeActions<T extends NodeTypes = {}> = {
 	setNodes: (nodes: Nodes | null) => void;
-	removeNode: (id: number) => void;
+	removeNode: (id: string) => void;
 	addNode: <K extends keyof T>(
 		type: K,
 		node?: Partial<ComponentProps<T[K]>["node"]>
@@ -39,10 +42,6 @@ const useNodesStore = create(
 							return state;
 						}
 
-						if (!state.nodes[id]) {
-							return state;
-						}
-
 						const nodes = state.nodes?.filter((node) => node.id !== id);
 						return { nodes };
 					}),
@@ -50,7 +49,7 @@ const useNodesStore = create(
 					set((state) => {
 						const nodes = state.nodes ?? [];
 						const node = {
-							id: nodes.length,
+							id: uuid4(),
 							position: { x: 0, y: 0 },
 							type,
 							...data,

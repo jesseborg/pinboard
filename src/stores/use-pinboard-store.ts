@@ -1,3 +1,5 @@
+"use client";
+
 import { Tuple } from "@/hooks/use-drag";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";

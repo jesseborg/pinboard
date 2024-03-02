@@ -6,7 +6,7 @@ export type Point = {
 };
 
 export type NodeProps = {
-	id: number;
+	id: string;
 	position: Point;
 	type: string;
 };
