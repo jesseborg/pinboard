@@ -11,6 +11,7 @@ export type Nodes = Array<Node>;
 
 export type NodesState = {
 	nodes: Nodes | null;
+	selectedNodeId: string | null;
 };
 
 type NodeActions<T extends NodeTypes<NodeProps> = {}> = {
@@ -23,6 +24,7 @@ type NodeActions<T extends NodeTypes<NodeProps> = {}> = {
 			Omit<NodeProps & ComponentProps<T[K]>["node"], "id" | "type">
 		>
 	) => void;
+	setSelectedNodeId: (id: string | null) => void;
 };
 
 type NodesStore = NodesState & {
@@ -31,6 +33,7 @@ type NodesStore = NodesState & {
 
 const initialState: NodesState = {
 	nodes: null,
+	selectedNodeId: null,
 };
 
 const useNodesStore = create(
@@ -77,6 +80,7 @@ const useNodesStore = create(
 
 						return { nodes };
 					}),
+				setSelectedNodeId: (id) => set({ selectedNodeId: id }),
 			},
 		}),
 		{
@@ -90,6 +94,8 @@ const useNodesStore = create(
 );
 
 export const useNodes = () => useNodesStore((state) => state.nodes);
+export const useSelectedNodeId = () =>
+	useNodesStore((state) => state.selectedNodeId);
 
 export const useNodesActions = <T extends NodeTypes = {}>() =>
 	useNodesStore((state) => state.actions as NodeActions<T>);

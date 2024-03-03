@@ -1,14 +1,19 @@
 "use client";
 
 import useDrag from "@/hooks/use-drag";
-import { Node, Nodes, useNodesActions } from "@/stores/use-nodes-store";
+import {
+	Node,
+	Nodes,
+	useNodesActions,
+	useSelectedNodeId,
+} from "@/stores/use-nodes-store";
 import {
 	usePinBoardActions,
 	usePinBoardHydrated,
 	usePinBoardName,
 	usePinBoardXY,
 } from "@/stores/use-pinboard-store";
-import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import { PropsWithChildren, useEffect, useRef } from "react";
 import { NodeHandle, NodeTypes } from "./types";
 
 type PinBoardProps = {
@@ -99,9 +104,9 @@ function NodeRenderer({ node, nodeTypes }: NodeRendererProps) {
 
 function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	const [x, y] = usePinBoardXY();
-	const { removeNode } = useNodesActions();
 
-	const [targetId, setTargetId] = useState<string | null>(null);
+	const selectedNodeId = useSelectedNodeId();
+	const { removeNode, setSelectedNodeId } = useNodesActions();
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
@@ -115,7 +120,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 			}
 		},
 		{
-			onDragStart: ({ target }) => setTargetId(target.id),
+			onDragStart: ({ target }) => setSelectedNodeId(target.id),
 			selectors: "[data-draggable=true]",
 			offset: [x, y],
 			grid: {
@@ -132,18 +137,18 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 			}
 
 			if (event.key === "Delete") {
-				if (targetId === null) {
+				if (selectedNodeId === null) {
 					return;
 				}
 
-				removeNode(targetId);
+				removeNode(selectedNodeId);
 			}
 		}
 
 		window.addEventListener("keydown", handleKeyDown);
 
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [removeNode, targetId]);
+	}, [removeNode, selectedNodeId]);
 
 	if (!Boolean(nodes?.length)) {
 		return null;

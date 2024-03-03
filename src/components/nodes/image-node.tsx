@@ -11,7 +11,7 @@ export type ImageNodeProps = NodeProps & {
 
 export function ImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 	return (
-		<BaseNode>
+		<BaseNode node={node}>
 			{/* eslint-disable-next-line @next/next/no-img-element */}
 			<img src={node.data.src} alt={node.data.alt} />
 		</BaseNode>
