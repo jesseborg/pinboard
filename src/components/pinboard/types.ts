@@ -9,9 +9,13 @@ export type NodeProps = {
 	id: string;
 	position: Point;
 	type: string;
+	data: Record<string, unknown>;
 };
 
-export type NodeTypes = Record<string, ComponentType<CustomNodeProps<any>>>;
+export type NodeTypes<T extends NodeProps = any> = Record<
+	string,
+	ComponentType<CustomNodeProps<T>>
+>;
 
 export type CustomNodeProps<T extends NodeProps> = {
 	node: T;

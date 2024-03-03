@@ -13,13 +13,15 @@ export type NodesState = {
 	nodes: Nodes | null;
 };
 
-type NodeActions<T extends NodeTypes = {}> = {
+type NodeActions<T extends NodeTypes<NodeProps> = {}> = {
 	setNode: <N extends NodeProps>(id: string, node: Partial<N>) => void;
 	setNodes: (nodes: Nodes | null) => void;
 	removeNode: (id: string) => void;
 	addNode: <K extends keyof T>(
 		type: K,
-		node?: Partial<ComponentProps<T[K]>["node"]>
+		node?: Partial<
+			Omit<NodeProps & ComponentProps<T[K]>["node"], "id" | "type">
+		>
 	) => void;
 };
 
@@ -61,17 +63,17 @@ const useNodesStore = create(
 						const nodes = state.nodes?.filter((node) => node.id !== id);
 						return { nodes };
 					}),
-				addNode: (type, data) =>
+				addNode: (type, node) =>
 					set((state) => {
+						// Clone to force a re-render
 						const nodes = [...(state.nodes ?? [])];
-						const node = {
+
+						nodes.push({
+							...node,
 							id: uuid4(),
 							position: { x: 0, y: 0 },
 							type,
-							...data,
-						};
-
-						nodes.push(node);
+						} as NodeProps); // NOTE: I would like to find a way to remove the 'as NodeProps'
 
 						return { nodes };
 					}),
