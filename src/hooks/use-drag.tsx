@@ -51,6 +51,7 @@ type UseDragOptionsProps<T extends HTMLElement> = {
 		ignore?: boolean;
 	};
 	onDragStart?: (event: DragStartEvent<T>) => void;
+	onDragEnd?: (event: DragEndEvent) => void;
 };
 
 function useDrag<T extends HTMLElement>(
@@ -161,14 +162,31 @@ function useDrag<T extends HTMLElement>(
 		[down, offsetInitial, onDrag, options?.grid?.step, pointerInitial]
 	);
 
-	const onMouseUp = useCallback((_: MouseEvent) => {
-		if (!ref.current || !dragTarget.current) {
-			return;
-		}
+	const onMouseUp = useCallback(
+		(event: MouseEvent) => {
+			if (!ref.current || !dragTarget.current) {
+				return;
+			}
 
-		dragTarget.current = null;
-		setDown(false);
-	}, []);
+			const movement = [
+				event.clientX - pointerInitial[0],
+				event.clientY - pointerInitial[1],
+			] as Tuple<number>;
+
+			dragTarget.current = null;
+			setDown(false);
+
+			options?.onDragEnd?.({
+				event,
+				initial: pointerInitial,
+				movement,
+				offset,
+				target: event.target as HTMLElement,
+				xy: [event.clientX, event.clientY],
+			});
+		},
+		[offset, options, pointerInitial]
+	);
 
 	const handleMouseEvent = useCallback(
 		(event: MouseEvent | React.MouseEvent) => {

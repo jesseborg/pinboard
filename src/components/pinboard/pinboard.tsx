@@ -35,6 +35,8 @@ export function PinBoard({
 	return <DraggablePinBoard {...props}>{children}</DraggablePinBoard>;
 }
 
+const MIN_DRAG_DISTANCE = 3;
+
 function DraggablePinBoard({
 	children,
 	...props
@@ -42,12 +44,29 @@ function DraggablePinBoard({
 	const { setXY } = usePinBoardActions();
 	const xy = usePinBoardXY();
 
+	const { setSelectedNodeId } = useNodesActions();
+
 	const { bind } = useDrag<HTMLDivElement>(
-		({ offset: [x, y] }) => {
+		({ offset: [x, y], movement: [mx, my] }) => {
 			// Update pinboard store state
 			setXY([x, y]);
 		},
 		{
+			onDragEnd: ({ event, movement: [mx, my] }) => {
+				// Only allow click events on the pinboard container (not nodes)
+				if (event.target !== bind.ref.current) {
+					return;
+				}
+
+				const hasDragged = Math.abs(mx) + Math.abs(my) > MIN_DRAG_DISTANCE;
+
+				// Only allow clicks, this keeps nodes selected if dragging
+				if (hasDragged) {
+					return;
+				}
+
+				setSelectedNodeId(null);
+			},
 			initialPosition: xy,
 			children: {
 				ignore: true,
@@ -56,7 +75,11 @@ function DraggablePinBoard({
 	);
 
 	return (
-		<div {...bind} className="w-full h-full relative overflow-hidden">
+		<div
+			{...bind}
+			// onClick={handleClick}
+			className="w-full h-full relative overflow-hidden"
+		>
 			{children}
 			<NameContainer />
 			<NodesContainer {...props} />
