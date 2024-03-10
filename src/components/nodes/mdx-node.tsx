@@ -1,15 +1,7 @@
 import useDebounce from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import { useNodesActions } from "@/stores/use-nodes-store";
-import {
-	FocusEvent,
-	FormEvent,
-	memo,
-	useEffect,
-	useImperativeHandle,
-	useRef,
-	useState,
-} from "react";
+import { memo, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { CustomNodeProps, NodeProps } from "../pinboard/types";
 import { BaseNode } from "./base-node";
 
@@ -54,12 +46,12 @@ export function MDXNodee({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 		setNode<MDXNodeProps>(node.id, { data });
 	}, 300);
 
-	function handleInput(_: FormEvent<HTMLTextAreaElement>) {
+	function handleInput() {
 		autoResize();
 		debounceUpdateNode({ label: textareaRef.current?.value });
 	}
 
-	function handleBlur(event: FocusEvent<HTMLTextAreaElement>) {
+	function handleBlur() {
 		setEditing(false);
 
 		if (window.getSelection()?.focusNode?.contains(textareaRef.current)) {
