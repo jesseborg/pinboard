@@ -1,6 +1,8 @@
+import useDebounce from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
-import { useNodes, useNodesActions } from "@/stores/use-nodes-store";
+import { useNodesActions } from "@/stores/use-nodes-store";
 import {
+	FocusEvent,
 	FormEvent,
 	memo,
 	useEffect,
@@ -21,7 +23,6 @@ export type MDXNodeProps = NodeProps & {
 export function MDXNodee({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-	const nodes = useNodes();
 	const { setNode } = useNodesActions();
 
 	const [editing, setEditing] = useState(false);
@@ -45,23 +46,20 @@ export function MDXNodee({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 		}
 
 		textareaRef.current.style.height = "auto";
-		textareaRef.current.style.height =
-			textareaRef.current.scrollHeight + 2 + "px"; // 2px to account for padding
+		textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
 	}
+
+	const debounceUpdateNode = useDebounce((data: MDXNodeProps["data"]) => {
+		console.log("updated node");
+		setNode<MDXNodeProps>(node.id, { data });
+	}, 300);
 
 	function handleInput(_: FormEvent<HTMLTextAreaElement>) {
 		autoResize();
-
-		if (!nodes || !textareaRef.current) {
-			return;
-		}
-
-		setNode<MDXNodeProps>(node.id, {
-			data: { label: textareaRef.current.value },
-		});
+		debounceUpdateNode({ label: textareaRef.current?.value });
 	}
 
-	function handleBlur() {
+	function handleBlur(event: FocusEvent<HTMLTextAreaElement>) {
 		setEditing(false);
 
 		if (window.getSelection()?.focusNode?.contains(textareaRef.current)) {
@@ -69,8 +67,13 @@ export function MDXNodee({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 		}
 	}
 
+	// Sometimes the textarea height is incorrect on first render
 	useEffect(() => {
-		autoResize();
+		const timeout = setTimeout(() => {
+			autoResize();
+		}, 50);
+
+		return () => clearTimeout(timeout);
 	}, []);
 
 	return (
