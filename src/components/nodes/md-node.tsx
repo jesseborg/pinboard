@@ -12,7 +12,7 @@ export type MDXNodeProps = NodeProps & {
 	};
 };
 
-export function MDXNodee({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
+export function BaseMDNode({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const { setNode } = useNodesActions();
@@ -93,4 +93,4 @@ export function MDXNodee({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 	);
 }
 
-export const MDXNode = memo(MDXNodee);
+export const MDNode = memo(BaseMDNode);
