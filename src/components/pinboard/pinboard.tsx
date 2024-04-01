@@ -14,6 +14,7 @@ import {
 	usePinBoardName,
 	usePinBoardXY,
 } from "@/stores/use-pinboard-store";
+import clsx from "clsx";
 import {
 	FocusEvent,
 	PropsWithChildren,
@@ -138,6 +139,7 @@ type NodeRendererProps = {
 };
 function NodeRenderer({ node, nodeTypes }: NodeRendererProps) {
 	const handleRef = useRef<NodeHandle>(null);
+	const selectedNodeId = useSelectedNodeId();
 
 	const Node = nodeTypes?.[node.type];
 	if (Node === undefined) {
@@ -151,7 +153,9 @@ function NodeRenderer({ node, nodeTypes }: NodeRendererProps) {
 			style={{
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
 			}}
-			className="pointer-events-auto absolute"
+			className={clsx("pointer-events-auto absolute", {
+				"z-50": selectedNodeId === node.id,
+			})}
 			onDoubleClick={() => handleRef.current?.onDoubleClick()}
 			onClick={(e) => (e.target as HTMLElement).focus()}
 		>
