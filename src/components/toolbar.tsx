@@ -52,8 +52,12 @@ export function ToolBar() {
 
 type ToolTipProps = {
 	content: ReactNode;
-};
-const ToolTip = ({ content, children }: PropsWithChildren<ToolTipProps>) => {
+} & Partial<ToolTipPrimitive.BaseContentProps>;
+export const ToolTip = ({
+	content,
+	children,
+	...contentProps
+}: PropsWithChildren<ToolTipProps>) => {
 	return (
 		<ToolTipPrimitive.Root>
 			<ToolTipPrimitive.Trigger asChild>{children}</ToolTipPrimitive.Trigger>
@@ -63,6 +67,7 @@ const ToolTip = ({ content, children }: PropsWithChildren<ToolTipProps>) => {
 					align="center"
 					sideOffset={14}
 					className="bg-black text-white text-xs p-2 rounded-[4px]"
+					{...contentProps}
 				>
 					{content}
 				</ToolTipPrimitive.Content>

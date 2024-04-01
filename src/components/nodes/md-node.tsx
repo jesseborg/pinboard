@@ -1,5 +1,5 @@
 import useDebounce from "@/hooks/use-debounce";
-import { cn } from "@/lib/utils";
+import { cn, sleep } from "@/lib/utils";
 import { useNodesActions } from "@/stores/use-nodes-store";
 import { memo, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { CustomNodeProps, NodeProps } from "../pinboard/types";
@@ -24,13 +24,21 @@ export function BaseMDNode({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 		() => {
 			return {
 				onDoubleClick: () => {
-					textareaRef.current?.focus();
-					setEditing(true);
+					handleEdit();
 				},
 			};
 		},
 		[]
 	);
+
+	async function handleEdit() {
+		setEditing(true);
+
+		// when calling this function from BaseNode
+		// React refuses to update the 'editing' state, unless I wait
+		await sleep(10);
+		textareaRef.current?.focus();
+	}
 
 	function autoResize() {
 		if (!textareaRef.current) {
@@ -69,7 +77,11 @@ export function BaseMDNode({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 	}, []);
 
 	return (
-		<BaseNode node={node} className="p-2 min-h-[250px] w-[250px] text-sm">
+		<BaseNode
+			node={node}
+			handleEdit={handleEdit}
+			className="p-2 min-h-[250px] w-[250px] text-sm"
+		>
 			<textarea
 				ref={textareaRef}
 				autoComplete="off"

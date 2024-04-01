@@ -137,7 +137,7 @@ function Portal({ container, children }: PropsWithChildren<PortalProps>) {
 
 /* --- ToolTipContent --- */
 
-type BaseContentProps = {
+export type BaseContentProps = {
 	asChild?: boolean;
 	side: "top" | "bottom" | "left" | "right";
 	sideOffset: number;
