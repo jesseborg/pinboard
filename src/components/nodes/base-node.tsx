@@ -5,7 +5,7 @@ import {
 	useSelectedNodeId,
 } from "@/stores/use-nodes-store";
 import { HTMLAttributes, PropsWithChildren } from "react";
-import { Button } from "../button";
+import { Button } from "../primitives/button";
 
 type BaseNodeProps = {
 	node: Node;
@@ -49,8 +49,13 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 
 	return (
 		<div className="text-xs absolute top-full left-1/2 -translate-x-1/2 flex gap-1.5 bg-black p-1.5 rounded-md text-white mt-2 pointer-events-auto">
-			<Button onClick={() => handleEdit?.()}>Edit</Button>|
-			<Button onClick={() => removeNode(node.id)}>Delete</Button>
+			<Button intent="blank" size="xs" onClick={() => handleEdit?.()}>
+				Edit
+			</Button>
+			|
+			<Button intent="blank" size="xs" onClick={() => removeNode(node.id)}>
+				Delete
+			</Button>
 		</div>
 	);
 }

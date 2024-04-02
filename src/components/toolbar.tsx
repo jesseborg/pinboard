@@ -1,9 +1,9 @@
 import { useNodesActions } from "@/stores/use-nodes-store";
 import { PropsWithChildren, ReactNode } from "react";
 import { nodeTypes } from "./app";
-import { Button } from "./button";
 import { ImageIcon } from "./icons/image-icon";
 import { NoteIcon } from "./icons/note-icon";
+import { Button } from "./primitives/button";
 import * as ToolTipPrimitive from "./tooltip/tooltip";
 
 export function ToolBar() {
@@ -20,7 +20,10 @@ export function ToolBar() {
 							</p>
 						}
 					>
-						<Button onClick={() => addNode("mdx", { data: { label: "" } })}>
+						<Button
+							intent="blank"
+							onClick={() => addNode("mdx", { data: { label: "" } })}
+						>
 							<NoteIcon />
 						</Button>
 					</ToolTip>
@@ -32,6 +35,7 @@ export function ToolBar() {
 						}
 					>
 						<Button
+							intent="blank"
 							onClick={() =>
 								addNode("image", {
 									data: {
