@@ -90,7 +90,7 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 							</Button>
 							<Button
 								type="reset"
-								intent="blank"
+								intent="secondary"
 								size="xs"
 								className="w-full"
 								onClick={handleResetForm}

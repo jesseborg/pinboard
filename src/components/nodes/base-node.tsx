@@ -49,11 +49,21 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 
 	return (
 		<div className="text-xs absolute top-full left-1/2 -translate-x-1/2 flex gap-1.5 bg-black p-1.5 rounded-md text-white mt-2 pointer-events-auto">
-			<Button intent="blank" size="xs" onClick={() => handleEdit?.()}>
+			<Button
+				intent="primary"
+				size="xs"
+				className="p-1 px-2"
+				onClick={() => handleEdit?.()}
+			>
 				Edit
 			</Button>
-			|
-			<Button intent="blank" size="xs" onClick={() => removeNode(node.id)}>
+			<span className="bg-white w-px my-1 mr-px" />
+			<Button
+				intent="primary"
+				size="xs"
+				className="p-1 px-2"
+				onClick={() => removeNode(node.id)}
+			>
 				Delete
 			</Button>
 		</div>

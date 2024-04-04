@@ -1,10 +1,18 @@
+import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import React, { forwardRef, HTMLAttributes, PropsWithChildren } from "react";
 
-const button = cva("button", {
+const button = cva("button focus:ring-2 outline-none ring-white rounded-md", {
 	variants: {
 		intent: {
-			primary: ["bg-black text-white rounded-md p-2"],
+			primary: [
+				"bg-black text-white p-2",
+				"ring-neutral-400 focus:bg-neutral-900",
+			],
+			secondary: [
+				"bg-white text-black p-2",
+				"ring-neutral-400 focus:bg-neutral-50",
+			],
 			blank: "",
 		},
 		size: {
@@ -32,7 +40,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonPropsWithAttributes>(
 		return (
 			<button
 				ref={ref}
-				className={button({ intent, size, className })}
+				className={cn(button({ intent, size, className }))}
 				{...props}
 			>
 				{children}
