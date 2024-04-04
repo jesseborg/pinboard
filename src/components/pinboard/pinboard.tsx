@@ -137,18 +137,26 @@ type NodeRendererProps = {
 	node: Node;
 	nodeTypes: NodeTypes;
 };
-function NodeRenderer({ node, nodeTypes }: NodeRendererProps) {
+function NodeRenderer({ node, nodeTypes, ...props }: NodeRendererProps) {
 	const handleRef = useRef<NodeHandle>(null);
+
 	const selectedNodeId = useSelectedNodeId();
+	const { setSelectedNodeId } = useNodesActions();
 
 	const Node = nodeTypes?.[node.type];
 	if (Node === undefined) {
 		return null;
 	}
 
+	function handleFocusNode(element: HTMLElement) {
+		element.focus();
+		setSelectedNodeId(node.id);
+	}
+
 	return (
 		<div
 			data-draggable
+			tabIndex={0}
 			id={node.id}
 			style={{
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
@@ -157,7 +165,8 @@ function NodeRenderer({ node, nodeTypes }: NodeRendererProps) {
 				"z-50": selectedNodeId === node.id,
 			})}
 			onDoubleClick={() => handleRef.current?.onDoubleClick()}
-			onClick={(e) => (e.target as HTMLElement).focus()}
+			onClick={(e) => handleFocusNode(e.target as HTMLElement)}
+			onFocus={(e) => handleFocusNode(e.target)}
 		>
 			<Node handleRef={handleRef} node={node} />
 		</div>
@@ -168,7 +177,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	const [x, y] = usePinBoardXY();
 
 	const selectedNodeId = useSelectedNodeId();
-	const { removeNode, setSelectedNodeId } = useNodesActions();
+	const { removeNode } = useNodesActions();
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
@@ -182,7 +191,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 			}
 		},
 		{
-			onDragStart: ({ target }) => setSelectedNodeId(target.id),
+			// onDragStart: ({ target }) => setSelectedNodeId(target.id),
 			selectors: "[data-draggable=true]",
 			offset: [x, y],
 			grid: {
@@ -193,16 +202,11 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
-			// Avoid collision with inputs, etc.
-			if (document.activeElement !== document.body) {
+			if (!selectedNodeId) {
 				return;
 			}
 
 			if (event.key === "Delete") {
-				if (selectedNodeId === null) {
-					return;
-				}
-
 				removeNode(selectedNodeId);
 			}
 		}
