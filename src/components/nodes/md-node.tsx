@@ -84,6 +84,7 @@ export function BaseMDNode({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 		>
 			<textarea
 				ref={textareaRef}
+				tabIndex={-1}
 				autoComplete="off"
 				autoCapitalize="off"
 				autoCorrect="off"
