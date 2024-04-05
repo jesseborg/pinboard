@@ -12,13 +12,7 @@ import {
 	usePinBoardHydrated,
 	usePinBoardXY,
 } from "@/stores/use-pinboard-store";
-import {
-	PropsWithChildren,
-	useCallback,
-	useEffect,
-	useRef,
-	useState,
-} from "react";
+import { PropsWithChildren, memo, useEffect, useRef } from "react";
 import { NameContainer } from "./name-container";
 import { NodeHandle, NodeTypes } from "./types";
 
@@ -119,7 +113,7 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 			style={{
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
 			}}
-			className="pointer-events-auto absolute"
+			className="absolute"
 			onDoubleClick={() => handleRef.current?.onDoubleClick()}
 			onClick={(e) => handleFocusNode(e.target as HTMLDivElement)}
 			onFocus={(e) => handleFocusNode(e.target)}
@@ -135,42 +129,20 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	const selectedNodeId = useSelectedNodeId();
 	const { removeNode, setNode } = useNodesActions();
 
-	const [z, setZ] = useState(nodes?.length ?? 0);
-
-	function bringToFront(target: HTMLElement) {
-		target.style.zIndex = `${z}`;
-		setZ(z + 1);
-	}
-
-	function handleNodeFocus(target: HTMLElement) {
-		bringToFront(target);
-	}
-
-	const centerElement = useCallback(
-		(element: HTMLElement) => {
-			const { width, height } = element.getBoundingClientRect();
-			setNode(element.id, {
-				position: {
-					x: (window.innerWidth - width) / 2 - x,
-					y: (window.innerHeight - height) / 2 - y,
-				},
-			});
-		},
-		[setNode, x, y]
-	);
-
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
 			target.style.transform = `translate(${ox}px, ${oy}px)`;
-
-			const node = nodes?.find((n) => n.id === target.id);
-
-			if (node) {
-				node.position = { x: ox, y: oy };
-				onNodesChange?.(nodes);
-			}
 		},
 		{
+			onDragEnd: ({ gridOffset: [ox, oy] }) => {
+				const node = nodes?.find((node) => node.id === selectedNodeId);
+				if (!node) {
+					return;
+				}
+
+				node.position = { x: ox, y: oy };
+				onNodesChange?.(nodes);
+			},
 			selectors: "[data-draggable=true]",
 			offset: [x, y],
 			grid: {
@@ -196,6 +168,16 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	}, [removeNode, selectedNodeId]);
 
 	useEffect(() => {
+		function centerElement(element: HTMLElement) {
+			const { width, height } = element.getBoundingClientRect();
+			setNode(element.id, {
+				position: {
+					x: (window.innerWidth - width) / 2 - x,
+					y: (window.innerHeight - height) / 2 - y,
+				},
+			});
+		}
+
 		const observer = new MutationObserver((records) => {
 			for (const record of records) {
 				for (const node of record.addedNodes as NodeListOf<HTMLElement>) {
@@ -215,7 +197,8 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		});
 
 		return () => observer.disconnect();
-	}, [bind.ref, centerElement]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [bind.ref]);
 
 	if (!Boolean(nodes?.length)) {
 		return null;
@@ -227,6 +210,23 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 			style={{ transform: `translate(${x}px, ${y}px)` }}
 			className="pointer-events-none relative z-10"
 		>
+			<MemoNodes nodes={nodes} nodeTypes={nodeTypes} />
+		</div>
+	);
+}
+
+let lastIndex = 0;
+const MemoNodes = memo(({ nodes, nodeTypes }: PinBoardProps) => {
+	function bringToFront(target: HTMLElement) {
+		target.style.zIndex = `${lastIndex++}`;
+	}
+
+	function handleNodeFocus(target: HTMLElement) {
+		bringToFront(target);
+	}
+
+	return (
+		<>
 			{nodes?.map((node) => (
 				<NodeRenderer
 					key={node.id}
@@ -235,6 +235,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 					onFocus={handleNodeFocus}
 				/>
 			))}
-		</div>
+		</>
 	);
-}
+});
+MemoNodes.displayName = "MemoNodes";

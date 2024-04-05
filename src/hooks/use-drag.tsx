@@ -33,7 +33,10 @@ type DragEvent = BaseDragEvent & {
 type DragStartEvent<T extends HTMLElement> = Omit<BaseDragEvent<T>, "event"> & {
 	event: React.MouseEvent;
 };
-type DragEndEvent = BaseDragEvent;
+type DragEndEvent = BaseDragEvent & {
+	/** The current offset position snapped to the grid step */
+	gridOffset: Tuple<number>;
+};
 
 type UseDragOptionsProps<T extends HTMLElement> = {
 	/** Initial position of the element */
@@ -173,6 +176,18 @@ function useDrag<T extends HTMLElement>(
 				event.clientY - pointerInitial[1],
 			] as Tuple<number>;
 
+			const offset = [
+				offsetInitial[0] + movement[0],
+				offsetInitial[1] + movement[1],
+			] as Tuple<number>;
+
+			const gridOffset = options?.grid?.step
+				? ([
+						snap(offset[0], options.grid.step[0]),
+						snap(offset[1], options.grid.step[1]),
+				  ] as Tuple<number>)
+				: offset;
+
 			dragTarget.current = null;
 			setDown(false);
 
@@ -183,9 +198,10 @@ function useDrag<T extends HTMLElement>(
 				offset,
 				target: event.target as HTMLElement,
 				xy: [event.clientX, event.clientY],
+				gridOffset,
 			});
 		},
-		[offset, options, pointerInitial]
+		[offsetInitial, options, pointerInitial]
 	);
 
 	const handleMouseEvent = useCallback(
