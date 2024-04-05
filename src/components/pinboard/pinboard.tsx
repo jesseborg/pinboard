@@ -1,6 +1,7 @@
 "use client";
 
 import useDrag from "@/hooks/use-drag";
+import { useKeyDown } from "@/hooks/use-keydown";
 import {
 	Node,
 	Nodes,
@@ -151,21 +152,17 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		}
 	);
 
-	useEffect(() => {
-		function handleKeyDown(event: KeyboardEvent) {
+	useKeyDown(
+		"Delete",
+		() => {
 			if (!selectedNodeId) {
 				return;
 			}
 
-			if (event.key === "Delete") {
-				removeNode(selectedNodeId);
-			}
-		}
-
-		window.addEventListener("keydown", handleKeyDown);
-
-		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [removeNode, selectedNodeId]);
+			removeNode(selectedNodeId);
+		},
+		[removeNode, selectedNodeId]
+	);
 
 	useEffect(() => {
 		function centerElement(element: HTMLElement) {
