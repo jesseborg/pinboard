@@ -199,6 +199,10 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		const observer = new MutationObserver((records) => {
 			for (const record of records) {
 				for (const node of record.addedNodes as NodeListOf<HTMLElement>) {
+					if (!node.children.length || !node.dataset["draggable"]) {
+						return;
+					}
+
 					node.focus();
 					centerElement(node);
 				}

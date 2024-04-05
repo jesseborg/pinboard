@@ -1,6 +1,14 @@
 import useDebounce from "@/hooks/use-debounce";
-import { Node, useNodesActions } from "@/stores/use-nodes-store";
-import { ChangeEvent, FormEvent, KeyboardEvent, useRef, useState } from "react";
+import { preloadImage } from "@/lib/utils";
+import { useNodesActions } from "@/stores/use-nodes-store";
+import {
+	ChangeEvent,
+	FormEvent,
+	KeyboardEvent,
+	memo,
+	useRef,
+	useState,
+} from "react";
 import { CloudUploadIcon } from "../icons/cloud-upload-icon";
 import { CustomNodeProps, NodeProps } from "../pinboard/types";
 import { Button } from "../primitives/button";
@@ -15,7 +23,7 @@ export type ImageNodeProps = NodeProps & {
 	};
 };
 
-export function ImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
+export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 	const [editing, setEditing] = useState(false);
 
 	function handleEdit() {
@@ -26,7 +34,12 @@ export function ImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 		<>
 			<BaseNode node={node} handleEdit={handleEdit}>
 				{/* eslint-disable-next-line @next/next/no-img-element */}
-				<img src={node.data.src} alt={node.data.alt} />
+				<img
+					src={node.data.src}
+					alt={node.data.alt}
+					width={node.size.width}
+					height={node.size.height}
+				/>
 			</BaseNode>
 
 			{editing && <EditDialog node={node} onClose={() => setEditing(false)} />}
@@ -34,8 +47,10 @@ export function ImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 	);
 }
 
+export const ImageNode = memo(BaseImageNode);
+
 type EditDialogProps = {
-	node: Node;
+	node: ImageNodeProps;
 	onClose?: () => void;
 };
 function EditDialog({ node, onClose }: EditDialogProps) {
@@ -43,8 +58,12 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 
 	const [value, setValue] = useState<string | null>(null);
 
-	function handleSubmit(event: FormEvent<HTMLFormElement>) {
-		setNode<ImageNodeProps>(node.id, { data: { src: value!, alt: "" } });
+	async function handleSubmit(_: FormEvent<HTMLFormElement>) {
+		const img = await preloadImage(value!);
+		setNode<ImageNodeProps>(node.id, {
+			size: { width: img.width, height: img.height },
+			data: { src: img.src, alt: "" },
+		});
 	}
 
 	function handleResetForm() {
@@ -74,11 +93,7 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 				{hasImage && (
 					<div className="space-y-2">
 						{/* eslint-disable-next-line @next/next/no-img-element */}
-						<img
-							className="rounded-md mx-auto bg-red-500"
-							src={value}
-							alt="image"
-						/>
+						<img src={value} alt="image" className="rounded-md mx-auto" />
 						<div className="flex gap-2">
 							<Button
 								formMethod="dialog"

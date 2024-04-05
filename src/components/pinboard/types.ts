@@ -4,10 +4,15 @@ export type Point = {
 	x: number;
 	y: number;
 };
+export type Size = {
+	width: number;
+	height: number;
+};
 
 export type NodeProps = {
 	id: string;
 	position: Point;
+	size: Size;
 	type: string;
 	data: Record<string, unknown>;
 };

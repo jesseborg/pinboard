@@ -1,3 +1,4 @@
+import { preloadImage } from "@/lib/utils";
 import { useNodesActions } from "@/stores/use-nodes-store";
 import { PropsWithChildren, ReactNode } from "react";
 import { nodeTypes } from "./app";
@@ -36,14 +37,22 @@ export function ToolBar() {
 					>
 						<Button
 							intent="blank"
-							onClick={() =>
-								addNode("image", {
+							onClick={async () => {
+								const img = await preloadImage(
+									"https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?q=80&w=240"
+								);
+
+								return addNode("image", {
+									size: {
+										width: img.width,
+										height: img.height,
+									},
 									data: {
-										src: "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?q=80&w=240",
+										src: img.src,
 										alt: "photo of a cat yawning",
 									},
-								})
-							}
+								});
+							}}
 						>
 							<ImageIcon />
 						</Button>
