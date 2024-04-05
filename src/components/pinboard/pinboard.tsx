@@ -14,7 +14,6 @@ import {
 	usePinBoardName,
 	usePinBoardXY,
 } from "@/stores/use-pinboard-store";
-import clsx from "clsx";
 import {
 	FocusEvent,
 	PropsWithChildren,
@@ -83,11 +82,7 @@ function DraggablePinBoard({
 	);
 
 	return (
-		<div
-			{...bind}
-			// onClick={handleClick}
-			className="w-full h-full relative overflow-hidden"
-		>
+		<div {...bind} className="w-full h-full relative overflow-hidden">
 			{children}
 			<NameContainer />
 			<NodesContainer {...props} />
@@ -136,11 +131,11 @@ function NameContainer() {
 type NodeRendererProps = {
 	node: Node;
 	nodeTypes: NodeTypes;
+	onFocus: (element: HTMLDivElement) => void;
 };
-function NodeRenderer({ node, nodeTypes, ...props }: NodeRendererProps) {
+function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 	const handleRef = useRef<NodeHandle>(null);
 
-	const selectedNodeId = useSelectedNodeId();
 	const { setSelectedNodeId } = useNodesActions();
 
 	const Node = nodeTypes?.[node.type];
@@ -148,9 +143,11 @@ function NodeRenderer({ node, nodeTypes, ...props }: NodeRendererProps) {
 		return null;
 	}
 
-	function handleFocusNode(element: HTMLElement) {
+	function handleFocusNode(element: HTMLDivElement) {
 		element.focus();
 		setSelectedNodeId(node.id);
+
+		onFocus?.(element);
 	}
 
 	return (
@@ -161,11 +158,9 @@ function NodeRenderer({ node, nodeTypes, ...props }: NodeRendererProps) {
 			style={{
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
 			}}
-			className={clsx("pointer-events-auto absolute", {
-				"z-50": selectedNodeId === node.id,
-			})}
+			className="pointer-events-auto absolute"
 			onDoubleClick={() => handleRef.current?.onDoubleClick()}
-			onClick={(e) => handleFocusNode(e.target as HTMLElement)}
+			onClick={(e) => handleFocusNode(e.target as HTMLDivElement)}
 			onFocus={(e) => handleFocusNode(e.target)}
 		>
 			<Node handleRef={handleRef} node={node} />
@@ -179,6 +174,17 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	const selectedNodeId = useSelectedNodeId();
 	const { removeNode } = useNodesActions();
 
+	const [z, setZ] = useState(nodes?.length ?? 0);
+
+	function bringToFront(target: HTMLElement) {
+		target.style.zIndex = `${z}`;
+		setZ(z + 1);
+	}
+
+	function handleNodeFocus(target: HTMLElement) {
+		bringToFront(target);
+	}
+
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
 			target.style.transform = `translate(${ox}px, ${oy}px)`;
@@ -191,7 +197,6 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 			}
 		},
 		{
-			// onDragStart: ({ target }) => setSelectedNodeId(target.id),
 			selectors: "[data-draggable=true]",
 			offset: [x, y],
 			grid: {
@@ -216,6 +221,14 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [removeNode, selectedNodeId]);
 
+	// Not the biggest fan of this approach, but it works
+	// ideally would like something more event based
+	useEffect(() => {
+		const lastNodeId = nodes?.[nodes.length - 1]?.id;
+		const node = document.querySelector(`[id="${lastNodeId}"]`) as HTMLElement;
+		node?.focus();
+	}, [nodes]);
+
 	if (!Boolean(nodes?.length)) {
 		return null;
 	}
@@ -227,7 +240,12 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 			className="pointer-events-none relative z-10"
 		>
 			{nodes?.map((node) => (
-				<NodeRenderer key={node.id} node={node} nodeTypes={nodeTypes} />
+				<NodeRenderer
+					key={node.id}
+					node={node}
+					nodeTypes={nodeTypes}
+					onFocus={handleNodeFocus}
+				/>
 			))}
 		</div>
 	);
