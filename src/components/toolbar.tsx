@@ -12,8 +12,8 @@ export function ToolBar() {
 
 	return (
 		<ToolTipPrimitive.Provider delay={150}>
-			<div className="absolute z-20 text-white h-full pl-6 flex">
-				<div className="flex self-center gap-1.5 flex-col bg-black p-1.5 rounded-md">
+			<div className="fixed z-20 text-white pl-6 flex top-1/2 -translate-y-1/2">
+				<div className="flex gap-1.5 flex-col bg-black p-1.5 rounded-md">
 					<ToolTip
 						content={
 							<p className="leading-3">
