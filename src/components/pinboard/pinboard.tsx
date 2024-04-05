@@ -17,6 +17,7 @@ import {
 import {
 	FocusEvent,
 	PropsWithChildren,
+	useCallback,
 	useEffect,
 	useRef,
 	useState,
@@ -172,7 +173,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	const [x, y] = usePinBoardXY();
 
 	const selectedNodeId = useSelectedNodeId();
-	const { removeNode } = useNodesActions();
+	const { removeNode, setNode } = useNodesActions();
 
 	const [z, setZ] = useState(nodes?.length ?? 0);
 
@@ -184,6 +185,19 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	function handleNodeFocus(target: HTMLElement) {
 		bringToFront(target);
 	}
+
+	const centerElement = useCallback(
+		(element: HTMLElement) => {
+			const { width, height } = element.getBoundingClientRect();
+			setNode(element.id, {
+				position: {
+					x: (window.innerWidth - width) / 2 - x,
+					y: (window.innerHeight - height) / 2 - y,
+				},
+			});
+		},
+		[setNode, x, y]
+	);
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
@@ -221,13 +235,23 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [removeNode, selectedNodeId]);
 
-	// Not the biggest fan of this approach, but it works
-	// ideally would like something more event based
 	useEffect(() => {
-		const lastNodeId = nodes?.[nodes.length - 1]?.id;
-		const node = document.querySelector(`[id="${lastNodeId}"]`) as HTMLElement;
-		node?.focus();
-	}, [nodes]);
+		const observer = new MutationObserver((records) => {
+			for (const record of records) {
+				for (const node of record.addedNodes as NodeListOf<HTMLElement>) {
+					node.focus();
+					centerElement(node);
+				}
+			}
+		});
+
+		observer.observe(bind.ref.current as HTMLDivElement, {
+			childList: true,
+			subtree: false,
+		});
+
+		return () => observer.disconnect();
+	}, [bind.ref, centerElement]);
 
 	if (!Boolean(nodes?.length)) {
 		return null;
