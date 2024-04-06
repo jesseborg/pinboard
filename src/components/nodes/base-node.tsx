@@ -1,10 +1,11 @@
+import { useKeyDown } from "@/hooks/use-keydown";
 import { cn } from "@/lib/utils";
 import {
 	Node,
 	useNodesActions,
 	useSelectedNodeId,
 } from "@/stores/use-nodes-store";
-import { HTMLAttributes, PropsWithChildren } from "react";
+import { HTMLAttributes, PropsWithChildren, useRef } from "react";
 import { Button } from "../primitives/button";
 
 type BaseNodeProps = {
@@ -47,8 +48,35 @@ type NodeToolBarProps = {
 function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 	const { removeNode } = useNodesActions();
 
+	const ref = useRef<HTMLDivElement | null>(null);
+
+	useKeyDown(
+		ref,
+		["ArrowLeft", "ArrowRight"],
+		(key) => {
+			const children = Array.from(ref.current?.childNodes ?? []).filter(
+				isButton
+			);
+			const index = children.indexOf(
+				document.activeElement! as HTMLButtonElement
+			);
+
+			if (key === "ArrowLeft") {
+				children.at(-(index + 1))?.focus();
+			}
+
+			if (key === "ArrowRight") {
+				children.at(index - 1)?.focus();
+			}
+		},
+		[ref]
+	);
+
 	return (
-		<div className="text-xs absolute top-full left-1/2 -translate-x-1/2 flex gap-1.5 bg-black p-1.5 rounded-md text-white mt-2 pointer-events-auto">
+		<div
+			ref={ref}
+			className="text-xs absolute top-full left-1/2 -translate-x-1/2 flex gap-1.5 bg-black p-1.5 rounded-md text-white mt-2 pointer-events-auto"
+		>
 			<Button
 				intent="primary"
 				size="xs"
@@ -68,4 +96,8 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 			</Button>
 		</div>
 	);
+}
+
+function isButton(element: any): element is HTMLButtonElement {
+	return element.localName === "button";
 }

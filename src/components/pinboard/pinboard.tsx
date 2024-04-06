@@ -153,6 +153,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	);
 
 	useKeyDown(
+		bind.ref,
 		"Delete",
 		() => {
 			if (!selectedNodeId) {
@@ -163,6 +164,8 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		},
 		[removeNode, selectedNodeId]
 	);
+
+	console.log("aaaaaaaa");
 
 	useEffect(() => {
 		function centerElement(element: HTMLElement) {

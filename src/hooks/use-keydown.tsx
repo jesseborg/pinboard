@@ -1,9 +1,10 @@
-import { DependencyList, useEffect } from "react";
+import { DependencyList, MutableRefObject, useEffect } from "react";
 
-export function useKeyDown(
-	keys: string | Array<string>,
-	callback: Function,
-	deps: DependencyList
+export function useKeyDown<K extends string>(
+	ref: MutableRefObject<HTMLDivElement | null>,
+	keys: K | Array<K>,
+	callback: (key: K) => void,
+	deps?: DependencyList
 ) {
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
@@ -11,16 +12,16 @@ export function useKeyDown(
 				return;
 			}
 
-			if (typeof keys === "object" && !keys.includes(event.key)) {
+			if (typeof keys === "object" && !keys.includes(event.key as K)) {
 				return;
 			}
 
-			callback();
+			callback(event.key as K);
 		}
 
-		window.addEventListener("keydown", handleKeyDown);
+		const element = ref.current;
+		element?.addEventListener("keydown", handleKeyDown);
 
-		return () => window.removeEventListener("keydown", handleKeyDown);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [keys, callback, ...deps]);
+		return () => element?.removeEventListener("keydown", handleKeyDown);
+	}, [keys, callback, ref, deps]);
 }

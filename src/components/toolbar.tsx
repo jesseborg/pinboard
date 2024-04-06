@@ -1,6 +1,7 @@
+import { useKeyDown } from "@/hooks/use-keydown";
 import { preloadImage } from "@/lib/utils";
 import { useNodesActions } from "@/stores/use-nodes-store";
-import { PropsWithChildren, ReactNode } from "react";
+import { PropsWithChildren, ReactNode, useRef } from "react";
 import { nodeTypes } from "./app";
 import { ImageIcon } from "./icons/image-icon";
 import { NoteIcon } from "./icons/note-icon";
@@ -10,10 +11,35 @@ import * as ToolTipPrimitive from "./tooltip/tooltip";
 export function ToolBar() {
 	const { addNode } = useNodesActions<typeof nodeTypes>();
 
+	const ref = useRef<HTMLDivElement | null>(null);
+
+	useKeyDown(
+		ref,
+		["ArrowDown", "ArrowUp"],
+		(key) => {
+			const children = Array.from(
+				(ref.current?.childNodes as NodeListOf<HTMLElement>) ?? []
+			);
+			const index = children.indexOf(document.activeElement! as HTMLElement);
+
+			if (key === "ArrowDown") {
+				children.at(-(index + 1))?.focus();
+			}
+
+			if (key === "ArrowUp") {
+				children.at(index - 1)?.focus();
+			}
+		},
+		[ref]
+	);
+
 	return (
 		<ToolTipPrimitive.Provider delay={150}>
 			<div className="fixed z-20 text-white pl-6 flex top-1/2 -translate-y-1/2">
-				<div className="flex gap-1.5 flex-col bg-black p-1.5 rounded-md">
+				<div
+					ref={ref}
+					className="flex gap-1.5 flex-col bg-black p-1.5 rounded-md"
+				>
 					<ToolTip
 						content={
 							<p className="leading-3">
