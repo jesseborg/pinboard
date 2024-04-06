@@ -1,7 +1,7 @@
 import { DependencyList, MutableRefObject, useEffect } from "react";
 
-export function useKeyDown<K extends string>(
-	ref: MutableRefObject<HTMLDivElement | null>,
+export function useKeyDown<K extends string, T extends HTMLElement>(
+	ref: MutableRefObject<T | null>,
 	keys: K | Array<K>,
 	callback: (key: K) => void,
 	deps?: DependencyList

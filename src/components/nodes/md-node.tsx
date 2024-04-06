@@ -1,4 +1,5 @@
 import useDebounce from "@/hooks/use-debounce";
+import { useKeyDown } from "@/hooks/use-keydown";
 import { cn, sleep } from "@/lib/utils";
 import { useNodesActions } from "@/stores/use-nodes-store";
 import { memo, useEffect, useImperativeHandle, useRef, useState } from "react";
@@ -75,6 +76,8 @@ export function BaseMDNode({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 
 		return () => clearTimeout(timeout);
 	}, []);
+
+	useKeyDown(textareaRef, "Escape", () => handleBlur());
 
 	return (
 		<BaseNode
