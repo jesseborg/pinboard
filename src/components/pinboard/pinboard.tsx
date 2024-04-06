@@ -156,6 +156,10 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		bind.ref,
 		"Delete",
 		() => {
+			if (document.activeElement?.id !== selectedNodeId) {
+				return;
+			}
+
 			if (!selectedNodeId) {
 				return;
 			}
@@ -164,8 +168,6 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		},
 		[removeNode, selectedNodeId]
 	);
-
-	console.log("aaaaaaaa");
 
 	useEffect(() => {
 		function centerElement(element: HTMLElement) {
