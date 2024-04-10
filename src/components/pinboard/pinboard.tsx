@@ -109,17 +109,14 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 	}
 
 	function handleFocusNode(element: HTMLDivElement) {
-		element.focus();
 		setSelectedNodeId(node.id);
+		onFocus?.(element);
 
 		const pinboard = document.getElementById("pinboard");
-
 		if (pinboard) {
 			pinboard.scrollLeft = 0;
 			pinboard.scrollTop = 0;
 		}
-
-		onFocus?.(element);
 	}
 
 	return (
@@ -132,7 +129,7 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 			}}
 			className="absolute"
 			onDoubleClick={() => handleRef.current?.onDoubleClick()}
-			onClick={(e) => handleFocusNode(e.currentTarget as HTMLDivElement)}
+			onClick={(e) => handleFocusNode(e.target as HTMLDivElement)}
 			onFocus={(e) => handleFocusNode(e.currentTarget)}
 		>
 			<Node handleRef={handleRef} node={node} />
@@ -169,7 +166,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	);
 
 	useKeyDown(
-		bind.ref,
+		{ current: document.body },
 		"Delete",
 		() => {
 			if (!selectedNodeId) {

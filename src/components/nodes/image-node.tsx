@@ -200,6 +200,7 @@ function ImageUploadInput({ onChange }: ImageUploadInputProps) {
 			className="flex items-center flex-col mx-auto p-2 py-8 cursor-pointer rounded-md outline-2 focus:outline bg-neutral-100"
 			onKeyDown={handleKeyDown}
 			onClick={handleClick}
+			onFocus={(event) => event?.stopPropagation()}
 		>
 			<input
 				hidden
