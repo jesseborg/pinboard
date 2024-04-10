@@ -2,6 +2,7 @@
 
 import useDrag from "@/hooks/use-drag";
 import { useKeyDown } from "@/hooks/use-keydown";
+import { cn } from "@/lib/utils";
 import {
 	Node,
 	Nodes,
@@ -75,11 +76,15 @@ function DraggablePinBoard({
 		}
 	);
 
+	const isPanning = useKeyDown({ current: document.body }, " ");
+
 	return (
 		<div
 			{...bind}
 			id="pinboard"
-			className="w-full h-full relative overflow-hidden"
+			className={cn("w-full h-full relative overflow-hidden", {
+				"cursor-grab [&_*]:!pointer-events-none": isPanning,
+			})}
 		>
 			{children}
 			<NameContainer />
