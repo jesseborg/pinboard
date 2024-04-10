@@ -18,7 +18,7 @@ export function App() {
 	const { setNodes, addNode } = useNodesActions<typeof nodeTypes>();
 
 	useKeyDown(
-		{ current: document.body },
+		{ current: typeof document !== "undefined" ? document.body : null },
 		["n", "i"],
 		async (keys) => {
 			if (keys === "n") {
