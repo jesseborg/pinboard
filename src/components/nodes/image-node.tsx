@@ -13,7 +13,8 @@ import { CloudUploadIcon } from "../icons/cloud-upload-icon";
 import { ImageIcon } from "../icons/image-icon";
 import { CustomNodeProps, NodeProps } from "../pinboard/types";
 import { Button } from "../primitives/button";
-import { Dialog } from "../primitives/dialog";
+import { Dialog, DialogProps } from "../primitives/dialog";
+import { Portal } from "../primitives/portal";
 import { BaseNode } from "./base-node";
 
 export type ImageNodeProps = NodeProps & {
@@ -33,10 +34,10 @@ export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 		setEditing(true);
 	}
 
-	function handleClose() {
+	function handleClose(event: FormEvent, submit?: boolean) {
 		setEditing(false);
 
-		if (!node.data) {
+		if (!submit && !node.data) {
 			removeNode(node.id);
 		}
 	}
@@ -76,19 +77,24 @@ function Image({ node }: { node: ImageNodeProps }) {
 
 type EditDialogProps = {
 	node: ImageNodeProps;
-	onClose?: () => void;
-};
+	onClose: (event: FormEvent, submit?: boolean) => void;
+} & Omit<DialogProps, "onClose">;
 function EditDialog({ node, onClose }: EditDialogProps) {
 	const { setNode } = useNodesActions();
 
 	const [value, setValue] = useState<string | null>(null);
 
-	async function handleSubmit(_: FormEvent<HTMLFormElement>) {
+	async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+		event?.preventDefault();
+
 		const img = await preloadImage(value!);
+
 		setNode<ImageNodeProps>(node.id, {
 			size: { width: img.width, height: img.height },
 			data: { src: img.src, alt: "" },
 		});
+
+		onClose?.(event, true);
 	}
 
 	function handleResetForm() {
@@ -98,50 +104,52 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 	const hasImage = value !== null;
 
 	return (
-		<Dialog
-			onClose={() => onClose?.()}
-			className="rounded-md bg-white shadow-3xl backdrop:bg-black/50 pointer-events-auto"
-		>
-			<form
-				method="dialog"
-				onSubmit={handleSubmit}
-				className="p-4 text-xs bg-white space-y-4 w-80"
+		<Portal>
+			<Dialog
+				onClose={(e) => onClose?.(e)}
+				className="rounded-md bg-white shadow-3xl backdrop:bg-black/50 pointer-events-auto"
 			>
-				{!hasImage && (
-					<>
-						<ImageUploadInput onChange={setValue} />
-						<p className="text-center">or</p>
-						<ImageURLInput onChange={setValue} />
-					</>
-				)}
+				<form
+					method="dialog"
+					onSubmit={handleSubmit}
+					className="p-4 text-xs bg-white space-y-4 w-80"
+				>
+					{!hasImage && (
+						<>
+							<ImageUploadInput onChange={setValue} />
+							<p className="text-center">or</p>
+							<ImageURLInput onChange={setValue} />
+						</>
+					)}
 
-				{hasImage && (
-					<div className="space-y-2">
-						{/* eslint-disable-next-line @next/next/no-img-element */}
-						<img src={value} alt="image" className="rounded-md mx-auto" />
-						<div className="flex gap-2">
-							<Button
-								formMethod="dialog"
-								type="submit"
-								size="xs"
-								className="w-full"
-							>
-								Submit
-							</Button>
-							<Button
-								type="reset"
-								intent="secondary"
-								size="xs"
-								className="w-full"
-								onClick={handleResetForm}
-							>
-								Cancel
-							</Button>
+					{hasImage && (
+						<div className="space-y-2">
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img src={value} alt="image" className="rounded-md mx-auto" />
+							<div className="flex gap-2">
+								<Button
+									formMethod="dialog"
+									type="submit"
+									size="xs"
+									className="w-full"
+								>
+									Submit
+								</Button>
+								<Button
+									type="reset"
+									intent="secondary"
+									size="xs"
+									className="w-full"
+									onClick={handleResetForm}
+								>
+									Cancel
+								</Button>
+							</div>
 						</div>
-					</div>
-				)}
-			</form>
-		</Dialog>
+					)}
+				</form>
+			</Dialog>
+		</Portal>
 	);
 }
 

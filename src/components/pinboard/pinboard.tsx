@@ -103,9 +103,6 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 
 	const { setSelectedNodeId } = useNodesActions();
 
-	const { setXY } = usePinBoardActions();
-	const [x, y] = usePinBoardXY();
-
 	const Node = nodeTypes?.[node.type];
 	if (Node === undefined) {
 		return null;
@@ -135,8 +132,8 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 			}}
 			className="absolute"
 			onDoubleClick={() => handleRef.current?.onDoubleClick()}
-			onClick={(e) => handleFocusNode(e.target as HTMLDivElement)}
-			onFocus={(e) => handleFocusNode(e.target)}
+			onClick={(e) => handleFocusNode(e.currentTarget as HTMLDivElement)}
+			onFocus={(e) => handleFocusNode(e.currentTarget)}
 		>
 			<Node handleRef={handleRef} node={node} />
 		</div>
@@ -215,8 +212,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		});
 
 		return () => observer.disconnect();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [bind.ref, x, y]);
+	}, [bind.ref, x, y, setNode]);
 
 	if (!Boolean(nodes?.length)) {
 		return null;

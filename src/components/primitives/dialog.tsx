@@ -1,5 +1,6 @@
 import {
 	ComponentProps,
+	FormEvent,
 	MouseEvent,
 	PropsWithChildren,
 	useLayoutEffect,
@@ -7,10 +8,10 @@ import {
 } from "react";
 
 type BaseDialogProps = {
-	onClose?: () => void;
+	onClose?: (event: FormEvent) => void;
 };
 
-type DialogProps = BaseDialogProps & ComponentProps<"dialog">;
+export type DialogProps = BaseDialogProps & ComponentProps<"dialog">;
 
 export function Dialog({
 	onClose,
@@ -26,12 +27,12 @@ export function Dialog({
 	function handleOnClick(event: MouseEvent<HTMLDialogElement>) {
 		if (event.target === ref.current) {
 			ref.current?.close();
-			onClose?.();
+			onClose?.(event);
 		}
 	}
 
-	function handleClose() {
-		onClose?.();
+	function handleClose(event: FormEvent) {
+		onClose?.(event);
 	}
 
 	return (
