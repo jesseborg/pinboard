@@ -27,8 +27,18 @@ export type ImageNodeProps = NodeProps & {
 export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 	const [editing, setEditing] = useState(!node.data);
 
+	const { removeNode } = useNodesActions();
+
 	function handleEdit() {
 		setEditing(true);
+	}
+
+	function handleClose() {
+		setEditing(false);
+
+		if (!node.data) {
+			removeNode(node.id);
+		}
 	}
 
 	return (
@@ -38,7 +48,7 @@ export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 				<Image node={node} />
 			</BaseNode>
 
-			{editing && <EditDialog node={node} onClose={() => setEditing(false)} />}
+			{editing && <EditDialog node={node} onClose={handleClose} />}
 		</>
 	);
 }
