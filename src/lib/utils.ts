@@ -19,6 +19,6 @@ export async function preloadImage(src: string) {
 		img.src = src;
 
 		img.onload = () => resolve(img);
-		img.onerror = () => reject();
+		img.onerror = (error) => reject(error);
 	});
 }
