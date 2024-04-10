@@ -30,7 +30,6 @@ export function useKeyDown<K extends string, T extends HTMLElement>(
 				document.activeElement?.localName &&
 				IGNORE_ELEMENTS.includes(document.activeElement.localName)
 			) {
-				console.log("ignoring hotkey, input active:", document.activeElement);
 				return;
 			}
 
