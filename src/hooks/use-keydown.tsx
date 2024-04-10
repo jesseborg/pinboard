@@ -1,9 +1,16 @@
 import { DependencyList, MutableRefObject, useEffect } from "react";
 
+const IGNORE_ELEMENTS = ["textarea", "input"];
+
+type UseKeyDownOptions = {
+	ignoreWhileInput?: boolean;
+};
+
 export function useKeyDown<K extends string, T extends HTMLElement>(
 	ref: MutableRefObject<T | null>,
 	keys: K | Array<K>,
 	callback: (key: K) => void,
+	options?: UseKeyDownOptions | null,
 	deps?: DependencyList
 ) {
 	useEffect(() => {
@@ -16,6 +23,15 @@ export function useKeyDown<K extends string, T extends HTMLElement>(
 				return;
 			}
 
+			if (
+				options?.ignoreWhileInput &&
+				document.activeElement?.localName &&
+				IGNORE_ELEMENTS.includes(document.activeElement.localName)
+			) {
+				console.log("ignoring hotkey, input active:", document.activeElement);
+				return;
+			}
+
 			callback(event.key as K);
 		}
 
@@ -23,5 +39,5 @@ export function useKeyDown<K extends string, T extends HTMLElement>(
 		element?.addEventListener("keydown", handleKeyDown);
 
 		return () => element?.removeEventListener("keydown", handleKeyDown);
-	}, [keys, callback, ref, deps]);
+	}, [keys, callback, ref, deps, options]);
 }

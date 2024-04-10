@@ -30,6 +30,7 @@ export function ToolBar() {
 				children.at(index - 1)?.focus();
 			}
 		},
+		null,
 		[ref]
 	);
 

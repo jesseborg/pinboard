@@ -156,16 +156,13 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		bind.ref,
 		"Delete",
 		() => {
-			if (document.activeElement?.id !== selectedNodeId) {
-				return;
-			}
-
 			if (!selectedNodeId) {
 				return;
 			}
 
 			removeNode(selectedNodeId);
 		},
+		{ ignoreWhileInput: true },
 		[removeNode, selectedNodeId]
 	);
 
