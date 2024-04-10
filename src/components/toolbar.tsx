@@ -1,5 +1,4 @@
 import { useKeyDown } from "@/hooks/use-keydown";
-import { preloadImage } from "@/lib/utils";
 import { useNodesActions } from "@/stores/use-nodes-store";
 import { PropsWithChildren, ReactNode, useRef } from "react";
 import { nodeTypes } from "./app";
@@ -62,25 +61,7 @@ export function ToolBar() {
 							</p>
 						}
 					>
-						<Button
-							intent="blank"
-							onClick={async () => {
-								const img = await preloadImage(
-									"https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?q=80&w=240"
-								);
-
-								return addNode("image", {
-									size: {
-										width: img.width,
-										height: img.height,
-									},
-									data: {
-										src: img.src,
-										alt: "photo of a cat yawning",
-									},
-								});
-							}}
-						>
+						<Button intent="blank" onClick={() => addNode("image")}>
 							<ImageIcon />
 						</Button>
 					</ToolTip>
