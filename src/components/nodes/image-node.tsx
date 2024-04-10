@@ -10,6 +10,7 @@ import {
 	useState,
 } from "react";
 import { CloudUploadIcon } from "../icons/cloud-upload-icon";
+import { ImageIcon } from "../icons/image-icon";
 import { CustomNodeProps, NodeProps } from "../pinboard/types";
 import { Button } from "../primitives/button";
 import { Dialog } from "../primitives/dialog";
@@ -24,7 +25,7 @@ export type ImageNodeProps = NodeProps & {
 };
 
 export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
-	const [editing, setEditing] = useState(false);
+	const [editing, setEditing] = useState(!node.data);
 
 	function handleEdit() {
 		setEditing(true);
@@ -33,21 +34,35 @@ export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 	return (
 		<>
 			<BaseNode node={node} handleEdit={handleEdit}>
-				{/* eslint-disable-next-line @next/next/no-img-element */}
-				<img
-					src={node.data.src}
-					alt={node.data.alt}
-					width={node.size.width}
-					height={node.size.height}
-				/>
+				{/* eslint-disable-next-line jsx-a11y/alt-text */}
+				<Image node={node} />
 			</BaseNode>
 
 			{editing && <EditDialog node={node} onClose={() => setEditing(false)} />}
 		</>
 	);
 }
-
 export const ImageNode = memo(BaseImageNode);
+
+function Image({ node }: { node: ImageNodeProps }) {
+	if (!node.data) {
+		return (
+			<div className="size-64 flex items-center justify-center">
+				<ImageIcon className="w-12 h-12" />
+			</div>
+		);
+	}
+
+	return (
+		// eslint-disable-next-line @next/next/no-img-element
+		<img
+			src={node.data.src}
+			alt={node.data.alt}
+			width={node.size.width}
+			height={node.size.height}
+		/>
+	);
+}
 
 type EditDialogProps = {
 	node: ImageNodeProps;

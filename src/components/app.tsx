@@ -1,5 +1,6 @@
 "use client";
 
+import { useKeyDown } from "@/hooks/use-keydown";
 import { useNodes, useNodesActions } from "@/stores/use-nodes-store";
 import { ImageNode } from "./nodes/image-node";
 import { MDNode } from "./nodes/md-node";
@@ -14,7 +15,24 @@ export const nodeTypes = {
 
 export function App() {
 	const nodes = useNodes();
-	const { setNodes } = useNodesActions();
+	const { setNodes, addNode } = useNodesActions<typeof nodeTypes>();
+
+	useKeyDown(
+		{ current: document.body },
+		["n", "i"],
+		async (keys) => {
+			if (keys === "n") {
+				addNode("mdx", { data: { label: "" } });
+				return;
+			}
+
+			if (keys === "i") {
+				addNode("image");
+				return;
+			}
+		},
+		{ ignoreWhileInput: true }
+	);
 
 	return (
 		<PinBoard nodes={nodes} onNodesChange={setNodes} nodeTypes={nodeTypes}>
