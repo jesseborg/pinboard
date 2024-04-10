@@ -5,7 +5,7 @@ import { nodeTypes } from "./app";
 import { ImageIcon } from "./icons/image-icon";
 import { NoteIcon } from "./icons/note-icon";
 import { Button } from "./primitives/button";
-import * as ToolTipPrimitive from "./tooltip/tooltip";
+import * as ToolTipPrimitive from "./primitives/tooltip";
 
 export function ToolBar() {
 	const { addNode } = useNodesActions<typeof nodeTypes>();

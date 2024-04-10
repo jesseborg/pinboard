@@ -13,7 +13,7 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { Slot } from "../primitives/slot";
+import { Slot } from "./slot";
 
 const ToolTipProviderContext = createContext({
 	delay: 0,
