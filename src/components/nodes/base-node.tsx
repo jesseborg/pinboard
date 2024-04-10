@@ -69,6 +69,7 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 				children.at(index - 1)?.focus();
 			}
 		},
+		null,
 		[ref]
 	);
 
