@@ -66,6 +66,8 @@ export function BaseMDNode({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 		if (window.getSelection()?.focusNode?.contains(textareaRef.current)) {
 			window.getSelection()?.empty();
 		}
+
+		document.getElementById(node.id)?.focus();
 	}
 
 	// Sometimes the textarea height is incorrect on first render
