@@ -76,7 +76,11 @@ function DraggablePinBoard({
 	);
 
 	return (
-		<div {...bind} className="w-full h-full relative overflow-hidden">
+		<div
+			{...bind}
+			id="pinboard"
+			className="w-full h-full relative overflow-hidden"
+		>
 			{children}
 			<NameContainer />
 			<NodesContainer {...props} />
@@ -94,6 +98,9 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 
 	const { setSelectedNodeId } = useNodesActions();
 
+	const { setXY } = usePinBoardActions();
+	const [x, y] = usePinBoardXY();
+
 	const Node = nodeTypes?.[node.type];
 	if (Node === undefined) {
 		return null;
@@ -102,6 +109,13 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 	function handleFocusNode(element: HTMLDivElement) {
 		element.focus();
 		setSelectedNodeId(node.id);
+
+		const pinboard = document.getElementById("pinboard");
+
+		if (pinboard) {
+			pinboard.scrollLeft = 0;
+			pinboard.scrollTop = 0;
+		}
 
 		onFocus?.(element);
 	}
