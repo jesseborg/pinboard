@@ -197,7 +197,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 
 		return () => observer.disconnect();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [bind.ref]);
+	}, [bind.ref, x, y]);
 
 	if (!Boolean(nodes?.length)) {
 		return null;
