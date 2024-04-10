@@ -4,7 +4,7 @@ import {
 	usePinBoardActions,
 	usePinBoardName,
 } from "@/stores/use-pinboard-store";
-import { FocusEvent, useRef, useState } from "react";
+import { ChangeEvent, FocusEvent, useRef, useState } from "react";
 
 export function NameContainer() {
 	const name = usePinBoardName();
@@ -14,12 +14,20 @@ export function NameContainer() {
 
 	const inputRef = useRef<HTMLInputElement | null>(null);
 
+	function handleFocus() {
+		setEditing(true);
+	}
+
 	function handleBlur(event: FocusEvent) {
 		setEditing(false);
 
 		if (window.getSelection()?.focusNode?.contains(event.target)) {
 			window.getSelection()?.empty();
 		}
+	}
+
+	function handleChange(event: ChangeEvent<HTMLInputElement>) {
+		setName(event.target.value);
 	}
 
 	useKeyDown(inputRef, ["Enter", "Escape"], (key) => {
@@ -51,8 +59,8 @@ export function NameContainer() {
 					}
 				)}
 				defaultValue={name}
-				onChange={({ target: { value } }) => setName(value)}
-				onDoubleClick={() => setEditing(true)}
+				onChange={handleChange}
+				onFocus={handleFocus}
 				onBlur={handleBlur}
 			/>
 		</div>
