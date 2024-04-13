@@ -51,7 +51,6 @@ export function BaseMDNode({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 	}
 
 	const debounceUpdateNode = useDebounce((data: MDXNodeProps["data"]) => {
-		console.log("updated node");
 		setNode<MDXNodeProps>(node.id, { data });
 	}, 300);
 
