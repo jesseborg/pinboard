@@ -1,6 +1,6 @@
 "use client";
 
-import useDrag from "@/hooks/use-drag";
+import useDrag, { Tuple } from "@/hooks/use-drag";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { cn } from "@/lib/utils";
 import {
@@ -14,7 +14,7 @@ import {
 	usePinBoardHydrated,
 	usePinBoardXY,
 } from "@/stores/use-pinboard-store";
-import { PropsWithChildren, memo, useEffect, useRef } from "react";
+import { PropsWithChildren, memo, useEffect, useRef, useState } from "react";
 import { NameContainer } from "./name-container";
 import { NodeHandle, NodeTypes } from "./types";
 
@@ -49,7 +49,7 @@ function DraggablePinBoard({
 	const { setSelectedNodeId } = useNodesActions();
 
 	const { bind } = useDrag<HTMLDivElement>(
-		({ offset: [x, y], movement: [mx, my] }) => {
+		({ offset: [x, y] }) => {
 			// Update pinboard store state
 			setXY([x, y]);
 		},
@@ -143,6 +143,8 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	const selectedNodeId = useSelectedNodeId();
 	const { removeNode, setNode } = useNodesActions();
 
+	const [offset, setOffset] = useState([x, y]);
+
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
 			target.style.transform = `translate(${ox}px, ${oy}px)`;
@@ -158,12 +160,23 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 				onNodesChange?.(nodes);
 			},
 			selectors: "[data-draggable=true]",
-			offset: [x, y],
+			offset: offset as Tuple<number>,
 			grid: {
 				step: [10, 10],
 			},
 		}
 	);
+
+	useEffect(() => {
+		if (!bind.ref.current || !bind.ref.current.parentElement) {
+			return;
+		}
+
+		setOffset([
+			x + bind.ref.current.parentElement.offsetLeft,
+			y + bind.ref.current.parentElement.offsetTop,
+		]);
+	}, [bind.ref, x, y]);
 
 	useKeyDown(
 		{ current: document.body },
@@ -180,6 +193,10 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	);
 
 	useEffect(() => {
+		if (!bind.ref.current) {
+			return;
+		}
+
 		function centerElement(element: HTMLElement) {
 			const { width, height } = element.getBoundingClientRect();
 			setNode(element.id, {
@@ -203,7 +220,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 			}
 		});
 
-		observer.observe(bind.ref.current as HTMLDivElement, {
+		observer.observe(bind.ref.current, {
 			childList: true,
 			subtree: false,
 		});
