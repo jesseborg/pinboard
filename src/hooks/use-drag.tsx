@@ -132,22 +132,12 @@ function useDrag<T extends HTMLElement>(
 			}
 
 			if (down) {
-				const movement = [
-					event.clientX - pointerInitial[0],
-					event.clientY - pointerInitial[1],
-				] as Tuple<number>;
-
-				const offset = [
-					offsetInitial[0] + movement[0],
-					offsetInitial[1] + movement[1],
-				] as Tuple<number>;
-
-				const gridOffset = options?.grid?.step
-					? ([
-							snap(offset[0], options.grid.step[0]),
-							snap(offset[1], options.grid.step[1]),
-					  ] as Tuple<number>)
-					: offset;
+				const { movement, offset, gridOffset } = calculateOffsets(
+					event,
+					pointerInitial,
+					offsetInitial,
+					options
+				);
 
 				setOffset(offset);
 
@@ -162,7 +152,7 @@ function useDrag<T extends HTMLElement>(
 				});
 			}
 		},
-		[down, offsetInitial, onDrag, options?.grid?.step, pointerInitial]
+		[down, offsetInitial, onDrag, options, pointerInitial]
 	);
 
 	const onMouseUp = useCallback(
@@ -171,22 +161,12 @@ function useDrag<T extends HTMLElement>(
 				return;
 			}
 
-			const movement = [
-				event.clientX - pointerInitial[0],
-				event.clientY - pointerInitial[1],
-			] as Tuple<number>;
-
-			const offset = [
-				offsetInitial[0] + movement[0],
-				offsetInitial[1] + movement[1],
-			] as Tuple<number>;
-
-			const gridOffset = options?.grid?.step
-				? ([
-						snap(offset[0], options.grid.step[0]),
-						snap(offset[1], options.grid.step[1]),
-				  ] as Tuple<number>)
-				: offset;
+			const { movement, offset, gridOffset } = calculateOffsets(
+				event,
+				pointerInitial,
+				offsetInitial,
+				options
+			);
 
 			dragTarget.current = null;
 			setDown(false);
@@ -247,6 +227,32 @@ function useDrag<T extends HTMLElement>(
 		target: dragTarget,
 		offset,
 	};
+}
+
+function calculateOffsets<T extends HTMLElement>(
+	event: MouseEvent,
+	pointerInitial: Tuple<number>,
+	offsetInitial: Tuple<number>,
+	options?: UseDragOptionsProps<T>
+) {
+	const movement = [
+		event.clientX - pointerInitial[0],
+		event.clientY - pointerInitial[1],
+	] as Tuple<number>;
+
+	const offset = [
+		offsetInitial[0] + movement[0],
+		offsetInitial[1] + movement[1],
+	] as Tuple<number>;
+
+	const gridOffset = options?.grid?.step
+		? ([
+				snap(offset[0], options.grid.step[0]),
+				snap(offset[1], options.grid.step[1]),
+		  ] as Tuple<number>)
+		: offset;
+
+	return { movement, offset, gridOffset };
 }
 
 export default useDrag;
