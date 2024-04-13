@@ -223,10 +223,6 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		return () => observer.disconnect();
 	}, [bind.ref, x, y, setNode]);
 
-	if (!Boolean(nodes?.length)) {
-		return null;
-	}
-
 	return (
 		<div
 			{...bind}
