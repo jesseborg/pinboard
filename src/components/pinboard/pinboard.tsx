@@ -1,6 +1,6 @@
 "use client";
 
-import useDrag, { Tuple } from "@/hooks/use-drag";
+import useDrag from "@/hooks/use-drag";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { cn } from "@/lib/utils";
 import {
@@ -14,7 +14,7 @@ import {
 	usePinBoardHydrated,
 	usePinBoardXY,
 } from "@/stores/use-pinboard-store";
-import { PropsWithChildren, memo, useEffect, useRef, useState } from "react";
+import { PropsWithChildren, memo, useEffect, useRef } from "react";
 import { NameContainer } from "./name-container";
 import { NodeHandle, NodeTypes } from "./types";
 
@@ -143,8 +143,6 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	const selectedNodeId = useSelectedNodeId();
 	const { removeNode, setNode } = useNodesActions();
 
-	const [offset, setOffset] = useState([x, y]);
-
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
 			target.style.transform = `translate(${ox}px, ${oy}px)`;
@@ -160,23 +158,12 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 				onNodesChange?.(nodes);
 			},
 			selectors: "[data-draggable=true]",
-			offset: offset as Tuple<number>,
+			offset: [x, y],
 			grid: {
 				step: [10, 10],
 			},
 		}
 	);
-
-	useEffect(() => {
-		if (!bind.ref.current || !bind.ref.current.parentElement) {
-			return;
-		}
-
-		setOffset([
-			x + bind.ref.current.parentElement.offsetLeft,
-			y + bind.ref.current.parentElement.offsetTop,
-		]);
-	}, [bind.ref, x, y]);
 
 	useKeyDown(
 		{ current: document.body },
@@ -198,11 +185,19 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		}
 
 		function centerElement(element: HTMLElement) {
-			const { width, height } = element.getBoundingClientRect();
+			if (!bind.ref.current || !bind.ref.current.parentElement) {
+				return;
+			}
+
+			const { width: nodeWidth, height: nodeHeight } =
+				element.getBoundingClientRect();
+			const { width: parentWidth, height: parentHeight } =
+				bind.ref.current.parentElement.getBoundingClientRect();
+
 			setNode(element.id, {
 				position: {
-					x: (window.innerWidth - width) / 2 - x,
-					y: (window.innerHeight - height) / 2 - y,
+					x: (parentWidth - nodeWidth) / 2 - x,
+					y: (parentHeight - nodeHeight) / 2 - y,
 				},
 			});
 		}

@@ -81,6 +81,17 @@ function useDrag<T extends HTMLElement>(
 	// Initial position of the element when the gesture started
 	const [offsetInitial, setOffsetInitial] = useState<Tuple<number>>(offset);
 
+	function updateOffsetInitial(value: Tuple<number>) {
+		if (!ref.current?.parentElement) {
+			return;
+		}
+
+		setOffsetInitial([
+			value[0] - ref.current.parentElement.offsetLeft,
+			value[1] - ref.current.parentElement.offsetTop,
+		]);
+	}
+
 	const onMouseDown = useCallback(
 		(event: React.MouseEvent) => {
 			// Target needs to be an HTMLElement
@@ -106,9 +117,9 @@ function useDrag<T extends HTMLElement>(
 				// Get the position relative to the offset
 				const { x, y } = target.getBoundingClientRect();
 				const [ox, oy] = options.offset;
-				setOffsetInitial([x - ox, y - oy]);
+				updateOffsetInitial([x - ox, y - oy]);
 			} else {
-				setOffsetInitial(offset);
+				updateOffsetInitial(offset);
 			}
 
 			setDown(true);
