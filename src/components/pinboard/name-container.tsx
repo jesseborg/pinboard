@@ -43,7 +43,7 @@ export function NameContainer() {
 	});
 
 	return (
-		<div className="absolute flex w-full justify-center pt-6 z-50">
+		<div className="absolute left-1/2 -translate-x-1/2 bg-red-500 top-6 z-50">
 			<input
 				ref={inputRef}
 				autoComplete="off"
