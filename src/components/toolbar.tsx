@@ -47,10 +47,7 @@ export function ToolBar() {
 							</p>
 						}
 					>
-						<Button
-							intent="blank"
-							onClick={() => addNode("mdx", { data: { label: "" } })}
-						>
+						<Button intent="blank" onClick={() => addNode("note")}>
 							<NoteIcon />
 						</Button>
 					</ToolTip>

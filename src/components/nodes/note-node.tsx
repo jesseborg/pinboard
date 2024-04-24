@@ -6,14 +6,17 @@ import { memo, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { CustomNodeProps, NodeProps } from "../pinboard/types";
 import { BaseNode } from "./base-node";
 
-export type MDXNodeProps = NodeProps & {
-	type: "mdx";
+export type NoteNodeProps = NodeProps & {
+	type: "note";
 	data: {
 		label: string;
 	};
 };
 
-export function BaseMDNode({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
+export function BaseNoteNode({
+	node,
+	handleRef,
+}: CustomNodeProps<NoteNodeProps>) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const { setNode } = useNodesActions();
@@ -50,8 +53,8 @@ export function BaseMDNode({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 		textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
 	}
 
-	const debounceUpdateNode = useDebounce((data: MDXNodeProps["data"]) => {
-		setNode<MDXNodeProps>(node.id, { data });
+	const debounceUpdateNode = useDebounce((data: NoteNodeProps["data"]) => {
+		setNode<NoteNodeProps>(node.id, { data });
 	}, 300);
 
 	function handleInput() {
@@ -101,7 +104,7 @@ export function BaseMDNode({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 					}
 				)}
 				cols={25}
-				defaultValue={node.data.label ?? ""}
+				defaultValue={node.data?.label ?? ""}
 				placeholder="Type anything..."
 				onInput={handleInput}
 				onBlur={handleBlur}
@@ -110,4 +113,4 @@ export function BaseMDNode({ node, handleRef }: CustomNodeProps<MDXNodeProps>) {
 	);
 }
 
-export const MDNode = memo(BaseMDNode);
+export const NoteNode = memo(BaseNoteNode);
