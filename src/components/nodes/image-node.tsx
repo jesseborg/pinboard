@@ -1,4 +1,5 @@
 import useDebounce from "@/hooks/use-debounce";
+import { useIndexedDB } from "@/hooks/use-indexed-db";
 import { preloadImage } from "@/lib/utils";
 import { useNodesActions } from "@/stores/use-nodes-store";
 import {
@@ -6,6 +7,7 @@ import {
 	FormEvent,
 	KeyboardEvent,
 	memo,
+	useEffect,
 	useRef,
 	useState,
 } from "react";
@@ -30,11 +32,7 @@ export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 
 	const { removeNode } = useNodesActions();
 
-	function handleEdit() {
-		setEditing(true);
-	}
-
-	function handleClose(event: FormEvent, submit?: boolean) {
+	function handleDialogClose(_: FormEvent, submit?: boolean) {
 		setEditing(false);
 
 		if (!submit && !node.data) {
@@ -44,18 +42,33 @@ export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 
 	return (
 		<>
-			<BaseNode node={node} handleEdit={handleEdit}>
+			<BaseNode node={node} handleEdit={() => setEditing(true)}>
 				{/* eslint-disable-next-line jsx-a11y/alt-text */}
 				<Image node={node} />
 			</BaseNode>
 
-			{editing && <EditDialog node={node} onClose={handleClose} />}
+			{editing && <EditDialog node={node} onClose={handleDialogClose} />}
 		</>
 	);
 }
 export const ImageNode = memo(BaseImageNode);
 
 function Image({ node }: { node: ImageNodeProps }) {
+	const { getById } = useIndexedDB<Blob>("images");
+
+	const [src, setSrc] = useState<string | undefined>(undefined);
+
+	useEffect(() => {
+		if (!node.data) {
+			return;
+		}
+
+		getById(node.id).then((blob) => {
+			const url = URL.createObjectURL(blob);
+			setSrc(url);
+		});
+	}, [getById, node.id, node.data]);
+
 	if (!node.data) {
 		return (
 			<div className="size-64 flex items-center justify-center">
@@ -67,7 +80,7 @@ function Image({ node }: { node: ImageNodeProps }) {
 	return (
 		// eslint-disable-next-line @next/next/no-img-element
 		<img
-			src={node.data.src}
+			src={src}
 			alt={node.data.alt}
 			width={node.size.width}
 			height={node.size.height}
@@ -84,14 +97,22 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 
 	const [value, setValue] = useState<string | null>(null);
 
+	const { addOrUpdate } = useIndexedDB<Blob>("images");
+
 	async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 		event?.preventDefault();
 
 		const img = await preloadImage(value!);
 
+		const res = await fetch(img.src);
+		const blob = await res.blob();
+		const url = URL.createObjectURL(blob);
+
+		await addOrUpdate(blob, node.id);
+
 		setNode<ImageNodeProps>(node.id, {
 			size: { width: img.width, height: img.height },
-			data: { src: img.src, alt: "" },
+			data: { src: url, alt: "" },
 		});
 
 		onClose?.(event, true);

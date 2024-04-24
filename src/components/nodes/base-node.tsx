@@ -1,3 +1,4 @@
+import { useIndexedDB } from "@/hooks/use-indexed-db";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { cn } from "@/lib/utils";
 import {
@@ -50,6 +51,8 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 
 	const ref = useRef<HTMLDivElement | null>(null);
 
+	const { deleteById } = useIndexedDB<Blob>("images");
+
 	useKeyDown(
 		ref,
 		["ArrowLeft", "ArrowRight"],
@@ -73,6 +76,11 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 		[ref]
 	);
 
+	async function handleDeleteClick() {
+		await deleteById(node.id);
+		removeNode(node.id);
+	}
+
 	return (
 		<div
 			ref={ref}
@@ -91,7 +99,7 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 				intent="primary"
 				size="xs"
 				className="p-1 px-2"
-				onClick={() => removeNode(node.id)}
+				onClick={handleDeleteClick}
 			>
 				Delete
 			</Button>
