@@ -22,7 +22,7 @@ export function App() {
 		["n", "i"],
 		async (keys) => {
 			if (keys === "n") {
-				addNode("mdx", { data: { label: "" } });
+				addNode("mdx");
 				return;
 			}
 
