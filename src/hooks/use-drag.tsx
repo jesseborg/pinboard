@@ -1,5 +1,11 @@
 import { snap } from "@/lib/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	ComponentProps,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 
 enum MouseButtons {
 	LEFT = 0,
@@ -57,10 +63,19 @@ type UseDragOptionsProps<T extends HTMLElement> = {
 	onDragEnd?: (event: DragEndEvent) => void;
 };
 
+type UseDragReturnProps<T extends HTMLElement> = {
+	bind: { ref: React.MutableRefObject<T | null> } & Omit<
+		ComponentProps<"div">,
+		"ref"
+	>;
+	target: React.MutableRefObject<HTMLElement | null>;
+	offset: Tuple<number>;
+};
+
 function useDrag<T extends HTMLElement>(
 	onDrag?: ((event: DragEvent) => void) | null,
 	options?: UseDragOptionsProps<T>
-) {
+): UseDragReturnProps<T> {
 	// Main element that holds all the events
 	const ref = useRef<T | null>(null);
 
@@ -92,13 +107,13 @@ function useDrag<T extends HTMLElement>(
 		]);
 	}
 
-	const onMouseDown = useCallback(
-		(event: React.MouseEvent) => {
+	const onPointerDown = useCallback(
+		(event: React.PointerEvent) => {
 			// Target needs to be an HTMLElement
 			const target = event.target as T;
 
 			// If the selector option is set, make sure the target matches it
-			if (options?.selectors && !target.matches(options.selectors)) {
+			if (options?.selectors && !target?.matches(options.selectors)) {
 				return;
 			}
 
@@ -136,8 +151,8 @@ function useDrag<T extends HTMLElement>(
 		[offset, options]
 	);
 
-	const onMouseMove = useCallback(
-		(event: MouseEvent) => {
+	const onPointerMove = useCallback(
+		(event: PointerEvent) => {
 			if (!ref.current || !dragTarget.current) {
 				return;
 			}
@@ -166,8 +181,8 @@ function useDrag<T extends HTMLElement>(
 		[down, offsetInitial, onDrag, options, pointerInitial]
 	);
 
-	const onMouseUp = useCallback(
-		(event: MouseEvent) => {
+	const onPointerUp = useCallback(
+		(event: PointerEvent) => {
 			if (!ref.current || !dragTarget.current) {
 				return;
 			}
@@ -196,45 +211,45 @@ function useDrag<T extends HTMLElement>(
 	);
 
 	const handleMouseEvent = useCallback(
-		(event: MouseEvent | React.MouseEvent) => {
+		(event: PointerEvent | React.PointerEvent) => {
 			event.stopPropagation();
 
-			if (event.button !== MouseButtons.LEFT) {
+			if (event.type !== "pointermove" && event.button !== MouseButtons.LEFT) {
 				return;
 			}
 
 			switch (event.type) {
-				case "mousedown": {
-					onMouseDown(event as React.MouseEvent);
+				case "pointerdown": {
+					onPointerDown(event as React.PointerEvent);
 					break;
 				}
 
-				case "mousemove": {
-					onMouseMove(event as MouseEvent);
+				case "pointermove": {
+					onPointerMove(event as PointerEvent);
 					break;
 				}
 
-				case "mouseup": {
-					onMouseUp(event as MouseEvent);
+				case "pointerup": {
+					onPointerUp(event as PointerEvent);
 					break;
 				}
 			}
 		},
-		[onMouseDown, onMouseMove, onMouseUp]
+		[onPointerDown, onPointerMove, onPointerUp]
 	);
 
 	useEffect(() => {
-		document.addEventListener("mousemove", handleMouseEvent);
-		document.addEventListener("mouseup", handleMouseEvent);
+		document.addEventListener("pointermove", handleMouseEvent);
+		document.addEventListener("pointerup", handleMouseEvent);
 
 		return () => {
-			document.removeEventListener("mousemove", handleMouseEvent);
-			document.removeEventListener("mouseup", handleMouseEvent);
+			document.removeEventListener("pointermove", handleMouseEvent);
+			document.removeEventListener("pointerup", handleMouseEvent);
 		};
 	}, [handleMouseEvent]);
 
 	return {
-		bind: { ref, onMouseDown: handleMouseEvent },
+		bind: { ref, onPointerDown: handleMouseEvent },
 		target: dragTarget,
 		offset,
 	};
