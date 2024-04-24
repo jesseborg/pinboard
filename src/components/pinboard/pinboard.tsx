@@ -141,14 +141,22 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	const [x, y] = usePinBoardXY();
 
 	const selectedNodeId = useSelectedNodeId();
-	const { removeNode, setNode } = useNodesActions();
+	const { removeNode, setNode, setSelectedNodeId } = useNodesActions();
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
 			target.style.transform = `translate(${ox}px, ${oy}px)`;
 		},
 		{
-			onDragEnd: ({ gridOffset: [ox, oy] }) => {
+			onDragStart: ({ target }) => setSelectedNodeId(target.id),
+			onDragEnd: ({ gridOffset: [ox, oy], movement: [mx, my] }) => {
+				const hasDragged = Math.abs(mx) + Math.abs(my) > MIN_DRAG_DISTANCE;
+
+				// Only allow drags
+				if (!hasDragged) {
+					return;
+				}
+
 				const node = nodes?.find((node) => node.id === selectedNodeId);
 				if (!node) {
 					return;
@@ -179,6 +187,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 		[removeNode, selectedNodeId]
 	);
 
+	// TODO: maybe move into custom hook
 	useEffect(() => {
 		if (!bind.ref.current) {
 			return;
