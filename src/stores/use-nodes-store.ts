@@ -1,5 +1,5 @@
 import { NodeProps, NodeTypes } from "@/components/pinboard/types";
-import { uuid4 } from "@/lib/guid";
+import { uuid4 } from "@/lib/utils";
 import { ComponentProps } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
