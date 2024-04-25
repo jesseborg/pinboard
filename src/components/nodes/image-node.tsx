@@ -22,15 +22,15 @@ import { BaseNode } from "./base-node";
 export type ImageNodeProps = NodeProps & {
 	type: "image";
 	data: {
-		alt: string;
 		src: string;
+		alt?: string;
 	};
 };
 
 export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
-	const [editing, setEditing] = useState(!node.data);
-
 	const { removeNode } = useNodesActions();
+
+	const [editing, setEditing] = useState(!node.data);
 
 	function handleDialogClose(_: FormEvent, submit?: boolean) {
 		setEditing(false);
@@ -43,7 +43,6 @@ export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 	return (
 		<>
 			<BaseNode node={node} handleEdit={() => setEditing(true)}>
-				{/* eslint-disable-next-line jsx-a11y/alt-text */}
 				<Image node={node} />
 			</BaseNode>
 
@@ -56,7 +55,7 @@ export const ImageNode = memo(BaseImageNode);
 function Image({ node }: { node: ImageNodeProps }) {
 	const { getById } = useIndexedDB<Blob>("images");
 
-	const [src, setSrc] = useState<string | undefined>(undefined);
+	const [blobURL, setBlobURL] = useState<string | undefined>(undefined);
 
 	useEffect(() => {
 		if (!node.data) {
@@ -64,8 +63,7 @@ function Image({ node }: { node: ImageNodeProps }) {
 		}
 
 		getById(node.id).then((blob) => {
-			const url = URL.createObjectURL(blob);
-			setSrc(url);
+			setBlobURL(URL.createObjectURL(blob));
 		});
 	}, [getById, node.id, node.data]);
 
@@ -79,7 +77,7 @@ function Image({ node }: { node: ImageNodeProps }) {
 
 	return (
 		<img
-			src={src}
+			src={blobURL}
 			alt={node.data.alt}
 			width={node.size.width}
 			height={node.size.height}
@@ -93,35 +91,37 @@ type EditDialogProps = {
 } & Omit<DialogProps, "onClose">;
 function EditDialog({ node, onClose }: EditDialogProps) {
 	const { setNode } = useNodesActions();
-
-	const [value, setValue] = useState<string | null>(null);
-
 	const { addOrUpdate } = useIndexedDB<Blob>("images");
+
+	const [url, setURL] = useState<string | null>(null);
+
+	const hasImage = url !== null;
 
 	async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 		event?.preventDefault();
 
-		const img = await preloadImage(value!);
+		// preload image to get width and height
+		const img = await preloadImage(url!);
 
-		const res = await fetch(img.src);
-		const blob = await res.blob();
-		const url = URL.createObjectURL(blob);
+		// fetch image and get blob data
+		const response = await fetch(img.src);
+		const blob = await response.blob();
 
+		// add image blob to indexedDB
 		await addOrUpdate(blob, node.id);
 
+		// update node data
 		setNode<ImageNodeProps>(node.id, {
 			size: { width: img.width, height: img.height },
-			data: { src: url, alt: "" },
+			data: { src: URL.createObjectURL(blob) },
 		});
 
 		onClose?.(event, true);
 	}
 
 	function handleResetForm() {
-		setValue(null);
+		setURL(null);
 	}
-
-	const hasImage = value !== null;
 
 	return (
 		<Portal>
@@ -136,15 +136,15 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 				>
 					{!hasImage && (
 						<>
-							<ImageUploadInput onChange={setValue} />
+							<ImageUploadInput onChange={setURL} />
 							<p className="text-center">or</p>
-							<ImageURLInput onChange={setValue} />
+							<ImageURLInput onChange={setURL} />
 						</>
 					)}
 
 					{hasImage && (
 						<div className="space-y-2">
-							<img src={value} alt="image" className="rounded-md mx-auto" />
+							<img src={url} alt="image" className="rounded-md mx-auto" />
 							<div className="flex gap-2">
 								<Button
 									formMethod="dialog"
@@ -184,11 +184,12 @@ function ImageUploadInput({ onChange }: ImageUploadInputProps) {
 		}
 	}
 
+	// emulate click event on file input
 	function handleClick() {
 		fileRef.current?.click();
 	}
 
-	function handleFile(event: ChangeEvent<HTMLInputElement>) {
+	function handleReadFile(event: ChangeEvent<HTMLInputElement>) {
 		const file = event.target.files?.[0];
 
 		if (!file) {
@@ -228,7 +229,7 @@ function ImageUploadInput({ onChange }: ImageUploadInputProps) {
 				type="file"
 				accept="image/png"
 				className="w-fit"
-				onChange={handleFile}
+				onChange={handleReadFile}
 			/>
 			<CloudUploadIcon />
 			<p>Upload Image</p>
