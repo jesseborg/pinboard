@@ -77,7 +77,7 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 	);
 
 	async function handleDeleteClick() {
-		await deleteById(node.id);
+		deleteById(node.id);
 		removeNode(node.id);
 	}
 

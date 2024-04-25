@@ -1,4 +1,5 @@
 import useDrag from "@/hooks/use-drag";
+import { useIndexedDB } from "@/hooks/use-indexed-db";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { cn } from "@/lib/utils";
 import {
@@ -139,6 +140,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 
 	const selectedNodeId = useSelectedNodeId();
 	const { removeNode, setNode, setSelectedNodeId } = useNodesActions();
+	const { deleteById } = useIndexedDB<Blob>("images");
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
@@ -178,6 +180,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 				return;
 			}
 
+			deleteById(selectedNodeId);
 			removeNode(selectedNodeId);
 		},
 		{ ignoreWhileInput: true },
