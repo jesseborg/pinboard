@@ -34,7 +34,7 @@ export function ToolBar() {
 	);
 
 	return (
-		<ToolTipPrimitive.Provider delay={150}>
+		<ToolTipPrimitive.Provider>
 			<div className="fixed z-20 text-white pl-6 flex top-1/2 -translate-y-1/2">
 				<div
 					ref={ref}

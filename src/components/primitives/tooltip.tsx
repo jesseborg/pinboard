@@ -15,9 +15,7 @@ import React, {
 } from "react";
 import { Slot } from "./slot";
 
-const ToolTipProviderContext = createContext({
-	delay: 0,
-});
+const ToolTipProviderContext = createContext({});
 type ToolTipProviderContextProps =
 	typeof ToolTipProviderContext extends React.Context<infer P> ? P : never;
 
