@@ -17,7 +17,7 @@ function dispatchStorageEvent<T extends string | null | undefined>(
 }
 
 function getLocalStorageItem(key: string) {
-	return window.localStorage.getItem(key);
+	return window.localStorage.getItem(key)!;
 }
 
 function setLocalStorageItem<T>(key: string, value: T) {
@@ -43,7 +43,7 @@ function getLocalStorageServerSnapshot<T>(): T {
 export function useLocalStorage<T>(key: string, initialValue: T | null = null) {
 	const snapshot = useMemo(() => getLocalStorageItem(key), [key]);
 
-	const store = useSyncExternalStore<string | null>(
+	const store = useSyncExternalStore<string>(
 		useLocalStorageSubscribe,
 		() => snapshot,
 		getLocalStorageServerSnapshot
@@ -53,10 +53,7 @@ export function useLocalStorage<T>(key: string, initialValue: T | null = null) {
 		(value: SetStateAction<T>) => {
 			try {
 				const nextState =
-					typeof value === "function"
-						? // @ts-ignore
-						  value(JSON.parse(store))
-						: value;
+					value instanceof Function ? value(JSON.parse(store)) : value;
 
 				if (nextState === undefined || nextState === null) {
 					removeLocalStorageItem(key);
