@@ -48,7 +48,6 @@ function DraggablePinBoard({
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ offset: [x, y] }) => {
-			// Update pinboard store state
 			setXY([x, y]);
 		},
 		{
@@ -74,7 +73,7 @@ function DraggablePinBoard({
 		}
 	);
 
-	const isPanning = useKeyDown({ current: document.body }, " ");
+	const isPanning = useKeyDown(document.body, " ");
 
 	return (
 		<div

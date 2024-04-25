@@ -7,7 +7,7 @@ type UseKeyDownOptions = {
 };
 
 export function useKeyDown<K extends string, T extends HTMLElement>(
-	ref: MutableRefObject<T | null>,
+	ref: MutableRefObject<T | null> | T | null,
 	keys: K | Array<K>,
 	callback?: (key: K) => void,
 	options?: UseKeyDownOptions | null,
@@ -41,7 +41,7 @@ export function useKeyDown<K extends string, T extends HTMLElement>(
 			setKeyDown(false);
 		}
 
-		const element = ref.current;
+		const element = ref instanceof HTMLElement ? ref : ref?.current;
 		element?.addEventListener("keydown", handleKeyDown);
 		element?.addEventListener("keyup", handleKeyUp);
 

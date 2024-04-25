@@ -20,7 +20,7 @@ export function App() {
 	const [loading, setLoading] = useState(true);
 
 	useKeyDown(
-		{ current: typeof document !== "undefined" ? document.body : null },
+		typeof document !== "undefined" ? document.body : null,
 		["n", "i"],
 		(keys) => {
 			if (keys === "n") {
