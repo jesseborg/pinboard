@@ -17,14 +17,17 @@ export function useKeyDown<K extends string, T extends HTMLElement>(
 
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
+			// Handle single keys
 			if (typeof keys === "string" && event.key !== keys) {
 				return;
 			}
 
+			// Handle multiple keys
 			if (typeof keys === "object" && !keys.includes(event.key as K)) {
 				return;
 			}
 
+			// Check if the currently active element is one of the ignored elements
 			if (
 				options?.ignoreWhileInput &&
 				document.activeElement?.localName &&
