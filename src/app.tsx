@@ -1,14 +1,12 @@
-"use client";
-
 import { setupIndexedDB } from "@/hooks/use-indexed-db";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { useNodes, useNodesActions } from "@/stores/use-nodes-store";
 import { useEffect, useState } from "react";
-import { ImageNode } from "./nodes/image-node";
-import { NoteNode } from "./nodes/note-node";
-import { Background } from "./pinboard/background";
-import { PinBoard } from "./pinboard/pinboard";
-import { ToolBar } from "./toolbar";
+import { ImageNode } from "./components/nodes/image-node";
+import { NoteNode } from "./components/nodes/note-node";
+import { Background } from "./components/pinboard/background";
+import { PinBoard } from "./components/pinboard/pinboard";
+import { ToolBar } from "./components/toolbar";
 
 export const nodeTypes = {
 	note: NoteNode,
@@ -62,9 +60,11 @@ export function App() {
 	}
 
 	return (
-		<PinBoard nodes={nodes} onNodesChange={setNodes} nodeTypes={nodeTypes}>
-			<ToolBar />
-			<Background />
-		</PinBoard>
+		<main>
+			<PinBoard nodes={nodes} onNodesChange={setNodes} nodeTypes={nodeTypes}>
+				<ToolBar />
+				<Background />
+			</PinBoard>
+		</main>
 	);
 }

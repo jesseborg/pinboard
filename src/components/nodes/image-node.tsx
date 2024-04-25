@@ -78,7 +78,6 @@ function Image({ node }: { node: ImageNodeProps }) {
 	}
 
 	return (
-		// eslint-disable-next-line @next/next/no-img-element
 		<img
 			src={src}
 			alt={node.data.alt}
@@ -145,7 +144,6 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 
 					{hasImage && (
 						<div className="space-y-2">
-							{/* eslint-disable-next-line @next/next/no-img-element */}
 							<img src={value} alt="image" className="rounded-md mx-auto" />
 							<div className="flex gap-2">
 								<Button

@@ -1,5 +1,3 @@
-"use client";
-
 import useDrag from "@/hooks/use-drag";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { cn } from "@/lib/utils";

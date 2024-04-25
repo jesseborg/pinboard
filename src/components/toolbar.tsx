@@ -1,7 +1,7 @@
 import { useKeyDown } from "@/hooks/use-keydown";
 import { useNodesActions } from "@/stores/use-nodes-store";
 import { PropsWithChildren, ReactNode, useRef } from "react";
-import { nodeTypes } from "./app";
+import { nodeTypes } from "../app";
 import { ImageIcon } from "./icons/image-icon";
 import { NoteIcon } from "./icons/note-icon";
 import { Button } from "./primitives/button";

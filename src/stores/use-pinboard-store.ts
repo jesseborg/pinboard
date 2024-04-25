@@ -1,5 +1,3 @@
-"use client";
-
 import { Tuple } from "@/hooks/use-drag";
 import { useEffect, useState } from "react";
 import { create } from "zustand";

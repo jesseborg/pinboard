@@ -1,8 +1,6 @@
 // Modified version of the code from
 // https://usehooks.com/uselocalstorage
 
-"use client";
-
 import {
 	SetStateAction,
 	useCallback,

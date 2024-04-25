@@ -1,5 +1,3 @@
-"use client";
-
 import { NodeProps, NodeTypes } from "@/components/pinboard/types";
 import { uuid4 } from "@/lib/guid";
 import { ComponentProps } from "react";
