@@ -18,9 +18,9 @@ import { NameContainer } from "./name-container";
 import { NodeHandle, NodeTypes } from "./types";
 
 type PinBoardProps = {
-	nodes: Nodes | null;
+	nodes: Nodes;
 	nodeTypes: NodeTypes;
-	onNodesChange?: (nodes: Nodes | null) => void;
+	onNodesChange?: (nodes: Nodes) => void;
 };
 
 export function PinBoard({

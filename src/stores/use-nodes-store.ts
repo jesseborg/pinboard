@@ -8,19 +8,17 @@ export type Node<T extends NodeProps = NodeProps> = T;
 export type Nodes = Array<Node>;
 
 export type NodesState = {
-	nodes: Nodes | null;
+	nodes: Nodes;
 	selectedNodeId: string | null;
 };
 
 type NodeActions<T extends NodeTypes<NodeProps> = {}> = {
 	setNode: <N extends NodeProps>(id: string, node: Partial<N>) => void;
-	setNodes: (nodes: Nodes | null) => void;
+	setNodes: (nodes: Nodes) => void;
 	removeNode: (id: string) => void;
 	addNode: <K extends keyof T>(
 		type: K,
-		node?: Partial<
-			Omit<NodeProps & ComponentProps<T[K]>["node"], "id" | "type">
-		>
+		node?: Omit<NodeProps & ComponentProps<T[K]>["node"], "id" | "type">
 	) => void;
 	setSelectedNodeId: (id: string | null) => void;
 };
@@ -30,7 +28,7 @@ type NodesStore = NodesState & {
 };
 
 const initialState: NodesState = {
-	nodes: null,
+	nodes: [],
 	selectedNodeId: null,
 };
 
@@ -40,44 +38,28 @@ const useNodesStore = create(
 			...initialState,
 			actions: {
 				setNode: (id, data) =>
-					set((state) => {
-						if (!state.nodes || !Boolean(state.nodes.length)) {
-							return state;
-						}
-
-						const nodes = state.nodes.map((node) => {
-							if (node.id === id) {
-								return { ...node, ...data };
-							}
-							return node;
-						});
-
-						return { nodes };
-					}),
+					set((state) => ({
+						nodes: state.nodes.map((node) => {
+							return node.id === id ? { ...node, ...data } : node;
+						}),
+					})),
 				setNodes: (nodes) => set({ nodes }),
 				removeNode: (id) =>
-					set((state) => {
-						if (!state.nodes || !Boolean(state.nodes.length)) {
-							return state;
-						}
-
-						const nodes = state.nodes?.filter((node) => node.id !== id);
-						return { nodes };
-					}),
+					set((state) => ({
+						nodes: state.nodes.filter((node) => node.id !== id),
+					})),
 				addNode: (type, node) =>
-					set((state) => {
-						// Clone to force a re-render
-						const nodes = [...(state.nodes ?? [])];
-
-						nodes.push({
-							...node,
-							id: uuid4(),
-							position: { x: 0, y: 0 },
-							type,
-						} as NodeProps); // NOTE: I would like to find a way to remove the 'as NodeProps'
-
-						return { nodes };
-					}),
+					set((state) => ({
+						nodes: [
+							...state.nodes,
+							{
+								position: { x: 0, y: 0 },
+								...node,
+								id: uuid4(),
+								type,
+							} as NodeProps,
+						],
+					})),
 				setSelectedNodeId: (id) => set({ selectedNodeId: id }),
 			},
 		}),
