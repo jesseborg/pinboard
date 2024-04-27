@@ -24,8 +24,10 @@ type BaseDragEvent<T extends HTMLElement = HTMLElement> = {
 	xy: Tuple<number>; //
 	/** Offset since the first gesture */
 	offset: Tuple<number>;
-	/** xy value when the gesture started */
+	/** (screen space) xy value when the gesture started */
 	initial: Tuple<number>;
+	/** Offset when the gesture first started */
+	initialOffset: Tuple<number>;
 	/** Displacement between offset and lastOffset */
 	movement: Tuple<number>;
 	/** The element being dragged */
@@ -94,14 +96,14 @@ function useDrag<T extends HTMLElement>(
 	);
 
 	// Initial position of the element when the gesture started
-	const [offsetInitial, setOffsetInitial] = useState<Tuple<number>>(offset);
+	const [initialOffset, setInitialOffset] = useState<Tuple<number>>(offset);
 
 	function updateOffsetInitial(value: Tuple<number>) {
 		if (!ref.current?.parentElement) {
 			return;
 		}
 
-		setOffsetInitial([
+		setInitialOffset([
 			value[0] - ref.current.parentElement.offsetLeft,
 			value[1] - ref.current.parentElement.offsetTop,
 		]);
@@ -134,7 +136,7 @@ function useDrag<T extends HTMLElement>(
 				const [ox, oy] = options.offset;
 				updateOffsetInitial([x - ox, y - oy]);
 			} else {
-				updateOffsetInitial(offset);
+				updateOffsetInitial(options?.initialPosition ?? offset);
 			}
 
 			setDown(true);
@@ -146,6 +148,7 @@ function useDrag<T extends HTMLElement>(
 				movement: [event.clientX - initial[0], event.clientY - initial[1]],
 				initial,
 				offset,
+				initialOffset,
 			});
 		},
 		[offset, options]
@@ -161,7 +164,7 @@ function useDrag<T extends HTMLElement>(
 				const { movement, offset, gridOffset } = calculateOffsets(
 					event,
 					pointerInitial,
-					offsetInitial,
+					initialOffset,
 					options
 				);
 
@@ -175,10 +178,11 @@ function useDrag<T extends HTMLElement>(
 					initial: pointerInitial,
 					offset,
 					gridOffset,
+					initialOffset,
 				});
 			}
 		},
-		[down, offsetInitial, onDrag, options, pointerInitial]
+		[down, initialOffset, onDrag, options, pointerInitial]
 	);
 
 	const onPointerUp = useCallback(
@@ -190,7 +194,7 @@ function useDrag<T extends HTMLElement>(
 			const { movement, offset, gridOffset } = calculateOffsets(
 				event,
 				pointerInitial,
-				offsetInitial,
+				initialOffset,
 				options
 			);
 
@@ -205,9 +209,10 @@ function useDrag<T extends HTMLElement>(
 				target: event.target as HTMLElement,
 				xy: [event.clientX, event.clientY],
 				gridOffset,
+				initialOffset,
 			});
 		},
-		[offsetInitial, options, pointerInitial]
+		[initialOffset, options, pointerInitial]
 	);
 
 	const handleMouseEvent = useCallback(
@@ -256,7 +261,7 @@ function useDrag<T extends HTMLElement>(
 }
 
 function calculateOffsets<T extends HTMLElement>(
-	event: MouseEvent,
+	event: PointerEvent,
 	pointerInitial: Tuple<number>,
 	offsetInitial: Tuple<number>,
 	options?: UseDragOptionsProps<T>

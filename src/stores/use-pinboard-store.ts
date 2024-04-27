@@ -1,22 +1,28 @@
-import { Tuple } from "@/hooks/use-drag";
+import { Point } from "@/components/pinboard/types";
 import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+type Transform = Point & { scale: number };
+
 export type PinBoardState = {
-	xy: Tuple<number>;
+	transform: Transform;
 	name: string;
 };
 
 type PinBoardStore = PinBoardState & {
 	actions: {
-		setXY: (xy: Tuple<number>) => void;
+		setTransform: (transform: Partial<Transform>) => void;
 		setName: (name: string) => void;
 	};
 };
 
 const initialState: PinBoardState = {
-	xy: [0, 0],
+	transform: {
+		x: 0,
+		y: 0,
+		scale: 1,
+	},
 	name: "My Awesome PinBoard",
 };
 
@@ -25,7 +31,13 @@ export const usePinBoardStore = create(
 		(set) => ({
 			...initialState,
 			actions: {
-				setXY: (xy) => set({ xy }),
+				setTransform: (transform) =>
+					set((state) => ({
+						transform: {
+							...state.transform,
+							...transform,
+						},
+					})),
 				setName: (name) => set({ name }),
 			},
 		}),
@@ -65,7 +77,8 @@ export const usePinBoardHydrated = () => {
 	return hydrated;
 };
 
-export const usePinBoardXY = () => usePinBoardStore((state) => state.xy);
+export const usePinBoardTransform = () =>
+	usePinBoardStore((state) => state.transform);
 export const usePinBoardName = () => usePinBoardStore((state) => state.name);
 
 export const usePinBoardActions = () =>

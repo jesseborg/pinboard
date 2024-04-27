@@ -1,22 +1,38 @@
-import { usePinBoardXY } from "@/stores/use-pinboard-store";
+import { usePinBoardTransform } from "@/stores/use-pinboard-store";
 
 export function Background() {
-	const [x, y] = usePinBoardXY();
+	const transform = usePinBoardTransform();
+
+	const gap = 10;
+	const size = 2;
+	const offset = 2;
+
+	const scaledGap = gap * transform.scale || 1;
+	const scaledSize = size * transform.scale;
+
+	const radius = scaledSize / offset;
+	const patternOffset = scaledSize / offset;
 
 	return (
-		<span className="pointer-events-none">
+		<span className="background absolute top-0 left-0 w-full h-full pointer-events-none">
 			{/* Dots Pattern */}
 			<svg className="absolute inset-0 w-full h-full -z-10">
 				<pattern
 					id="dots-pattern"
-					x={x}
-					y={y}
-					width="10"
-					height="10"
+					x={transform.x % scaledGap}
+					y={transform.y % scaledGap}
+					width={scaledGap}
+					height={scaledGap}
 					patternUnits="userSpaceOnUse"
-					patternTransform="translate(0, 0)"
+					patternTransform={`translate(-${patternOffset},-${patternOffset})`}
 				>
-					<circle cx="1" cy="1" r="1" fill="#ccc" shapeRendering="crispEdges" />
+					<circle
+						cx={radius}
+						cy={radius}
+						r={radius}
+						fill="#ccc"
+						shapeRendering="crispEdges"
+					/>
 				</pattern>
 				<rect
 					x="0"
@@ -26,9 +42,6 @@ export function Background() {
 					fill="url(#dots-pattern)"
 				/>
 			</svg>
-
-			{/* Border Fade */}
-			{/* <span className="absolute inset-0 z-20 shadow-[0_0_0_16px,inset_0_0_8px_16px] shadow-white/80 rounded-[32px]" /> */}
 		</span>
 	);
 }
