@@ -2,7 +2,7 @@ import useDrag from "@/hooks/use-drag";
 import { useIndexedDB } from "@/hooks/use-indexed-db";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { useMouseWheel } from "@/hooks/use-mouse-wheel";
-import { cn } from "@/lib/utils";
+import { cn, round } from "@/lib/utils";
 import {
 	Node,
 	Nodes,
@@ -78,9 +78,11 @@ function DraggablePinBoard({
 			}
 
 			const direction = event.deltaY > 0 ? -1 : 1;
-			const scale = Math.max(
-				0.02,
-				Math.min(transform.scale * Math.pow(SCALE_FACTOR, direction), 256)
+			const scale = round(
+				Math.max(
+					0.02,
+					Math.min(transform.scale * Math.pow(SCALE_FACTOR, direction), 256)
+				)
 			);
 
 			// https://stackoverflow.com/a/45068045
@@ -251,10 +253,6 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 				},
 			});
 		}
-
-		// viewport x: 			-1200
-		// viewport width: 	1012
-		// render: w: 303 x: 364
 
 		const observer = new MutationObserver((records) => {
 			for (const record of records) {
