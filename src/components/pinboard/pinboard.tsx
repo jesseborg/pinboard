@@ -181,9 +181,10 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 
 	const { bind } = useDrag<HTMLDivElement>(
 		({ gridOffset: [ox, oy], target }) => {
-			target.style.transform = `translate(${ox / transform.scale}px, ${
-				oy / transform.scale
-			}px)`;
+			const x = ox / transform.scale;
+			const y = oy / transform.scale;
+			target.style.transform = `translate(${x}px, ${y}px)`;
+			setNode(target.id, { position: { x, y } });
 		},
 		{
 			onDragStart: ({ target }) => setSelectedNodeId(target.id),

@@ -6,13 +6,23 @@ import {
 	useNodesActions,
 	useSelectedNodeId,
 } from "@/stores/use-nodes-store";
-import { HTMLAttributes, PropsWithChildren, useRef } from "react";
+import { usePinBoardTransform } from "@/stores/use-pinboard-store";
+import {
+	HTMLAttributes,
+	PropsWithChildren,
+	useEffect,
+	useMemo,
+	useRef,
+} from "react";
 import { Button } from "../primitives/button";
+import { Portal } from "../primitives/portal";
 
 type BaseNodeProps = {
 	node: Node;
 	handleEdit?: () => void;
 };
+
+const OUTLINE_WIDTH = 4.5;
 
 export function BaseNode({
 	node,
@@ -20,15 +30,35 @@ export function BaseNode({
 	className,
 	children,
 }: PropsWithChildren<BaseNodeProps & HTMLAttributes<HTMLDivElement>>) {
+	const transform = usePinBoardTransform();
 	const selectedNodeId = useSelectedNodeId();
+	const { setNode } = useNodesActions();
 
 	const selected = node?.id === selectedNodeId;
+
+	useEffect(() => {
+		const element = document.getElementById(node.id);
+
+		if (!element) {
+			return;
+		}
+
+		setNode(node.id, {
+			size: { width: element.clientWidth, height: element.clientHeight },
+		});
+	}, []);
 
 	return (
 		<>
 			<div
+				style={{
+					outlineWidth: Math.max(
+						OUTLINE_WIDTH,
+						OUTLINE_WIDTH / transform.scale
+					),
+				}}
 				className={cn(
-					"border-2 border-black bg-white relative shadow-[2px_2px] shadow-black z-0",
+					"ring-2 ring-black bg-white relative shadow-[2px_2px_0_2px] shadow-black z-0",
 					className,
 					{
 						"outline outline-2 outline-blue-500 z-50": selected,
@@ -42,16 +72,18 @@ export function BaseNode({
 	);
 }
 
+const TOOLBAR_PADDING = 8;
+
 type NodeToolBarProps = {
 	node: Node;
 	handleEdit?: () => void;
 };
 function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
+	const transform = usePinBoardTransform();
 	const { removeNode } = useNodesActions();
+	const { deleteById } = useIndexedDB<Blob>("images");
 
 	const ref = useRef<HTMLDivElement | null>(null);
-
-	const { deleteById } = useIndexedDB<Blob>("images");
 
 	useKeyDown(
 		ref,
@@ -81,29 +113,43 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 		removeNode(node.id);
 	}
 
+	const pos = useMemo(
+		() => ({
+			// prettier-ignore
+			x: transform.x + (node.position.x * transform.scale) + (node.size.width * transform.scale) / 2,
+			// prettier-ignore
+			y: (transform.y + (node.position.y * transform.scale) + node.size.height * transform.scale) + TOOLBAR_PADDING,
+		}),
+		[transform, node]
+	);
+
 	return (
-		<div
-			ref={ref}
-			className="text-xs absolute top-full left-1/2 -translate-x-1/2 flex gap-1.5 bg-black p-1.5 rounded-md text-white mt-2 pointer-events-auto"
-		>
-			<Button
-				intent="primary"
-				size="xs"
-				className="p-1 px-2"
-				onClick={() => handleEdit?.()}
+		<Portal ref={ref} asChild>
+			<div
+				style={{
+					transform: `translate(calc(${pos.x}px - 50%),${pos.y}px)`,
+				}}
+				className="text-xs z-50 absolute flex top-0 left-0 gap-1.5 bg-black p-1.5 rounded-md text-white pointer-events-auto"
 			>
-				Edit
-			</Button>
-			<span className="bg-white w-px my-1 mr-px" />
-			<Button
-				intent="primary"
-				size="xs"
-				className="p-1 px-2"
-				onClick={handleDeleteClick}
-			>
-				Delete
-			</Button>
-		</div>
+				<Button
+					intent="primary"
+					size="xs"
+					className="p-1 px-2"
+					onClick={() => handleEdit?.()}
+				>
+					Edit
+				</Button>
+				<span className="bg-white w-px my-1 mr-px" />
+				<Button
+					intent="primary"
+					size="xs"
+					className="p-1 px-2"
+					onClick={handleDeleteClick}
+				>
+					Delete
+				</Button>
+			</div>
+		</Portal>
 	);
 }
 
