@@ -20,15 +20,15 @@ export function App() {
 	const [loading, setLoading] = useState(true);
 
 	useKeyDown(
-		typeof document !== "undefined" ? document.body : null,
+		document.body,
 		["n", "i"],
-		(keys) => {
-			if (keys === "n") {
+		({ key }) => {
+			if (key === "n") {
 				addNode("note");
 				return;
 			}
 
-			if (keys === "i") {
+			if (key === "i") {
 				addNode("image");
 				return;
 			}

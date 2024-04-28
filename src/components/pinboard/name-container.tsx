@@ -30,7 +30,7 @@ export function NameContainer() {
 		setName(event.target.value);
 	}
 
-	useKeyDown(inputRef, ["Enter", "Escape"], (key) => {
+	useKeyDown(inputRef, ["Enter", "Escape"], ({ key }) => {
 		if (key === "Enter") {
 			setEditing(true);
 			return;

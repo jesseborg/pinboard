@@ -6,10 +6,16 @@ type UseKeyDownOptions = {
 	ignoreWhileInput?: boolean;
 };
 
-export function useKeyDown<K extends string, T extends HTMLElement>(
-	ref: MutableRefObject<T | null> | T | null,
+type SelectorType =
+	| MutableRefObject<HTMLElement | null>
+	| HTMLElement
+	| null
+	| string;
+
+export function useKeyDown<K extends string>(
+	ref: SelectorType,
 	keys: K | Array<K>,
-	callback?: (key: K) => void,
+	callback?: (event: { key: K; element: HTMLElement }) => void,
 	options?: UseKeyDownOptions | null,
 	deps?: DependencyList
 ) {
@@ -36,7 +42,11 @@ export function useKeyDown<K extends string, T extends HTMLElement>(
 				return;
 			}
 
-			callback?.(event.key as K);
+			callback?.({
+				key: event.key as K,
+				// element will never be null here
+				element: element as HTMLElement,
+			});
 			setKeyDown(true);
 		}
 
@@ -44,15 +54,32 @@ export function useKeyDown<K extends string, T extends HTMLElement>(
 			setKeyDown(false);
 		}
 
-		const element = ref instanceof HTMLElement ? ref : ref?.current;
-		element?.addEventListener("keydown", handleKeyDown);
-		element?.addEventListener("keyup", handleKeyUp);
+		const element = getElement(ref);
+
+		if (!element) {
+			return;
+		}
+
+		element.addEventListener("keydown", handleKeyDown);
+		element.addEventListener("keyup", handleKeyUp);
 
 		return () => {
-			element?.removeEventListener("keydown", handleKeyDown);
-			element?.removeEventListener("keyup", handleKeyUp);
+			element.removeEventListener("keydown", handleKeyDown);
+			element.removeEventListener("keyup", handleKeyUp);
 		};
 	}, [keys, callback, ref, deps, options]);
 
 	return keyDown;
+}
+
+function getElement(ref: SelectorType) {
+	if (typeof ref === "string") {
+		return document.querySelector(ref) as HTMLElement | null;
+	}
+
+	if (ref && "current" in ref) {
+		return ref.current;
+	}
+
+	return ref;
 }

@@ -7,13 +7,7 @@ import {
 	useSelectedNodeId,
 } from "@/stores/use-nodes-store";
 import { usePinBoardTransform } from "@/stores/use-pinboard-store";
-import {
-	HTMLAttributes,
-	PropsWithChildren,
-	useEffect,
-	useMemo,
-	useRef,
-} from "react";
+import { HTMLAttributes, PropsWithChildren, useEffect, useMemo } from "react";
 import { Button } from "../primitives/button";
 import { Portal } from "../primitives/portal";
 
@@ -83,15 +77,11 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 	const { removeNode } = useNodesActions();
 	const { deleteById } = useIndexedDB<Blob>("images");
 
-	const ref = useRef<HTMLDivElement | null>(null);
-
 	useKeyDown(
-		ref,
+		"#node-toolbar",
 		["ArrowLeft", "ArrowRight"],
-		(key) => {
-			const children = Array.from(ref.current?.childNodes ?? []).filter(
-				isButton
-			);
+		({ key, element }) => {
+			const children = Array.from(element.childNodes ?? []).filter(isButton);
 			const index = children.indexOf(
 				document.activeElement! as HTMLButtonElement
 			);
@@ -103,9 +93,7 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 			if (key === "ArrowRight") {
 				children.at(index - 1)?.focus();
 			}
-		},
-		null,
-		[ref]
+		}
 	);
 
 	async function handleDeleteClick() {
@@ -124,8 +112,9 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 	);
 
 	return (
-		<Portal ref={ref} asChild>
+		<Portal asChild>
 			<div
+				id="node-toolbar"
 				style={{
 					transform: `translate(calc(${pos.x}px - 50%),${pos.y}px)`,
 				}}

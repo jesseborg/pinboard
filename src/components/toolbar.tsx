@@ -1,6 +1,6 @@
 import { useKeyDown } from "@/hooks/use-keydown";
 import { useNodesActions } from "@/stores/use-nodes-store";
-import { PropsWithChildren, ReactNode, useRef } from "react";
+import { PropsWithChildren, ReactNode } from "react";
 import { nodeTypes } from "../app";
 import { ImageIcon } from "./icons/image-icon";
 import { NoteIcon } from "./icons/note-icon";
@@ -10,34 +10,26 @@ import * as ToolTipPrimitive from "./primitives/tooltip";
 export function ToolBar() {
 	const { addNode } = useNodesActions<typeof nodeTypes>();
 
-	const ref = useRef<HTMLDivElement | null>(null);
+	useKeyDown("#toolbar", ["ArrowDown", "ArrowUp"], ({ key, element }) => {
+		const children = Array.from(
+			(element.childNodes as NodeListOf<HTMLElement>) ?? []
+		);
+		const index = children.indexOf(document.activeElement! as HTMLElement);
 
-	useKeyDown(
-		ref,
-		["ArrowDown", "ArrowUp"],
-		(key) => {
-			const children = Array.from(
-				(ref.current?.childNodes as NodeListOf<HTMLElement>) ?? []
-			);
-			const index = children.indexOf(document.activeElement! as HTMLElement);
+		if (key === "ArrowDown") {
+			children.at(-(index + 1))?.focus();
+		}
 
-			if (key === "ArrowDown") {
-				children.at(-(index + 1))?.focus();
-			}
-
-			if (key === "ArrowUp") {
-				children.at(index - 1)?.focus();
-			}
-		},
-		null,
-		[ref]
-	);
+		if (key === "ArrowUp") {
+			children.at(index - 1)?.focus();
+		}
+	});
 
 	return (
 		<ToolTipPrimitive.Provider>
 			<div className="absolute z-20 text-white pl-6 flex top-1/2 -translate-y-1/2">
 				<div
-					ref={ref}
+					id="toolbar"
 					className="flex gap-1.5 flex-col bg-black p-1.5 rounded-md"
 				>
 					<ToolTip
