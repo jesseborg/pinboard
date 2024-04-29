@@ -2,7 +2,7 @@ import useDrag from "@/hooks/use-drag";
 import { useIndexedDB } from "@/hooks/use-indexed-db";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { useMouseWheel } from "@/hooks/use-mouse-wheel";
-import { cn, round } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import {
 	Node,
 	Nodes,
@@ -24,10 +24,7 @@ type PinBoardProps = {
 	onNodesChange?: (nodes: Nodes) => void;
 };
 
-export function PinBoard({
-	children,
-	...props
-}: PropsWithChildren<PinBoardProps>) {
+function PinBoard({ children, ...props }: PropsWithChildren<PinBoardProps>) {
 	const hydrated = usePinBoardHydrated();
 
 	if (!hydrated) {
@@ -38,7 +35,7 @@ export function PinBoard({
 }
 
 const MIN_DRAG_DISTANCE = 3;
-const SCALE_FACTOR = 1.1;
+const SCALE_FACTOR = 0.04;
 
 function DraggablePinBoard({
 	children,
@@ -78,11 +75,9 @@ function DraggablePinBoard({
 			}
 
 			const direction = event.deltaY > 0 ? -1 : 1;
-			const scale = round(
-				Math.max(
-					0.02,
-					Math.min(transform.scale * Math.pow(SCALE_FACTOR, direction), 256)
-				)
+			const scale = Math.max(
+				0.02,
+				Math.min(transform.scale * Math.pow(1 + SCALE_FACTOR, direction), 256)
 			);
 
 			// https://stackoverflow.com/a/45068045
@@ -311,3 +306,5 @@ const MemoNodes = memo(({ nodes, nodeTypes }: PinBoardProps) => {
 	);
 });
 MemoNodes.displayName = "MemoNodes";
+
+export default memo(PinBoard);

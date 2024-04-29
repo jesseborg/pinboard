@@ -1,6 +1,7 @@
 import { usePinBoardTransform } from "@/stores/use-pinboard-store";
+import { memo } from "react";
 
-export function Background() {
+function Background() {
 	const transform = usePinBoardTransform();
 
 	const gap = 10;
@@ -45,3 +46,5 @@ export function Background() {
 		</span>
 	);
 }
+
+export default memo(Background);
