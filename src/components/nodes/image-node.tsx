@@ -144,7 +144,11 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 
 					{hasImage && (
 						<div className="space-y-2">
-							<img src={url} alt="image" className="rounded-md mx-auto" />
+							<img
+								src={url}
+								alt="image"
+								className="rounded-md mx-auto w-full"
+							/>
 							<div className="flex gap-2">
 								<Button
 									formMethod="dialog"
