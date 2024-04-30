@@ -141,12 +141,6 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 	function handleFocusNode(element: HTMLDivElement) {
 		setSelectedNodeId(node.id);
 		onFocus?.(element);
-
-		const pinboard = document.getElementById("pinboard");
-		if (pinboard) {
-			pinboard.scrollLeft = 0;
-			pinboard.scrollTop = 0;
-		}
 	}
 
 	return (

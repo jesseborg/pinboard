@@ -20,6 +20,10 @@
 	user-select: none;
 }
 
+html {
+	@apply fixed top-0 left-0;
+}
+
 body,
 main {
 	@apply font-mono;
