@@ -11,6 +11,7 @@ export type Size = {
 
 export type NodeProps = {
 	id: string;
+	index: number;
 	position: Point;
 	size: Size;
 	type: string;

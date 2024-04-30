@@ -129,7 +129,7 @@ function DraggablePinBoard({
 type NodeRendererProps = {
 	node: Node;
 	nodeTypes: NodeTypes;
-	onFocus: (element: HTMLDivElement) => void;
+	onFocus?: (element: HTMLDivElement) => void;
 };
 function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 	const handleRef = useRef<NodeHandle>(null);
@@ -153,11 +153,11 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 			id={node.id}
 			style={{
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
+				zIndex: node.index,
 			}}
 			className="absolute origin-top-left"
 			onDoubleClick={() => handleRef.current?.onDoubleClick()}
-			onClick={(e) => handleFocusNode(e.target as HTMLDivElement)}
-			onFocus={(e) => handleFocusNode(e.currentTarget)}
+			onFocus={(e) => handleFocusNode(e.target)}
 		>
 			<Node handleRef={handleRef} node={node} />
 		</div>
@@ -269,24 +269,30 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	}, [bind.ref, transform, setNode]);
 
 	return (
-		<div
-			{...bind}
-			// style={{ transform: `translate(${x}px, ${y}px)` }}
-			className="nodes pointer-events-none relative z-10"
-		>
+		<div {...bind} className="nodes pointer-events-none relative z-10">
 			<MemoNodes nodes={nodes} nodeTypes={nodeTypes} />
 		</div>
 	);
 }
 
-let lastIndex = 0;
 const MemoNodes = memo(({ nodes, nodeTypes }: PinBoardProps) => {
-	function bringToFront(target: HTMLElement) {
-		target.style.zIndex = `${lastIndex++}`;
-	}
+	const { setNodes } = useNodesActions();
 
-	function handleNodeFocus(target: HTMLElement) {
-		bringToFront(target);
+	function handleNodeFocus(node: Node) {
+		// hmm... good for now, i guess 😬
+		setNodes(
+			nodes.map((n) => {
+				if (n.id === node.id) {
+					return { ...n, index: nodes.length };
+				}
+
+				if (n.index >= node.index) {
+					return { ...n, index: n.index - 1 };
+				}
+
+				return n;
+			})
+		);
 	}
 
 	return (
@@ -296,7 +302,7 @@ const MemoNodes = memo(({ nodes, nodeTypes }: PinBoardProps) => {
 					key={node.id}
 					node={node}
 					nodeTypes={nodeTypes}
-					onFocus={handleNodeFocus}
+					onFocus={() => handleNodeFocus(node)}
 				/>
 			))}
 		</>
