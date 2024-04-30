@@ -6,16 +6,18 @@ type UseKeyDownOptions = {
 	ignoreWhileInput?: boolean;
 };
 
-type SelectorType =
-	| MutableRefObject<HTMLElement | null>
-	| HTMLElement
-	| null
-	| string;
+type SelectorType<T = HTMLElement | null> = MutableRefObject<T> | T | string;
+
+type CallbackProps<K> = {
+	key: K;
+	element: HTMLElement;
+	event: KeyboardEvent;
+};
 
 export function useKeyDown<K extends string>(
 	ref: SelectorType,
 	keys: K | Array<K>,
-	callback?: (event: { key: K; element: HTMLElement }) => void,
+	callback?: (event: CallbackProps<K>) => void,
 	options?: UseKeyDownOptions | null,
 	deps?: DependencyList
 ) {
@@ -46,6 +48,7 @@ export function useKeyDown<K extends string>(
 				key: event.key as K,
 				// element will never be null here
 				element: element as HTMLElement,
+				event,
 			});
 			setKeyDown(true);
 		}
