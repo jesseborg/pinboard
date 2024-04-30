@@ -10,6 +10,8 @@ import {
 	useSelectedNodeId,
 } from "@/stores/use-nodes-store";
 import {
+	calculateCenterPoint,
+	calculateScale,
 	usePinBoardActions,
 	usePinBoardHydrated,
 	usePinBoardTransform,
@@ -35,13 +37,12 @@ function PinBoard({ children, ...props }: PropsWithChildren<PinBoardProps>) {
 }
 
 const MIN_DRAG_DISTANCE = 3;
-const SCALE_FACTOR = 0.04;
 
 function DraggablePinBoard({
 	children,
 	...props
 }: PropsWithChildren<PinBoardProps>) {
-	const { setTransform } = usePinBoardActions();
+	const { setTransform, zoomReset } = usePinBoardActions();
 	const { setSelectedNodeId } = useNodesActions();
 
 	const transform = usePinBoardTransform();
@@ -68,35 +69,37 @@ function DraggablePinBoard({
 
 	const isPanning = useKeyDown(document.body, " ");
 
+	useKeyDown(
+		document.body,
+		"0",
+		({ event }) => {
+			if (!event.ctrlKey && !event.metaKey) {
+				return;
+			}
+			zoomReset();
+		},
+		{ ignoreWhileInput: true }
+	);
+
 	useMouseWheel(
 		(event) => {
+			if (!event.ctrlKey && !event.metaKey) {
+				return;
+			}
+
 			if (event.deltaY === 0) {
 				return;
 			}
 
-			const direction = event.deltaY > 0 ? -1 : 1;
-			const scale = Math.max(
-				0.02,
-				Math.min(transform.scale * Math.pow(1 + SCALE_FACTOR, direction), 256)
+			const scale = calculateScale(transform.scale, event.deltaY > 0 ? -1 : 1);
+			const { x, y } = calculateCenterPoint(
+				transform,
+				{ x: event.clientX, y: event.clientY },
+				scale
 			);
-
-			// https://stackoverflow.com/a/45068045
-			const ratio = 1 - scale / transform.scale;
-
-			if (ratio === 1 || ratio === 0.99) {
-				return;
-			}
-
-			const x = transform.x + (event.clientX - transform.x) * ratio;
-			const y = transform.y + (event.clientY - transform.y) * ratio;
-
-			setTransform({
-				x,
-				y,
-				scale,
-			});
+			setTransform({ x, y, scale });
 		},
-		{ ctrlKey: true, preventDefault: true },
+		{ preventDefault: true },
 		[transform]
 	);
 

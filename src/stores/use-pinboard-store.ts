@@ -12,10 +12,35 @@ export type PinBoardState = {
 
 type PinBoardStore = PinBoardState & {
 	actions: {
+		zoomReset: () => void;
 		setTransform: (transform: Partial<Transform>) => void;
 		setName: (name: string) => void;
 	};
 };
+
+const SCALE_MIN = 0.02;
+const SCALE_MAX = 256;
+const SCALE_FACTOR = 0.04;
+
+export function calculateScale(scale: number, direction: 1 | -1) {
+	return Math.max(
+		SCALE_MIN,
+		Math.min(scale * Math.pow(1 + SCALE_FACTOR, direction), SCALE_MAX)
+	);
+}
+
+export function calculateCenterPoint(
+	transform: Transform,
+	screenPos: Point,
+	scale: number = 1
+): Point {
+	// https://stackoverflow.com/a/45068045
+	const ratio = 1 - scale / transform.scale;
+	return {
+		x: transform.x + (screenPos.x - transform.x) * ratio,
+		y: transform.y + (screenPos.y - transform.y) * ratio,
+	};
+}
 
 const initialState: PinBoardState = {
 	transform: {
@@ -31,6 +56,25 @@ export const usePinBoardStore = create(
 		(set) => ({
 			...initialState,
 			actions: {
+				zoomReset: () =>
+					set((state) => {
+						if (state.transform.scale === 1) {
+							return state;
+						}
+
+						const { x, y } = calculateCenterPoint(state.transform, {
+							x: document.body.clientWidth / 2,
+							y: document.body.clientHeight / 2,
+						});
+
+						return {
+							transform: {
+								x,
+								y,
+								scale: initialState.transform.scale,
+							},
+						};
+					}),
 				setTransform: (transform) =>
 					set((state) => ({
 						transform: {
