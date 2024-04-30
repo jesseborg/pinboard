@@ -35,6 +35,10 @@ main {
 	overflow: hidden;
 }
 
+img {
+	max-width: none;
+}
+
 .top-left {
 	@apply top-0 left-0;
 }
