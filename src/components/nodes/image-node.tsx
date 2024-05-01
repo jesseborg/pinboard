@@ -89,22 +89,26 @@ type EditDialogProps = {
 	node: ImageNodeProps;
 	onClose: (event: FormEvent, submit?: boolean) => void;
 } & Omit<DialogProps, "onClose">;
+
 function EditDialog({ node, onClose }: EditDialogProps) {
 	const { setNode } = useNodesActions();
 	const { addOrUpdate } = useIndexedDB<Blob>("images");
 
-	const [url, setURL] = useState<string | null>(null);
+	const [image, setImage] = useState<HTMLImageElement | null>(null);
 
-	const hasImage = url !== null;
+	async function fetchImage(url: string) {
+		setImage(await preloadImage(url));
+	}
 
 	async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 		event?.preventDefault();
 
-		// preload image to get width and height
-		const img = await preloadImage(url!);
+		if (!image) {
+			return;
+		}
 
 		// fetch image and get blob data
-		const response = await fetch(img.src);
+		const response = await fetch(image.src);
 		const blob = await response.blob();
 
 		// add image blob to indexedDB
@@ -112,21 +116,26 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 
 		// update node data
 		setNode<ImageNodeProps>(node.id, {
-			size: { width: img.width, height: img.height },
-			data: { src: URL.createObjectURL(blob) },
+			size: { width: image.naturalWidth, height: image.naturalHeight },
+			data: { src: image.src },
 		});
 
 		onClose?.(event, true);
 	}
 
 	function handleResetForm() {
-		setURL(null);
+		if (!image) {
+			return;
+		}
+
+		URL.revokeObjectURL(image.src);
+		setImage(null);
 	}
 
 	return (
 		<Portal>
 			<Dialog
-				onClose={(e) => onClose?.(e)}
+				onClose={onClose}
 				className="rounded-md bg-white shadow-3xl backdrop:bg-black/50 pointer-events-auto"
 			>
 				<form
@@ -134,21 +143,25 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 					onSubmit={handleSubmit}
 					className="p-4 text-xs bg-white space-y-4 w-80"
 				>
-					{!hasImage && (
+					{!image && (
 						<>
-							<ImageUploadInput onChange={setURL} />
+							<ImageUploadInput onChange={fetchImage} />
 							<p className="text-center">or</p>
-							<ImageURLInput onChange={setURL} />
+							<ImageURLInput onChange={fetchImage} />
 						</>
 					)}
 
-					{hasImage && (
+					{image && (
 						<div className="space-y-2">
 							<img
-								src={url}
+								id="img"
+								src={image.src}
 								alt="image"
 								className="rounded-md mx-auto w-full"
 							/>
+							<div>
+								w:{image.naturalWidth} x h:{image.naturalHeight}
+							</div>
 							<div className="flex gap-2">
 								<Button
 									formMethod="dialog"
