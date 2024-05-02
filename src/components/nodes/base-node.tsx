@@ -63,18 +63,6 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 	const { removeNode } = useNodesActions();
 	const { deleteById } = useIndexedDB<Blob>("images");
 
-	const nodeElement = useMemo(() => document.getElementById(node.id)!, []);
-
-	const pos = {
-		x:
-			transform.x +
-			(node.position.x + nodeElement.clientWidth / 2) * transform.scale,
-		y:
-			transform.y +
-			(node.position.y + nodeElement.clientHeight) * transform.scale +
-			TOOLBAR_PADDING,
-	};
-
 	useKeyDown(
 		"#node-toolbar",
 		["ArrowLeft", "ArrowRight"],
@@ -98,6 +86,22 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 		deleteById(node.id);
 		removeNode(node.id);
 	}
+
+	const nodeElement = useMemo(() => document.getElementById(node.id)!, []);
+
+	if (!nodeElement) {
+		return null;
+	}
+
+	const pos = {
+		x:
+			transform.x +
+			(node.position.x + nodeElement.clientWidth / 2) * transform.scale,
+		y:
+			transform.y +
+			(node.position.y + nodeElement.clientHeight) * transform.scale +
+			TOOLBAR_PADDING,
+	};
 
 	return (
 		<Portal asChild>
