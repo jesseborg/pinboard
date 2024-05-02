@@ -7,7 +7,7 @@ import {
 	useSelectedNodeId,
 } from "@/stores/use-nodes-store";
 import { usePinBoardTransform } from "@/stores/use-pinboard-store";
-import { HTMLAttributes, PropsWithChildren, useEffect, useMemo } from "react";
+import { HTMLAttributes, PropsWithChildren, useMemo } from "react";
 import { Button } from "../primitives/button";
 import { Portal } from "../primitives/portal";
 
@@ -26,22 +26,8 @@ export function BaseNode({
 }: PropsWithChildren<BaseNodeProps & HTMLAttributes<HTMLDivElement>>) {
 	const transform = usePinBoardTransform();
 	const selectedNodeId = useSelectedNodeId();
-	const { setNode } = useNodesActions();
 
 	const selected = node?.id === selectedNodeId;
-
-	useEffect(() => {
-		const element = document.getElementById(node.id);
-
-		if (!element) {
-			return;
-		}
-
-		setNode(node.id, {
-			size: { width: element.clientWidth, height: element.clientHeight },
-		});
-	}, []);
-
 	return (
 		<>
 			<div
@@ -55,7 +41,7 @@ export function BaseNode({
 					"ring-2 ring-black bg-white relative shadow-[2px_2px_0_2px] shadow-black z-0",
 					className,
 					{
-						"outline outline-2 outline-blue-500 z-50": selected,
+						"outline outline-2 outline-blue-500 z-40": selected,
 					}
 				)}
 			>
@@ -76,6 +62,18 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 	const transform = usePinBoardTransform();
 	const { removeNode } = useNodesActions();
 	const { deleteById } = useIndexedDB<Blob>("images");
+
+	const nodeElement = useMemo(() => document.getElementById(node.id)!, []);
+
+	const pos = {
+		x:
+			transform.x +
+			(node.position.x + nodeElement.clientWidth / 2) * transform.scale,
+		y:
+			transform.y +
+			(node.position.y + nodeElement.clientHeight) * transform.scale +
+			TOOLBAR_PADDING,
+	};
 
 	useKeyDown(
 		"#node-toolbar",
@@ -100,16 +98,6 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 		deleteById(node.id);
 		removeNode(node.id);
 	}
-
-	const pos = useMemo(
-		() => ({
-			// prettier-ignore
-			x: transform.x + (node.position.x * transform.scale) + (node.size.width * transform.scale) / 2,
-			// prettier-ignore
-			y: (transform.y + (node.position.y * transform.scale) + node.size.height * transform.scale) + TOOLBAR_PADDING,
-		}),
-		[transform, node]
-	);
 
 	return (
 		<Portal asChild>

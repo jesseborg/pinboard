@@ -4,6 +4,10 @@ import { ComponentProps } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+type RecursivePartial<T> = {
+	[P in keyof T]?: RecursivePartial<T[P]>;
+};
+
 export type Node<T extends NodeProps<any, any> = NodeProps<string, any>> = T;
 
 export type NodesState = {
@@ -14,7 +18,7 @@ export type NodesState = {
 type NodeActions<T extends NodeTypes> = {
 	setNode: <N extends NodeProps<string, any>>(
 		id: string,
-		node: Partial<N>
+		node: RecursivePartial<N>
 	) => void;
 	setNodes: (nodes: Array<Node>) => void;
 	removeNode: (id: string) => void;
@@ -40,10 +44,13 @@ const useNodesStore = create(
 		(set) => ({
 			...initialState,
 			actions: {
-				setNode: (id, data) =>
+				setNode: (id, node) =>
 					set((state) => ({
-						nodes: state.nodes.map((node) => {
-							return node.id === id ? { ...node, ...data } : node;
+						nodes: state.nodes.map((n) => {
+							if (n.id == id) {
+								return { ...n, ...node, data: { ...n.data, ...node.data } };
+							}
+							return n;
 						}),
 					})),
 				setNodes: (nodes) => set({ nodes }),

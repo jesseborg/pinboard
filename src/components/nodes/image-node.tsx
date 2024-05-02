@@ -67,6 +67,14 @@ export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 				<Image node={node} />
 			</BaseNode>
 
+			{/* Alt text tag */}
+			{node.data?.alt && (
+				<div style={{ maxWidth: node.size.width }} className="px-2">
+					<p className="bg-black text-center w-fit relative text-white px-4 mx-auto py-2 z-50 break-words -mt-4">
+						{node.data.alt}
+					</p>
+				</div>
+			)}
 			{editing && <EditDialog node={node} onClose={handleDialogClose} />}
 		</>
 	);
@@ -74,7 +82,7 @@ export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 export const ImageNode = memo(BaseImageNode);
 
 function Image({ node }: { node: ImageNodeProps }) {
-	if (!node.data) {
+	if (!node.data || !node.size) {
 		return (
 			<div className="size-64 flex items-center justify-center">
 				<ImageIcon className="w-12 h-12" />
@@ -144,6 +152,10 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 		setImage(null);
 	}
 
+	function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
+		setNode<ImageNodeProps>(node.id, { data: { alt: event.target.value } });
+	}
+
 	return (
 		<Portal>
 			<Dialog
@@ -179,7 +191,11 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 								{image?.naturalHeight}px
 								<span className="text-neutral-400">(above not to scale)</span>
 							</div>
-
+							<textarea
+								className="ring-1 ring-neutral-400 rounded-md w-full"
+								value={node.data?.alt}
+								onChange={handleChange}
+							/>
 							<div className="flex gap-2">
 								{!hasMatchingImages && (
 									<Button
