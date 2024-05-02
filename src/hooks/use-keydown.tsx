@@ -25,6 +25,10 @@ export function useKeyDown<K extends string>(
 
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
+			if (document.querySelector("dialog[open]")) {
+				return;
+			}
+
 			// Handle single keys
 			if (typeof keys === "string" && event.key !== keys) {
 				return;
