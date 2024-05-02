@@ -1,4 +1,5 @@
 import { Point } from "@/components/pinboard/types";
+import { viewportCenter } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -12,6 +13,8 @@ export type PinBoardState = {
 
 type PinBoardStore = PinBoardState & {
 	actions: {
+		zoomIn: () => void;
+		zoomOut: () => void;
 		zoomReset: () => void;
 		setTransform: (transform: Partial<Transform>) => void;
 		setName: (name: string) => void;
@@ -20,26 +23,34 @@ type PinBoardStore = PinBoardState & {
 
 const SCALE_MIN = 0.02;
 const SCALE_MAX = 256;
-const SCALE_FACTOR = 0.04;
+const SCALE_FACTOR_WHEEL = 0.04;
+const SCALE_FACTOR_CLICK = 1;
 
-export function calculateScale(scale: number, direction: 1 | -1) {
+function calculateScale(
+	scale: number,
+	direction: -1 | 0 | 1 = 0,
+	factor: number = SCALE_FACTOR_WHEEL
+) {
 	return Math.max(
 		SCALE_MIN,
-		Math.min(scale * Math.pow(1 + SCALE_FACTOR, direction), SCALE_MAX)
+		Math.min(scale * Math.pow(1 + factor, direction), SCALE_MAX)
 	);
 }
 
-export function calculateCenterPoint(
+export function calculateTransform(
 	transform: Transform,
-	screenPos: Point,
-	scale: number = 1
-): Point {
-	// https://stackoverflow.com/a/45068045
+	screenPos: Point = viewportCenter(),
+	direction: -1 | 0 | 1 = 0,
+	scaleFactor?: number,
+	scale: number = calculateScale(transform.scale, direction, scaleFactor)
+) {
 	const ratio = 1 - scale / transform.scale;
-	return {
+	const { x, y } = {
 		x: transform.x + (screenPos.x - transform.x) * ratio,
 		y: transform.y + (screenPos.y - transform.y) * ratio,
 	};
+
+	return { x, y, scale };
 }
 
 const initialState: PinBoardState = {
@@ -56,23 +67,38 @@ export const usePinBoardStore = create(
 		(set) => ({
 			...initialState,
 			actions: {
+				zoomIn: () =>
+					set((state) => ({
+						transform: calculateTransform(
+							state.transform,
+							viewportCenter(),
+							1,
+							SCALE_FACTOR_CLICK
+						),
+					})),
+				zoomOut: () =>
+					set((state) => ({
+						transform: calculateTransform(
+							state.transform,
+							viewportCenter(),
+							-1,
+							SCALE_FACTOR_CLICK
+						),
+					})),
 				zoomReset: () =>
 					set((state) => {
 						if (state.transform.scale === 1) {
 							return state;
 						}
 
-						const { x, y } = calculateCenterPoint(state.transform, {
-							x: document.body.clientWidth / 2,
-							y: document.body.clientHeight / 2,
-						});
-
 						return {
-							transform: {
-								x,
-								y,
-								scale: initialState.transform.scale,
-							},
+							transform: calculateTransform(
+								state.transform,
+								viewportCenter(),
+								0,
+								SCALE_FACTOR_WHEEL,
+								initialState.transform.scale
+							),
 						};
 					}),
 				setTransform: (transform) =>

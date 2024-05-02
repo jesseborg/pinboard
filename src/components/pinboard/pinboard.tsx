@@ -9,8 +9,7 @@ import {
 	useSelectedNodeId,
 } from "@/stores/use-nodes-store";
 import {
-	calculateCenterPoint,
-	calculateScale,
+	calculateTransform,
 	usePinBoardActions,
 	usePinBoardHydrated,
 	usePinBoardTransform,
@@ -41,7 +40,7 @@ function DraggablePinBoard({
 	children,
 	...props
 }: PropsWithChildren<PinBoardProps>) {
-	const { setTransform, zoomReset } = usePinBoardActions();
+	const { setTransform, zoomIn, zoomOut, zoomReset } = usePinBoardActions();
 	const { setSelectedNodeId } = useNodesActions();
 
 	const transform = usePinBoardTransform();
@@ -70,12 +69,25 @@ function DraggablePinBoard({
 
 	useKeyDown(
 		document.body,
-		"0",
-		({ event }) => {
+		["0", "-", "="],
+		({ key, event }) => {
+			event.preventDefault();
+
 			if (!event.ctrlKey && !event.metaKey) {
 				return;
 			}
-			zoomReset();
+
+			switch (key) {
+				case "0":
+					zoomReset();
+					break;
+				case "-":
+					zoomOut();
+					break;
+				case "=":
+					zoomIn();
+					break;
+			}
 		},
 		{ ignoreWhileInput: true }
 	);
@@ -90,13 +102,13 @@ function DraggablePinBoard({
 				return;
 			}
 
-			const scale = calculateScale(transform.scale, event.deltaY > 0 ? -1 : 1);
-			const { x, y } = calculateCenterPoint(
-				transform,
-				{ x: event.clientX, y: event.clientY },
-				scale
+			setTransform(
+				calculateTransform(
+					transform,
+					{ x: event.clientX, y: event.clientY },
+					event.deltaY > 0 ? -1 : 1
+				)
 			);
-			setTransform({ x, y, scale });
 		},
 		{ preventDefault: true },
 		[transform]

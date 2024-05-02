@@ -38,3 +38,7 @@ export function round(value: number, precision: number = 2) {
 		Math.pow(10, precision)
 	);
 }
+
+export function viewportCenter() {
+	return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+}
