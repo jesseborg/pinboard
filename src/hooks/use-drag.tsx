@@ -72,6 +72,7 @@ type UseDragReturnProps<T extends HTMLElement> = {
 	>;
 	target: React.MutableRefObject<HTMLElement | null>;
 	offset: Tuple<number>;
+	isDown?: boolean;
 };
 
 function useDrag<T extends HTMLElement>(
@@ -85,7 +86,7 @@ function useDrag<T extends HTMLElement>(
 	const dragTarget = useRef<HTMLElement | null>(null);
 
 	// Pressed state of the pointer
-	const [down, setDown] = useState(false);
+	const [isDown, setIsDown] = useState(false);
 
 	// Initial position of the pointer when the gesture started
 	const [pointerInitial, setPointerInitial] = useState<Tuple<number>>([0, 0]);
@@ -139,7 +140,7 @@ function useDrag<T extends HTMLElement>(
 				updateOffsetInitial(options?.initialPosition ?? offset);
 			}
 
-			setDown(true);
+			setIsDown(true);
 
 			options?.onDragStart?.({
 				event,
@@ -160,7 +161,7 @@ function useDrag<T extends HTMLElement>(
 				return;
 			}
 
-			if (down) {
+			if (isDown) {
 				const { movement, offset, gridOffset } = calculateOffsets(
 					event,
 					pointerInitial,
@@ -182,7 +183,7 @@ function useDrag<T extends HTMLElement>(
 				});
 			}
 		},
-		[down, initialOffset, onDrag, options, pointerInitial]
+		[isDown, initialOffset, onDrag, options, pointerInitial]
 	);
 
 	const onPointerUp = useCallback(
@@ -199,7 +200,7 @@ function useDrag<T extends HTMLElement>(
 			);
 
 			dragTarget.current = null;
-			setDown(false);
+			setIsDown(false);
 
 			options?.onDragEnd?.({
 				event,
@@ -257,6 +258,7 @@ function useDrag<T extends HTMLElement>(
 		bind: { ref, onPointerDown: handleMouseEvent },
 		target: dragTarget,
 		offset,
+		isDown,
 	};
 }
 

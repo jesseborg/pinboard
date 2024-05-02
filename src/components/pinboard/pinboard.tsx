@@ -45,7 +45,7 @@ function DraggablePinBoard({
 
 	const transform = usePinBoardTransform();
 
-	const { bind } = useDrag<HTMLDivElement>(
+	const { bind, isDown } = useDrag<HTMLDivElement>(
 		({ movement: [mx, my], initialOffset: [ox, oy] }) => {
 			setTransform({ x: ox + mx, y: oy + my });
 		},
@@ -120,6 +120,7 @@ function DraggablePinBoard({
 			id="pinboard"
 			className={cn("pinboard w-full h-full", {
 				"cursor-grab [&_*]:!pointer-events-none": isPanning,
+				"cursor-grabbing": isDown,
 			})}
 		>
 			<div
