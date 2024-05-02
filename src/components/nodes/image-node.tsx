@@ -24,6 +24,7 @@ export type ImageNodeProps = NodeProps<
 	{
 		src: string;
 		alt?: string;
+		showAlt?: boolean;
 	}
 >;
 
@@ -68,7 +69,7 @@ export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 			</BaseNode>
 
 			{/* Alt text tag */}
-			{node.data?.alt && (
+			{node.data?.showAlt && node.data?.alt && (
 				<div style={{ maxWidth: node.size.width }} className="px-2">
 					<p className="bg-black text-center w-fit relative text-white px-4 mx-auto py-2 z-50 break-words -mt-4">
 						{node.data.alt}
@@ -152,8 +153,14 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 		setImage(null);
 	}
 
-	function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
+	function handleAltTextChange(event: ChangeEvent<HTMLTextAreaElement>) {
 		setNode<ImageNodeProps>(node.id, { data: { alt: event.target.value } });
+	}
+
+	function handleCheckboxChange(event: ChangeEvent<HTMLInputElement>) {
+		setNode<ImageNodeProps>(node.id, {
+			data: { showAlt: event.target.checked },
+		});
 	}
 
 	return (
@@ -191,11 +198,32 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 								{image?.naturalHeight}px
 								<span className="text-neutral-400">(above not to scale)</span>
 							</div>
-							<textarea
-								className="ring-1 ring-neutral-400 rounded-md w-full"
-								value={node.data?.alt}
-								onChange={handleChange}
-							/>
+							<div className="space-y-1">
+								<div className="flex w-full">
+									<label htmlFor="alt" className="flex-1">
+										Image Description
+									</label>
+									<div className="flex items-center gap-2">
+										<input
+											className="accent-black"
+											id="showAlt"
+											type="checkbox"
+											value="showAlt"
+											checked={node.data?.showAlt}
+											onChange={handleCheckboxChange}
+										/>
+										<label htmlFor="showAlt">Visible</label>
+									</div>
+								</div>
+								<textarea
+									id="alt"
+									rows={2}
+									className="ring-1 ring-neutral-400 rounded-md w-full p-2 min-h-[48px]"
+									value={node.data?.alt}
+									placeholder="image description"
+									onChange={handleAltTextChange}
+								/>
+							</div>
 							<div className="flex gap-2">
 								{!hasMatchingImages && (
 									<Button
@@ -213,7 +241,7 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 										className="w-full"
 										onClick={() => setImage(null)}
 									>
-										Edit
+										Replace
 									</Button>
 								)}
 								<Button
