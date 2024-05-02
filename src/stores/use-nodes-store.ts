@@ -4,28 +4,31 @@ import { ComponentProps } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type Node<T extends NodeProps = NodeProps> = T;
-export type Nodes = Array<Node>;
+export type Node<T extends NodeProps<any, any> = NodeProps<string, any>> = T;
 
 export type NodesState = {
-	nodes: Nodes;
+	nodes: Array<Node>;
 	selectedNodeId: string | null;
 };
 
-type NodeActions<T extends NodeTypes<NodeProps> = {}> = {
-	setNode: <N extends NodeProps>(id: string, node: Partial<N>) => void;
-	setNodes: (nodes: Nodes) => void;
+type NodeActions<T extends NodeTypes> = {
+	setNode: <N extends NodeProps<string, any>>(
+		id: string,
+		node: Partial<N>
+	) => void;
+	setNodes: (nodes: Array<Node>) => void;
 	removeNode: (id: string) => void;
 	addNode: <K extends keyof T>(
 		type: K,
-		node?: Omit<NodeProps & ComponentProps<T[K]>["node"], "id" | "type">
+		node?: Omit<ComponentProps<T[K]>["node"], "id" | "type">
 	) => void;
 	setSelectedNodeId: (id: string | null) => void;
 };
 
-type NodesStore = NodesState & {
-	actions: NodeActions;
-};
+type NodesStore<T extends NodeTypes = NodeTypes<NodeProps<string, {}>>> =
+	NodesState & {
+		actions: NodeActions<T>;
+	};
 
 const initialState: NodesState = {
 	nodes: [],
@@ -57,7 +60,7 @@ const useNodesStore = create(
 								...node,
 								id: uuid4(),
 								type,
-							} as NodeProps,
+							} as NodeProps<typeof type, {}>,
 						],
 					})),
 				setSelectedNodeId: (id) => set({ selectedNodeId: id }),
@@ -77,5 +80,6 @@ export const useNodes = () => useNodesStore((state) => state.nodes);
 export const useSelectedNodeId = () =>
 	useNodesStore((state) => state.selectedNodeId);
 
-export const useNodesActions = <T extends NodeTypes = {}>() =>
-	useNodesStore((state) => state.actions as NodeActions<T>);
+export const useNodesActions = <
+	T extends NodeTypes = NodeTypes<NodeProps<string, {}>>
+>() => useNodesStore((state) => state.actions as NodeActions<T>);

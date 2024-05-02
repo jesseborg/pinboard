@@ -6,12 +6,12 @@ import { memo, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { CustomNodeProps, NodeProps } from "../pinboard/types";
 import { BaseNode } from "./base-node";
 
-export type NoteNodeProps = NodeProps & {
-	type: "note";
-	data: {
+export type NoteNodeProps = NodeProps<
+	"note",
+	{
 		label: string;
-	};
-};
+	}
+>;
 
 export function BaseNoteNode({
 	node,

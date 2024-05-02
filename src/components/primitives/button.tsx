@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import React, { forwardRef, HTMLAttributes, PropsWithChildren } from "react";
+import React, { HTMLAttributes, PropsWithChildren, forwardRef } from "react";
 
 const button = cva("button focus:ring-2 outline-none ring-white rounded-md", {
 	variants: {

@@ -19,26 +19,47 @@ import { Dialog, DialogProps } from "../primitives/dialog";
 import { Portal } from "../primitives/portal";
 import { BaseNode } from "./base-node";
 
-export type ImageNodeProps = NodeProps & {
-	type: "image";
-	data: {
+export type ImageNodeProps = NodeProps<
+	"image",
+	{
 		src: string;
 		alt?: string;
-	};
-};
+	}
+>;
 
 export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
-	const { removeNode } = useNodesActions();
+	const { removeNode, setNode } = useNodesActions();
+	const { getById } = useIndexedDB<Blob>("images");
 
 	const [editing, setEditing] = useState(!node.data);
 
-	function handleDialogClose(_: FormEvent, submit?: boolean) {
+	function handleDialogClose(submit?: boolean) {
 		setEditing(false);
 
 		if (!submit && !node.data) {
 			removeNode(node.id);
 		}
 	}
+
+	// On first render, create a url from the indexeddb blob and update the node
+	useEffect(() => {
+		async function getBlobData() {
+			if (!node.data) {
+				return;
+			}
+
+			if (node.data.src.startsWith("blob:")) {
+				URL.revokeObjectURL(node.data.src);
+			}
+
+			const blob = await getById(node.id);
+			setNode<ImageNodeProps>(node.id, {
+				data: { src: URL.createObjectURL(blob) },
+			});
+		}
+
+		getBlobData();
+	}, []);
 
 	return (
 		<>
@@ -53,20 +74,6 @@ export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 export const ImageNode = memo(BaseImageNode);
 
 function Image({ node }: { node: ImageNodeProps }) {
-	const { getById } = useIndexedDB<Blob>("images");
-
-	const [blobURL, setBlobURL] = useState<string | undefined>(undefined);
-
-	useEffect(() => {
-		if (!node.data) {
-			return;
-		}
-
-		getById(node.id).then((blob) => {
-			setBlobURL(URL.createObjectURL(blob));
-		});
-	}, [getById, node.id, node.data]);
-
 	if (!node.data) {
 		return (
 			<div className="size-64 flex items-center justify-center">
@@ -77,7 +84,7 @@ function Image({ node }: { node: ImageNodeProps }) {
 
 	return (
 		<img
-			src={blobURL}
+			src={node.data.src}
 			alt={node.data.alt}
 			width={node.size.width}
 			height={node.size.height}
@@ -87,14 +94,19 @@ function Image({ node }: { node: ImageNodeProps }) {
 
 type EditDialogProps = {
 	node: ImageNodeProps;
-	onClose: (event: FormEvent, submit?: boolean) => void;
+	onClose: (submit?: boolean) => void;
 } & Omit<DialogProps, "onClose">;
 
 function EditDialog({ node, onClose }: EditDialogProps) {
 	const { setNode } = useNodesActions();
 	const { addOrUpdate } = useIndexedDB<Blob>("images");
 
-	const [image, setImage] = useState<HTMLImageElement | null>(null);
+	const [image, setImage] = useState(
+		document.querySelector(`[id="${node.id}"] img`) as HTMLImageElement | null
+	);
+
+	// if image.src and node.src match, we're editing, otherwise we're submitting
+	const hasMatchingImages = image?.src === node.data?.src;
 
 	async function fetchImage(url: string) {
 		setImage(await preloadImage(url));
@@ -120,22 +132,22 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 			data: { src: image.src },
 		});
 
-		onClose?.(event, true);
+		onClose?.(true);
 	}
 
-	function handleResetForm() {
-		if (!image) {
+	function handleCancel() {
+		if (hasMatchingImages) {
+			onClose?.(false);
 			return;
 		}
 
-		URL.revokeObjectURL(image.src);
 		setImage(null);
 	}
 
 	return (
 		<Portal>
 			<Dialog
-				onClose={onClose}
+				onClose={() => onClose?.(false)}
 				className="rounded-md bg-white shadow-3xl backdrop:bg-black/50 pointer-events-auto"
 			>
 				<form
@@ -155,28 +167,45 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 						<div className="space-y-2">
 							<img
 								id="img"
-								src={image.src}
+								src={image?.src}
 								alt="image"
 								className="rounded-md mx-auto w-full"
 							/>
-							<div>
-								w:{image.naturalWidth} x h:{image.naturalHeight}
+
+							<div className="space-x-2">
+								<span className="text-neutral-400">w:</span>
+								{image?.naturalWidth}px
+								<span className="text-neutral-400">h:</span>
+								{image?.naturalHeight}px
+								<span className="text-neutral-400">(above not to scale)</span>
 							</div>
+
 							<div className="flex gap-2">
-								<Button
-									formMethod="dialog"
-									type="submit"
-									size="xs"
-									className="w-full"
-								>
-									Submit
-								</Button>
+								{!hasMatchingImages && (
+									<Button
+										formMethod="dialog"
+										type="submit"
+										size="xs"
+										className="w-full"
+									>
+										Submit
+									</Button>
+								)}
+								{hasMatchingImages && (
+									<Button
+										size="xs"
+										className="w-full"
+										onClick={() => setImage(null)}
+									>
+										Edit
+									</Button>
+								)}
 								<Button
 									type="reset"
 									intent="secondary"
 									size="xs"
 									className="w-full"
-									onClick={handleResetForm}
+									onClick={handleCancel}
 								>
 									Cancel
 								</Button>
@@ -281,7 +310,6 @@ function ImageURLInput({ onChange }: ImageURLInputProps) {
 				return;
 			}
 
-			// const blob = URL.createObjectURL(await response.blob());
 			onChange?.(value);
 			setError(null);
 		} catch (error) {

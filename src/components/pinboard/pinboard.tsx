@@ -5,7 +5,6 @@ import { useMouseWheel } from "@/hooks/use-mouse-wheel";
 import { cn } from "@/lib/utils";
 import {
 	Node,
-	Nodes,
 	useNodesActions,
 	useSelectedNodeId,
 } from "@/stores/use-nodes-store";
@@ -21,9 +20,9 @@ import { NameContainer } from "./name-container";
 import { NodeHandle, NodeTypes } from "./types";
 
 type PinBoardProps = {
-	nodes: Nodes;
+	nodes: Array<Node>;
 	nodeTypes: NodeTypes;
-	onNodesChange?: (nodes: Nodes) => void;
+	onNodesChange?: (nodes: Array<Node>) => void;
 };
 
 function PinBoard({ children, ...props }: PropsWithChildren<PinBoardProps>) {
