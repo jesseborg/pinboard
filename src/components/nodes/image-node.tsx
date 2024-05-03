@@ -184,6 +184,7 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 
 					{image && (
 						<div className="space-y-2">
+							{/* Image Preview */}
 							<img
 								id="img"
 								src={image?.src}
@@ -191,6 +192,7 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 								className="rounded-md mx-auto w-full"
 							/>
 
+							{/* Image Information */}
 							<div className="space-x-2">
 								<span className="text-neutral-400">w:</span>
 								{image?.naturalWidth}px
@@ -198,20 +200,26 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 								{image?.naturalHeight}px
 								<span className="text-neutral-400">(above not to scale)</span>
 							</div>
+
+							{/* Image Description */}
 							<div className="space-y-1">
 								<div className="flex w-full">
 									<label htmlFor="alt" className="flex-1">
 										Image Description
 									</label>
+
+									{/* Show Alt Checkbox */}
 									<div className="flex items-center gap-2">
-										<input
-											className="accent-black"
-											id="showAlt"
-											type="checkbox"
-											value="showAlt"
-											checked={node.data?.showAlt}
-											onChange={handleCheckboxChange}
-										/>
+										<span className="flex focus-within:outline outline-2 rounded-[1px] outline-offset-1 outline-black p-0">
+											<input
+												className="accent-black"
+												id="showAlt"
+												type="checkbox"
+												value="showAlt"
+												checked={node.data?.showAlt}
+												onChange={handleCheckboxChange}
+											/>
+										</span>
 										<label htmlFor="showAlt">Visible</label>
 									</div>
 								</div>
@@ -224,6 +232,7 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 									onChange={handleAltTextChange}
 								/>
 							</div>
+							{/* Buttons */}
 							<div className="flex gap-2">
 								{!hasMatchingImages && (
 									<Button
