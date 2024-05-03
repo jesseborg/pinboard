@@ -7,7 +7,13 @@ import {
 	useSelectedNodeId,
 } from "@/stores/use-nodes-store";
 import { usePinBoardTransform } from "@/stores/use-pinboard-store";
-import { HTMLAttributes, PropsWithChildren, useMemo } from "react";
+import {
+	HTMLAttributes,
+	PropsWithChildren,
+	useLayoutEffect,
+	useState,
+} from "react";
+import { Point } from "../pinboard/types";
 import { Button } from "../primitives/button";
 import { Portal } from "../primitives/portal";
 
@@ -28,6 +34,7 @@ export function BaseNode({
 	const selectedNodeId = useSelectedNodeId();
 
 	const selected = node?.id === selectedNodeId;
+
 	return (
 		<>
 			<div
@@ -87,28 +94,36 @@ function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
 		removeNode(node.id);
 	}
 
-	const nodeElement = useMemo(() => document.getElementById(node.id)!, []);
+	const [position, setPosition] = useState<Point | null>(null);
 
-	if (!nodeElement) {
+	useLayoutEffect(() => {
+		const element = document.getElementById(node.id);
+
+		if (!element) {
+			return;
+		}
+
+		setPosition({
+			x:
+				transform.x +
+				(node.position.x + element.clientWidth / 2) * transform.scale,
+			y:
+				transform.y +
+				(node.position.y + element.clientHeight) * transform.scale +
+				TOOLBAR_PADDING,
+		});
+	}, [transform, node.position, node.size, node.data]);
+
+	if (!position) {
 		return null;
 	}
-
-	const pos = {
-		x:
-			transform.x +
-			(node.position.x + nodeElement.clientWidth / 2) * transform.scale,
-		y:
-			transform.y +
-			(node.position.y + nodeElement.clientHeight) * transform.scale +
-			TOOLBAR_PADDING,
-	};
 
 	return (
 		<Portal asChild>
 			<div
 				id="node-toolbar"
 				style={{
-					transform: `translate(calc(${pos.x}px - 50%),${pos.y}px)`,
+					transform: `translate(calc(${position.x}px - 50%),${position.y}px)`,
 				}}
 				className="text-xs z-50 absolute flex top-0 left-0 gap-1.5 bg-black p-1.5 rounded-md text-white pointer-events-auto"
 			>
