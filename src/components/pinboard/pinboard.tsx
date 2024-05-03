@@ -167,7 +167,7 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 				transform: `translate(${node.position.x}px, ${node.position.y}px)`,
 				zIndex: node.index,
 			}}
-			className="absolute origin-top-left"
+			className="absolute origin-top-left outline-none"
 			onDoubleClick={() => handleRef.current?.onDoubleClick()}
 			onFocus={(e) => handleFocusNode(e.target)}
 		>
