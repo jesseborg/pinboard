@@ -40,7 +40,8 @@ function DraggablePinBoard({
 	children,
 	...props
 }: PropsWithChildren<PinBoardProps>) {
-	const { setTransform, zoomIn, zoomOut, zoomReset } = usePinBoardActions();
+	const { setTransform, centerOnSelection, zoomIn, zoomOut, zoomReset } =
+		usePinBoardActions();
 	const { setSelectedNodeId } = useNodesActions();
 
 	const transform = usePinBoardTransform();
@@ -69,7 +70,7 @@ function DraggablePinBoard({
 
 	useKeyDown(
 		document.body,
-		["0", "-", "="],
+		["0", "-", "=", "."],
 		({ key, event }) => {
 			event.preventDefault();
 
@@ -87,6 +88,10 @@ function DraggablePinBoard({
 				case "=":
 					zoomIn();
 					break;
+				case ".": {
+					centerOnSelection();
+					break;
+				}
 			}
 		},
 		{ ignoreWhileInput: true }
@@ -128,7 +133,7 @@ function DraggablePinBoard({
 				style={{
 					transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
 				}}
-				className="renderer w-full h-full absolute pointer-events-none origin-top-left"
+				className="renderer bg-red-500 w-full h-full absolute pointer-events-none origin-top-left"
 			>
 				<NodesContainer {...props} />
 			</div>

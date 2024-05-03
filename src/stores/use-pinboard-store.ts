@@ -3,6 +3,7 @@ import { viewportCenter } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useNodesStore } from "./use-nodes-store";
 
 type Transform = Point & { scale: number };
 
@@ -16,6 +17,7 @@ type PinBoardStore = PinBoardState & {
 		zoomIn: () => void;
 		zoomOut: () => void;
 		zoomReset: () => void;
+		centerOnSelection: () => void;
 		setTransform: (transform: Partial<Transform>) => void;
 		setName: (name: string) => void;
 	};
@@ -99,6 +101,24 @@ export const usePinBoardStore = create(
 								SCALE_FACTOR_WHEEL,
 								initialState.transform.scale
 							),
+						};
+					}),
+				centerOnSelection: () =>
+					set((state) => {
+						const { selectedNodeId, nodes } = useNodesStore.getState();
+
+						const node = nodes.find((node) => node.id === selectedNodeId);
+
+						if (!node) {
+							return state;
+						}
+
+						return {
+							transform: {
+								x: viewportCenter().x - (node.position.x + node.size.width / 2) * state.transform.scale, // prettier-ignore
+								y: viewportCenter().y - (node.position.y + node.size.height / 2) * state.transform.scale, // prettier-ignore
+								scale: state.transform.scale,
+							},
 						};
 					}),
 				setTransform: (transform) =>

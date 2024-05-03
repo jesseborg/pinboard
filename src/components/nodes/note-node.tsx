@@ -54,7 +54,13 @@ export function BaseNoteNode({
 	}
 
 	const debounceUpdateNode = useDebounce((data: NoteNodeProps["data"]) => {
-		setNode<NoteNodeProps>(node.id, { data });
+		setNode<NoteNodeProps>(node.id, {
+			data,
+			size: {
+				width: textareaRef.current?.parentElement?.clientWidth,
+				height: textareaRef.current?.parentElement?.clientHeight,
+			},
+		});
 	}, 300);
 
 	function handleInput() {

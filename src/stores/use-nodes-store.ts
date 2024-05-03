@@ -39,7 +39,7 @@ const initialState: NodesState = {
 	selectedNodeId: null,
 };
 
-const useNodesStore = create(
+export const useNodesStore = create(
 	persist<NodesStore>(
 		(set) => ({
 			...initialState,

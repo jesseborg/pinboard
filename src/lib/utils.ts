@@ -1,3 +1,4 @@
+import { Point } from "@/components/pinboard/types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -39,6 +40,6 @@ export function round(value: number, precision: number = 2) {
 	);
 }
 
-export function viewportCenter() {
+export function viewportCenter(): Point {
 	return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 }
