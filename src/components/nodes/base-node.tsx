@@ -29,6 +29,7 @@ export function BaseNode({
 	handleEdit,
 	className,
 	children,
+	...props
 }: PropsWithChildren<BaseNodeProps & HTMLAttributes<HTMLDivElement>>) {
 	const transform = usePinBoardTransform();
 	const selectedNodeId = useSelectedNodeId();
@@ -51,6 +52,7 @@ export function BaseNode({
 						"outline outline-2 outline-blue-500 z-40": selected,
 					}
 				)}
+				{...props}
 			>
 				{children}
 			</div>

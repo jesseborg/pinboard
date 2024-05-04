@@ -1,8 +1,14 @@
-import useDebounce from "@/hooks/use-debounce";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { cn, sleep } from "@/lib/utils";
 import { useNodesActions } from "@/stores/use-nodes-store";
-import { memo, useEffect, useImperativeHandle, useRef, useState } from "react";
+import {
+	ChangeEvent,
+	memo,
+	useEffect,
+	useImperativeHandle,
+	useRef,
+	useState,
+} from "react";
 import { CustomNodeProps, NodeProps } from "../pinboard/types";
 import { BaseNode } from "./base-node";
 
@@ -13,27 +19,17 @@ export type NoteNodeProps = NodeProps<
 	}
 >;
 
+const DEFAULT_SIZE = 250;
+const PADDING = 8;
+
 export function BaseNoteNode({
 	node,
 	handleRef,
 }: CustomNodeProps<NoteNodeProps>) {
-	const textareaRef = useRef<HTMLTextAreaElement>(null);
-
 	const { setNode } = useNodesActions();
 
+	const textAreaRef = useRef<HTMLTextAreaElement>(null);
 	const [editing, setEditing] = useState(false);
-
-	useImperativeHandle(
-		handleRef,
-		() => {
-			return {
-				onDoubleClick: () => {
-					handleEdit();
-				},
-			};
-		},
-		[]
-	);
 
 	async function handleEdit() {
 		setEditing(true);
@@ -41,62 +37,73 @@ export function BaseNoteNode({
 		// when calling this function from BaseNode
 		// React refuses to update the 'editing' state, unless I wait
 		await sleep(10);
-		textareaRef.current?.focus();
+		textAreaRef.current?.focus();
 	}
 
-	function autoResize() {
-		if (!textareaRef.current) {
-			return;
-		}
-
-		textareaRef.current.style.height = "auto";
-		textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
-	}
-
-	const debounceUpdateNode = useDebounce((data: NoteNodeProps["data"]) => {
+	function handleChange(event: ChangeEvent<typeof textAreaRef.current>) {
 		setNode<NoteNodeProps>(node.id, {
-			data,
-			size: {
-				width: textareaRef.current?.parentElement?.clientWidth,
-				height: textareaRef.current?.parentElement?.clientHeight,
-			},
+			data: { label: event.target.value },
 		});
-	}, 300);
-
-	function handleInput() {
-		autoResize();
-		debounceUpdateNode({ label: textareaRef.current?.value });
 	}
 
 	function handleBlur() {
 		setEditing(false);
 
-		if (window.getSelection()?.focusNode?.contains(textareaRef.current)) {
+		// If the user selected text, empty the selection so it's not always visible
+		if (window.getSelection()?.focusNode?.contains(textAreaRef.current)) {
 			window.getSelection()?.empty();
 		}
 
 		document.getElementById(node.id)?.focus();
 	}
 
-	// Sometimes the textarea height is incorrect on first render
-	useEffect(() => {
-		const timeout = setTimeout(() => {
-			autoResize();
-		}, 50);
+	function resizeTextArea() {
+		if (!textAreaRef.current) {
+			return;
+		}
 
+		textAreaRef.current.style.height = `${DEFAULT_SIZE}px`;
+		textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
+
+		// Only updating the height at the moment, because width is fixed for now
+		setNode<NoteNodeProps>(node.id, {
+			size: {
+				width: DEFAULT_SIZE,
+				height: Math.max(
+					textAreaRef.current.scrollHeight + PADDING * 2,
+					DEFAULT_SIZE
+				),
+			},
+		});
+	}
+
+	// Forward the double click event from handleRef
+	useImperativeHandle(handleRef, () => ({ onDoubleClick: handleEdit }), []);
+
+	// Resize the textarea to match content
+	useEffect(resizeTextArea, [node.data?.label]);
+
+	useEffect(() => {
+		const timeout = setTimeout(resizeTextArea, 100);
 		return () => clearTimeout(timeout);
 	}, []);
 
-	useKeyDown(textareaRef, "Escape", () => handleBlur());
+	// Exit the textarea when escape pressed
+	useKeyDown(textAreaRef, "Escape", () => handleBlur());
 
 	return (
 		<BaseNode
 			node={node}
 			handleEdit={handleEdit}
-			className="p-2 min-h-[250px] w-[250px] text-sm"
+			style={{
+				width: node.size?.width,
+				height: node.size?.height,
+				padding: PADDING,
+			}}
+			className="text-sm min-w-[250px]"
 		>
 			<textarea
-				ref={textareaRef}
+				ref={textAreaRef}
 				tabIndex={-1}
 				autoComplete="off"
 				autoCapitalize="off"
@@ -110,9 +117,9 @@ export function BaseNoteNode({
 					}
 				)}
 				cols={25}
-				defaultValue={node.data?.label ?? ""}
+				value={node.data?.label}
 				placeholder="Type anything..."
-				onInput={handleInput}
+				onChange={handleChange}
 				onBlur={handleBlur}
 			/>
 		</BaseNode>
