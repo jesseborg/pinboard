@@ -133,7 +133,7 @@ function DraggablePinBoard({
 				style={{
 					transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
 				}}
-				className="renderer bg-red-500 w-full h-full absolute pointer-events-none origin-top-left"
+				className="renderer w-full h-full absolute pointer-events-none origin-top-left"
 			>
 				<NodesContainer {...props} />
 			</div>
