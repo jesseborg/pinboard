@@ -86,7 +86,7 @@ function useDrag<T extends HTMLElement>(
 	const dragTarget = useRef<HTMLElement | null>(null);
 
 	// Pressed state of the pointer
-	const [isDown, setIsDown] = useState(false);
+	const [pointerDown, setPointerDown] = useState(false);
 
 	// Initial position of the pointer when the gesture started
 	const [pointerInitial, setPointerInitial] = useState<Tuple<number>>([0, 0]);
@@ -112,6 +112,10 @@ function useDrag<T extends HTMLElement>(
 
 	const onPointerDown = useCallback(
 		(event: React.PointerEvent) => {
+			if (!event.isPrimary) {
+				return;
+			}
+
 			// Target needs to be an HTMLElement
 			const target = event.target as T;
 
@@ -140,7 +144,7 @@ function useDrag<T extends HTMLElement>(
 				updateOffsetInitial(options?.initialPosition ?? offset);
 			}
 
-			setIsDown(true);
+			setPointerDown(true);
 
 			options?.onDragStart?.({
 				event,
@@ -157,11 +161,15 @@ function useDrag<T extends HTMLElement>(
 
 	const onPointerMove = useCallback(
 		(event: PointerEvent) => {
+			if (!event.isPrimary) {
+				return;
+			}
+
 			if (!ref.current || !dragTarget.current) {
 				return;
 			}
 
-			if (isDown) {
+			if (pointerDown) {
 				const { movement, offset, gridOffset } = calculateOffsets(
 					event,
 					pointerInitial,
@@ -183,11 +191,15 @@ function useDrag<T extends HTMLElement>(
 				});
 			}
 		},
-		[isDown, initialOffset, onDrag, options, pointerInitial]
+		[pointerDown, initialOffset, onDrag, options, pointerInitial]
 	);
 
 	const onPointerUp = useCallback(
 		(event: PointerEvent) => {
+			if (!event.isPrimary) {
+				return;
+			}
+
 			if (!ref.current || !dragTarget.current) {
 				return;
 			}
@@ -200,7 +212,7 @@ function useDrag<T extends HTMLElement>(
 			);
 
 			dragTarget.current = null;
-			setIsDown(false);
+			setPointerDown(false);
 
 			options?.onDragEnd?.({
 				event,
@@ -258,7 +270,7 @@ function useDrag<T extends HTMLElement>(
 		bind: { ref, onPointerDown: handleMouseEvent },
 		target: dragTarget,
 		offset,
-		isDown,
+		isDown: pointerDown,
 	};
 }
 
