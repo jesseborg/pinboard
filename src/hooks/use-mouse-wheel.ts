@@ -12,12 +12,15 @@ export function useMouseWheel(
 ) {
 	useEffect(() => {
 		function handleScroll(event: WheelEvent) {
-			if (options?.preventDefault) {
-				event.preventDefault();
+			if (document.querySelector("dialog[open]")) {
+				if (event.ctrlKey) {
+					event.preventDefault();
+				}
+				return;
 			}
 
-			if (document.querySelector("dialog[open]")) {
-				return;
+			if (options?.preventDefault) {
+				event.preventDefault();
 			}
 
 			if (options?.ctrlKey && !event.ctrlKey) {
