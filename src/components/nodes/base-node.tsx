@@ -25,6 +25,7 @@ export function BaseNode({
 	handleEdit,
 	className,
 	children,
+	style,
 	...props
 }: PropsWithChildren<BaseNodeProps & HTMLAttributes<HTMLDivElement>>) {
 	const transform = usePinBoardTransform();
@@ -40,6 +41,7 @@ export function BaseNode({
 						OUTLINE_WIDTH,
 						OUTLINE_WIDTH / transform.scale
 					),
+					...style,
 				}}
 				className={cn(
 					"ring-2 ring-black bg-white relative shadow-[2px_2px_0_2px] shadow-black z-0",
