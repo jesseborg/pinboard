@@ -1,9 +1,8 @@
-import { ComponentType, Ref } from "react";
-
 export type Point = {
 	x: number;
 	y: number;
 };
+
 export type Size = {
 	width: number;
 	height: number;
@@ -18,14 +17,18 @@ export type NodeProps<T extends string, D extends Record<string, unknown>> = {
 	data: D | null;
 };
 
-export type NodeTypes<
-	T extends NodeProps<string, any> = NodeProps<string, any>
-> = Record<string, ComponentType<CustomNodeProps<T>>>;
-
-export type CustomNodeProps<T extends NodeProps<string, any>> = {
-	node: T;
-	handleRef: Ref<NodeHandle>;
+export type CustomNodeProps<
+	T extends string,
+	D extends Record<string, unknown>
+> = {
+	node: NodeProps<T, D>;
+	handleRef: React.Ref<NodeHandle>;
 };
+
+export type NodeTypes = Record<
+	string,
+	React.ComponentType<CustomNodeProps<any, any>>
+>;
 
 export type NodeHandle = {
 	onDoubleClick: () => void;

@@ -1,11 +1,7 @@
 import { useIndexedDB } from "@/hooks/use-indexed-db";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { cn } from "@/lib/utils";
-import {
-	Node,
-	useNodesActions,
-	useSelectedNodeId,
-} from "@/stores/use-nodes-store";
+import { useNodesActions, useSelectedNodeId } from "@/stores/use-nodes-store";
 import { usePinBoardTransform } from "@/stores/use-pinboard-store";
 import {
 	HTMLAttributes,
@@ -13,12 +9,12 @@ import {
 	useLayoutEffect,
 	useState,
 } from "react";
-import { Point } from "../pinboard/types";
+import { NodeProps, Point } from "../pinboard/types";
 import { Button } from "../primitives/button";
 import { Portal } from "../primitives/portal";
 
 type BaseNodeProps = {
-	node: Node;
+	node: NodeProps<any, any>;
 	handleEdit?: () => void;
 };
 
@@ -63,11 +59,7 @@ export function BaseNode({
 
 const TOOLBAR_PADDING = 8;
 
-type NodeToolBarProps = {
-	node: Node;
-	handleEdit?: () => void;
-};
-function NodeToolBar({ node, handleEdit }: NodeToolBarProps) {
+function NodeToolBar({ node, handleEdit }: BaseNodeProps) {
 	const transform = usePinBoardTransform();
 	const { removeNode } = useNodesActions();
 	const { deleteById } = useIndexedDB<Blob>("images");

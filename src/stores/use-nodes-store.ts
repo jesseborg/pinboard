@@ -8,10 +8,8 @@ type RecursivePartial<T> = {
 	[P in keyof T]?: RecursivePartial<T[P]>;
 };
 
-export type Node<T extends NodeProps<any, any> = NodeProps<string, any>> = T;
-
 export type NodesState = {
-	nodes: Array<Node>;
+	nodes: Array<NodeProps<any, any>>;
 	selectedNodeId: string | null;
 };
 
@@ -20,7 +18,7 @@ type NodeActions<T extends NodeTypes> = {
 		id: string,
 		node: RecursivePartial<N>
 	) => void;
-	setNodes: (nodes: Array<Node>) => void;
+	setNodes: (nodes: Array<NodeProps<any, any>>) => void;
 	removeNode: (id: string) => void;
 	addNode: <K extends keyof T>(
 		type: K,
@@ -29,10 +27,9 @@ type NodeActions<T extends NodeTypes> = {
 	setSelectedNodeId: (id: string | null) => void;
 };
 
-type NodesStore<T extends NodeTypes = NodeTypes<NodeProps<string, {}>>> =
-	NodesState & {
-		actions: NodeActions<T>;
-	};
+type NodesStore = NodesState & {
+	actions: NodeActions<NodeTypes>;
+};
 
 const initialState: NodesState = {
 	nodes: [],
@@ -67,7 +64,7 @@ export const useNodesStore = create(
 								...node,
 								id: uuid4(),
 								type,
-							} as NodeProps<typeof type, {}>,
+							} as (typeof state.nodes)[number],
 						],
 					})),
 				setSelectedNodeId: (id) => set({ selectedNodeId: id }),
@@ -87,6 +84,5 @@ export const useNodes = () => useNodesStore((state) => state.nodes);
 export const useSelectedNodeId = () =>
 	useNodesStore((state) => state.selectedNodeId);
 
-export const useNodesActions = <
-	T extends NodeTypes = NodeTypes<NodeProps<string, {}>>
->() => useNodesStore((state) => state.actions as NodeActions<T>);
+export const useNodesActions = <T extends NodeTypes>() =>
+	useNodesStore((state) => state.actions as NodeActions<T>);

@@ -13,13 +13,13 @@ import {
 } from "react";
 import { CloudUploadIcon } from "../icons/cloud-upload-icon";
 import { ImageIcon } from "../icons/image-icon";
-import { CustomNodeProps, NodeProps } from "../pinboard/types";
+import { CustomNodeProps } from "../pinboard/types";
 import { Button } from "../primitives/button";
 import { Dialog, DialogProps } from "../primitives/dialog";
 import { Portal } from "../primitives/portal";
 import { BaseNode } from "./base-node";
 
-export type ImageNodeProps = NodeProps<
+type ImageNodeType = CustomNodeProps<
 	"image",
 	{
 		src: string;
@@ -27,8 +27,9 @@ export type ImageNodeProps = NodeProps<
 		showAlt?: boolean;
 	}
 >;
+export type ImageNodeProps = ImageNodeType["node"];
 
-export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
+export function BaseImageNode({ node }: ImageNodeType) {
 	const { removeNode, setNode } = useNodesActions();
 	const { getById } = useIndexedDB<Blob>("images");
 

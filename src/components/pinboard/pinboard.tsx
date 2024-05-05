@@ -3,11 +3,7 @@ import { useIndexedDB } from "@/hooks/use-indexed-db";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { useMouseWheel } from "@/hooks/use-mouse-wheel";
 import { cn } from "@/lib/utils";
-import {
-	Node,
-	useNodesActions,
-	useSelectedNodeId,
-} from "@/stores/use-nodes-store";
+import { useNodesActions, useSelectedNodeId } from "@/stores/use-nodes-store";
 import {
 	calculateTransform,
 	usePinBoardActions,
@@ -16,12 +12,12 @@ import {
 } from "@/stores/use-pinboard-store";
 import { PropsWithChildren, memo, useEffect, useRef } from "react";
 import { NameContainer } from "./name-container";
-import { NodeHandle, NodeTypes } from "./types";
+import { NodeHandle, NodeProps, NodeTypes } from "./types";
 
 type PinBoardProps = {
-	nodes: Array<Node>;
+	nodes: Array<NodeProps<any, any>>;
 	nodeTypes: NodeTypes;
-	onNodesChange?: (nodes: Array<Node>) => void;
+	onNodesChange?: (nodes: Array<NodeProps<any, any>>) => void;
 };
 
 function PinBoard({ children, ...props }: PropsWithChildren<PinBoardProps>) {
@@ -144,7 +140,7 @@ function DraggablePinBoard({
 }
 
 type NodeRendererProps = {
-	node: Node;
+	node: NodeProps<any, any>;
 	nodeTypes: NodeTypes;
 	onFocus?: (element: HTMLDivElement) => void;
 };
@@ -295,7 +291,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 const MemoNodes = memo(({ nodes, nodeTypes }: PinBoardProps) => {
 	const { setNodes } = useNodesActions();
 
-	function handleNodeFocus(node: Node) {
+	function handleNodeFocus(node: NodeProps<any, any>) {
 		// hmm... good for now, i guess 😬
 		setNodes(
 			nodes.map((n) => {

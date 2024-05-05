@@ -9,23 +9,21 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { CustomNodeProps, NodeProps } from "../pinboard/types";
+import { CustomNodeProps } from "../pinboard/types";
 import { BaseNode } from "./base-node";
 
-export type NoteNodeProps = NodeProps<
+const DEFAULT_SIZE = 250;
+const PADDING = 8;
+
+type NoteNodeType = CustomNodeProps<
 	"note",
 	{
 		label: string;
 	}
 >;
+type NoteNodeProps = NoteNodeType["node"];
 
-const DEFAULT_SIZE = 250;
-const PADDING = 8;
-
-export function BaseNoteNode({
-	node,
-	handleRef,
-}: CustomNodeProps<NoteNodeProps>) {
+export function BaseNoteNode({ node, handleRef }: NoteNodeType) {
 	const { setNode } = useNodesActions();
 
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);
