@@ -71,7 +71,7 @@ export function BaseImageNode({ node }: CustomNodeProps<ImageNodeProps>) {
 			{/* Alt text tag */}
 			{node.data?.showAlt && node.data?.alt && (
 				<div style={{ maxWidth: node.size.width }} className="px-2">
-					<p className="bg-black text-center w-fit relative text-white px-4 mx-auto py-2 z-50 break-words -mt-4">
+					<p className="bg-black max-w-full text-center w-fit relative text-white px-4 mx-auto py-2 z-50 break-words -mt-4">
 						{node.data.alt}
 					</p>
 				</div>
