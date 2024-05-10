@@ -9,16 +9,16 @@ type RecursivePartial<T> = {
 };
 
 export type NodesState = {
-	nodes: Array<NodeProps<any, any>>;
+	nodes: Array<NodeProps>;
 	selectedNodeId: string | null;
 };
 
 type NodeActions<T extends NodeTypes> = {
-	setNode: <N extends NodeProps<string, any>>(
+	setNode: <N extends NodeProps<string>>(
 		id: string,
 		node: RecursivePartial<N>
 	) => void;
-	setNodes: (nodes: Array<NodeProps<any, any>>) => void;
+	setNodes: (nodes: Array<NodeProps>) => void;
 	removeNode: (id: string) => void;
 	addNode: <K extends keyof T>(
 		type: K,

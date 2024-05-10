@@ -14,7 +14,7 @@ import { Button } from "../primitives/button";
 import { Portal } from "../primitives/portal";
 
 type BaseNodeProps = {
-	node: NodeProps<any, any>;
+	node: NodeProps;
 	handleEdit?: () => void;
 };
 
@@ -108,7 +108,7 @@ function NodeToolBar({ node, handleEdit }: BaseNodeProps) {
 				(node.position.y + element.clientHeight) * transform.scale +
 				TOOLBAR_PADDING,
 		});
-	}, [transform, node.position, node.size, node.data]);
+	}, [transform, node.position, node.size, node.data, node.id]);
 
 	if (!position) {
 		return null;
@@ -145,6 +145,6 @@ function NodeToolBar({ node, handleEdit }: BaseNodeProps) {
 	);
 }
 
-function isButton(element: any): element is HTMLButtonElement {
-	return element.localName === "button";
+function isButton(element: ChildNode): element is HTMLButtonElement {
+	return element.nodeName === "BUTTON";
 }

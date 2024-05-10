@@ -18,7 +18,7 @@ import { NameContainer } from "./name-container";
 import { NodeHandle, NodeProps, NodeTypes } from "./types";
 
 type PinBoardProps = {
-	nodes: Array<NodeProps<any, any>>;
+	nodes: Array<NodeProps>;
 	nodeTypes: NodeTypes;
 };
 
@@ -179,7 +179,7 @@ const PanPinch = forwardRef<HTMLDivElement>((_, ref) => {
 });
 
 type NodeRendererProps = {
-	node: NodeProps<any, any>;
+	node: NodeProps;
 	nodeTypes: NodeTypes;
 	onFocus?: (element: HTMLDivElement) => void;
 };
@@ -326,7 +326,7 @@ function NodesContainer({ nodes, nodeTypes }: PinBoardProps) {
 const MemoNodes = memo(({ nodes, nodeTypes }: PinBoardProps) => {
 	const { setNodes } = useNodesActions();
 
-	function handleNodeFocus(node: NodeProps<any, any>) {
+	function handleNodeFocus(node: NodeProps) {
 		// hmm... good for now, i guess 😬
 		setNodes(
 			nodes.map((n) => {

@@ -8,7 +8,7 @@ export type Size = {
 	height: number;
 };
 
-export type NodeProps<T extends string, D extends Record<string, unknown>> = {
+export type NodeProps<T = string, D = Record<string, unknown>> = {
 	id: string;
 	index: number;
 	position: Point;
@@ -17,17 +17,15 @@ export type NodeProps<T extends string, D extends Record<string, unknown>> = {
 	data: D | null;
 };
 
-export type CustomNodeProps<
-	T extends string,
-	D extends Record<string, unknown>
-> = {
+export type CustomNodeProps<T, D> = {
 	node: NodeProps<T, D>;
 	handleRef: React.Ref<NodeHandle>;
 };
 
-export type NodeTypes = Record<
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type NodeTypes<T = any, D = any> = Record<
 	string,
-	React.ComponentType<CustomNodeProps<any, any>>
+	React.ComponentType<CustomNodeProps<T, D>>
 >;
 
 export type NodeHandle = {
