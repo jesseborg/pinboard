@@ -16,7 +16,7 @@ export const nodeTypes = {
 
 export function App() {
 	const nodes = useNodes();
-	const { setNodes, addNode } = useNodesActions<typeof nodeTypes>();
+	const { addNode } = useNodesActions<typeof nodeTypes>();
 
 	const [loading, setLoading] = useState(true);
 
@@ -62,7 +62,7 @@ export function App() {
 
 	return (
 		<main>
-			<PinBoard nodes={nodes} onNodesChange={setNodes} nodeTypes={nodeTypes}>
+			<PinBoard nodes={nodes} nodeTypes={nodeTypes}>
 				<ToolBar />
 				<Controls />
 				<Background />

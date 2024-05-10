@@ -20,7 +20,6 @@ import { NodeHandle, NodeProps, NodeTypes } from "./types";
 type PinBoardProps = {
 	nodes: Array<NodeProps<any, any>>;
 	nodeTypes: NodeTypes;
-	onNodesChange?: (nodes: Array<NodeProps<any, any>>) => void;
 };
 
 export function PinBoard({
