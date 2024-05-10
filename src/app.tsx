@@ -4,9 +4,9 @@ import { useNodes, useNodesActions } from "@/stores/use-nodes-store";
 import { useEffect, useState } from "react";
 import { ImageNode } from "./components/nodes/image-node";
 import { NoteNode } from "./components/nodes/note-node";
-import Background from "./components/pinboard/background";
-import Controls from "./components/pinboard/controls";
-import Pinboard from "./components/pinboard/pinboard";
+import { Background } from "./components/pinboard/background";
+import { Controls } from "./components/pinboard/controls";
+import { PinBoard } from "./components/pinboard/pinboard";
 import { ToolBar } from "./components/toolbar";
 
 export const nodeTypes = {
@@ -62,11 +62,11 @@ export function App() {
 
 	return (
 		<main>
-			<Pinboard nodes={nodes} onNodesChange={setNodes} nodeTypes={nodeTypes}>
+			<PinBoard nodes={nodes} onNodesChange={setNodes} nodeTypes={nodeTypes}>
 				<ToolBar />
 				<Controls />
 				<Background />
-			</Pinboard>
+			</PinBoard>
 		</main>
 	);
 }

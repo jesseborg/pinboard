@@ -2,15 +2,18 @@ import useDrag from "@/hooks/use-drag";
 import { useIndexedDB } from "@/hooks/use-indexed-db";
 import { useKeyDown } from "@/hooks/use-keydown";
 import { useMouseWheel } from "@/hooks/use-mouse-wheel";
+import usePinch from "@/hooks/use-pinch";
 import { cn } from "@/lib/utils";
 import { useNodesActions, useSelectedNodeId } from "@/stores/use-nodes-store";
 import {
+	SCALE_FACTOR_WHEEL,
 	calculateTransform,
 	usePinBoardActions,
 	usePinBoardHydrated,
 	usePinBoardTransform,
 } from "@/stores/use-pinboard-store";
-import { PropsWithChildren, memo, useEffect, useRef } from "react";
+import { PropsWithChildren, forwardRef, memo, useEffect, useRef } from "react";
+import { UsePinchDebug } from "../debug/use-pinch-debug";
 import { NameContainer } from "./name-container";
 import { NodeHandle, NodeProps, NodeTypes } from "./types";
 
@@ -20,7 +23,10 @@ type PinBoardProps = {
 	onNodesChange?: (nodes: Array<NodeProps<any, any>>) => void;
 };
 
-function PinBoard({ children, ...props }: PropsWithChildren<PinBoardProps>) {
+export function PinBoard({
+	children,
+	...props
+}: PropsWithChildren<PinBoardProps>) {
 	const hydrated = usePinBoardHydrated();
 
 	if (!hydrated) {
@@ -38,29 +44,10 @@ function DraggablePinBoard({
 }: PropsWithChildren<PinBoardProps>) {
 	const { setTransform, centerOnSelection, zoomIn, zoomOut, zoomReset } =
 		usePinBoardActions();
-	const { setSelectedNodeId } = useNodesActions();
 
 	const transform = usePinBoardTransform();
 
-	const { bind, isDown } = useDrag<HTMLDivElement>(
-		({ movement: [mx, my], initialOffset: [ox, oy] }) => {
-			setTransform({ x: ox + mx, y: oy + my });
-		},
-		{
-			onDragEnd: ({ movement: [mx, my] }) => {
-				// Only allow clicks, this keeps nodes selected if dragging
-				if (Math.abs(mx) + Math.abs(my) > MIN_DRAG_DISTANCE) {
-					return;
-				}
-
-				setSelectedNodeId(null);
-			},
-			initialPosition: [transform.x, transform.y],
-			children: {
-				ignore: true,
-			},
-		}
-	);
+	const ref = useRef<HTMLDivElement>(null);
 
 	const isPanning = useKeyDown(document.body, " ");
 
@@ -107,7 +94,7 @@ function DraggablePinBoard({
 				calculateTransform(
 					transform,
 					{ x: event.clientX, y: event.clientY },
-					event.deltaY > 0 ? -1 : 1
+					event.deltaY > 0 ? -SCALE_FACTOR_WHEEL : SCALE_FACTOR_WHEEL
 				)
 			);
 		},
@@ -117,13 +104,13 @@ function DraggablePinBoard({
 
 	return (
 		<div
-			{...bind}
+			ref={ref}
 			id="pinboard"
 			className={cn("pinboard w-full h-full", {
 				"cursor-grab [&_*]:!pointer-events-none": isPanning,
-				"cursor-grabbing": isDown,
 			})}
 		>
+			<PanPinch ref={ref} />
 			<div
 				id="renderer"
 				style={{
@@ -138,6 +125,59 @@ function DraggablePinBoard({
 		</div>
 	);
 }
+
+const PanPinch = forwardRef<HTMLDivElement>((_, ref) => {
+	const { setTransform } = usePinBoardActions();
+	const { setSelectedNodeId } = useNodesActions();
+
+	const transform = usePinBoardTransform();
+
+	useDrag(
+		({ movement: [mx, my], initialOffset: [ox, oy], pinching }) => {
+			// If pinching, ignore drag, movement will be handled in 'usePinch'
+			if (pinching) {
+				return;
+			}
+
+			// Handle dragging the pinboard
+			setTransform({ x: ox + mx, y: oy + my });
+		},
+		{
+			onDragStart: () => {
+				document.body.style.cursor = "grabbing";
+			},
+			onDragEnd: ({ movement: [mx, my] }) => {
+				document.body.style.cursor = "default";
+
+				// Only allow clicks, this keeps nodes selected if dragging
+				if (Math.abs(mx) + Math.abs(my) > MIN_DRAG_DISTANCE) {
+					return;
+				}
+
+				setSelectedNodeId(null);
+			},
+			target: ref as React.RefObject<HTMLDivElement>,
+			initialPosition: [transform.x, transform.y],
+			children: {
+				ignore: true,
+			},
+		}
+	);
+
+	const pinch = usePinch(
+		{
+			onPinch: ({ offset: [scale], origin: [ox, oy] }) => {
+				setTransform(calculateTransform(transform, { x: ox, y: oy }, 0, scale));
+			},
+		},
+		{
+			target: ref as React.RefObject<HTMLDivElement>,
+			offset: [transform.scale, 0],
+		}
+	);
+
+	return process.env.NODE_ENV === "development" && <UsePinchDebug {...pinch} />;
+});
 
 type NodeRendererProps = {
 	node: NodeProps<any, any>;
@@ -170,6 +210,8 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 			}}
 			className="absolute origin-top-left outline-none"
 			onDoubleClick={() => handleRef.current?.onDoubleClick()}
+			// On mobile 'onFocus' triggers after holding for a while so this forces focus on pointer down
+			// onPointerDown={(e) => handleFocusNode(e.target as HTMLDivElement)}
 			onFocus={(e) => handleFocusNode(e.target)}
 		>
 			<Node handleRef={handleRef} node={node} />
@@ -177,38 +219,28 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 	);
 }
 
-function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
+function NodesContainer({ nodes, nodeTypes }: PinBoardProps) {
 	const transform = usePinBoardTransform();
 
 	const selectedNodeId = useSelectedNodeId();
-	const { removeNode, setNode, setSelectedNodeId } = useNodesActions();
+	const { removeNode, setNode } = useNodesActions();
 	const { deleteById } = useIndexedDB<Blob>("images");
 
-	const { bind } = useDrag<HTMLDivElement>(
-		({ gridOffset: [ox, oy], target }) => {
+	const ref = useRef<HTMLDivElement>(null);
+
+	useDrag(
+		({ gridOffset: [ox, oy], target, pinching }) => {
+			if (pinching) {
+				return;
+			}
+
 			const x = ox / transform.scale;
 			const y = oy / transform.scale;
 			target.style.transform = `translate(${x}px, ${y}px)`;
 			setNode(target.id, { position: { x, y } });
 		},
 		{
-			onDragStart: ({ target }) => setSelectedNodeId(target.id),
-			onDragEnd: ({ gridOffset: [ox, oy], movement: [mx, my] }) => {
-				const hasDragged = Math.abs(mx) + Math.abs(my) > MIN_DRAG_DISTANCE;
-
-				// Only allow drags
-				if (!hasDragged) {
-					return;
-				}
-
-				const node = nodes?.find((node) => node.id === selectedNodeId);
-				if (!node) {
-					return;
-				}
-
-				node.position = { x: ox / transform.scale, y: oy / transform.scale };
-				onNodesChange?.(nodes);
-			},
+			target: ref,
 			selectors: "[data-draggable=true]",
 			offset: [transform.x, transform.y],
 			grid: {
@@ -218,7 +250,7 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 	);
 
 	useKeyDown(
-		{ current: document.body },
+		document.body,
 		"Delete",
 		() => {
 			if (!selectedNodeId) {
@@ -234,17 +266,17 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 
 	// TODO: maybe move into custom hook
 	useEffect(() => {
-		if (!bind.ref.current) {
+		if (!ref.current) {
 			return;
 		}
 
 		function centerElementToViewport(element: HTMLElement) {
-			if (!bind.ref.current || !bind.ref.current.parentElement) {
+			if (!ref.current || !ref.current.parentElement) {
 				return;
 			}
 
 			const elementRect = element.getBoundingClientRect();
-			const parentRect = bind.ref.current.parentElement.getBoundingClientRect();
+			const parentRect = ref.current.parentElement.getBoundingClientRect();
 			const viewportRect =
 				window.visualViewport ?? document.body.getBoundingClientRect();
 
@@ -273,16 +305,20 @@ function NodesContainer({ nodes, nodeTypes, onNodesChange }: PinBoardProps) {
 			}
 		});
 
-		observer.observe(bind.ref.current, {
+		observer.observe(ref.current, {
 			childList: true,
 			subtree: false,
 		});
 
 		return () => observer.disconnect();
-	}, [bind.ref, transform, setNode]);
+	}, [ref, transform, setNode]);
 
 	return (
-		<div {...bind} className="nodes pointer-events-none relative z-10">
+		<div
+			ref={ref}
+			id="nodes"
+			className="nodes pointer-events-none relative z-10"
+		>
 			<MemoNodes nodes={nodes} nodeTypes={nodeTypes} />
 		</div>
 	);
@@ -322,5 +358,3 @@ const MemoNodes = memo(({ nodes, nodeTypes }: PinBoardProps) => {
 	);
 });
 MemoNodes.displayName = "MemoNodes";
-
-export default memo(PinBoard);

@@ -23,28 +23,24 @@ type PinBoardStore = PinBoardState & {
 	};
 };
 
-const SCALE_MIN = 0.02;
-const SCALE_MAX = 256;
-const SCALE_FACTOR_WHEEL = 0.04;
-const SCALE_FACTOR_CLICK = 1;
+export const SCALE_MIN = 0.02;
+export const SCALE_MAX = 256;
+export const SCALE_FACTOR_WHEEL = 0.04;
+export const SCALE_FACTOR_CLICK = 1;
 
-function calculateScale(
-	scale: number,
-	direction: -1 | 0 | 1 = 0,
-	factor: number = SCALE_FACTOR_WHEEL
-) {
+function calculateScale(scale: number, factor: number = SCALE_FACTOR_WHEEL) {
+	const direction = factor === 0 ? 0 : factor > 0 ? 1 : -1;
 	return Math.max(
 		SCALE_MIN,
-		Math.min(scale * Math.pow(1 + factor, direction), SCALE_MAX)
+		Math.min(scale * Math.pow(1 + Math.abs(factor), direction), SCALE_MAX)
 	);
 }
 
 export function calculateTransform(
 	transform: Transform,
 	screenPos: Point = viewportCenter(),
-	direction: -1 | 0 | 1 = 0,
-	scaleFactor?: number,
-	scale: number = calculateScale(transform.scale, direction, scaleFactor)
+	scaleFactor: number = SCALE_FACTOR_WHEEL,
+	scale: number = calculateScale(transform.scale, scaleFactor)
 ) {
 	const ratio = 1 - scale / transform.scale;
 	const { x, y } = {
@@ -74,7 +70,6 @@ export const usePinBoardStore = create(
 						transform: calculateTransform(
 							state.transform,
 							viewportCenter(),
-							1,
 							SCALE_FACTOR_CLICK
 						),
 					})),
@@ -83,8 +78,7 @@ export const usePinBoardStore = create(
 						transform: calculateTransform(
 							state.transform,
 							viewportCenter(),
-							-1,
-							SCALE_FACTOR_CLICK
+							-SCALE_FACTOR_CLICK
 						),
 					})),
 				zoomReset: () =>
@@ -98,7 +92,6 @@ export const usePinBoardStore = create(
 								state.transform,
 								viewportCenter(),
 								0,
-								SCALE_FACTOR_WHEEL,
 								initialState.transform.scale
 							),
 						};

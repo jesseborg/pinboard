@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { usePinBoardTransform } from "@/stores/use-pinboard-store";
-import { memo } from "react";
 
 type Position = "top" | "middle" | "bottom";
 type Axis = "left" | "center" | "right";
@@ -9,7 +8,7 @@ type ControlsProps = {
 	position?: `${Position}-${Axis}`;
 };
 
-function Controls({ position = "bottom-right" }: ControlsProps) {
+export function Controls({ position = "bottom-right" }: ControlsProps) {
 	const transform = usePinBoardTransform();
 
 	return (
@@ -20,5 +19,3 @@ function Controls({ position = "bottom-right" }: ControlsProps) {
 		</div>
 	);
 }
-
-export default memo(Controls);

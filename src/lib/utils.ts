@@ -43,3 +43,11 @@ export function round(value: number, precision: number = 2) {
 export function viewportCenter(): Point {
 	return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 }
+
+// d=√((x2 – x1)² + (y2 – y1)²)
+export function euclideanDistance(
+	[x1, y1]: [number, number],
+	[x2, y2]: [number, number]
+) {
+	return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
