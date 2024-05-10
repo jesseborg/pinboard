@@ -143,10 +143,14 @@ const PanPinch = forwardRef<HTMLDivElement>((_, ref) => {
 		},
 		{
 			onDragStart: () => {
-				document.body.style.cursor = "grabbing";
+				(ref as React.RefObject<HTMLDivElement>).current?.classList.toggle(
+					"grabbing"
+				);
 			},
 			onDragEnd: ({ movement: [mx, my] }) => {
-				document.body.style.cursor = "default";
+				(ref as React.RefObject<HTMLDivElement>).current?.classList.toggle(
+					"grabbing"
+				);
 
 				// Only allow clicks, this keeps nodes selected if dragging
 				if (Math.abs(mx) + Math.abs(my) > MIN_DRAG_DISTANCE) {

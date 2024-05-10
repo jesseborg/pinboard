@@ -67,6 +67,12 @@ img {
 	@apply bottom-0 right-0;
 }
 
+@layer base {
+	.grabbing {
+		@apply !cursor-grabbing;
+	}
+}
+
 @layer components {
 	[data-draggable="true"] {
 		pointer-events: auto;
