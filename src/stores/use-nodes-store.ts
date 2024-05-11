@@ -54,6 +54,7 @@ export const useNodesStore = create(
 				removeNode: (id) =>
 					set((state) => ({
 						nodes: state.nodes.filter((node) => node.id !== id),
+						selectedNodeId: null,
 					})),
 				addNode: (type, node) =>
 					set((state) => ({
