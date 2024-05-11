@@ -51,3 +51,22 @@ export function euclideanDistance(
 ) {
 	return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
+
+export function blobToWebP(blob: Blob) {
+	// Create image from Blob
+	return new Promise<Blob | null>((resolve) => {
+		const img = new Image();
+		img.onload = () => {
+			// Draw image to canvas
+			const canvas = document.createElement("canvas");
+			canvas.width = img.width;
+			canvas.height = img.height;
+
+			canvas.getContext("2d")?.drawImage(img, 0, 0);
+
+			// Convert canvas to WebP Blob
+			canvas.toBlob(resolve, "image/webp");
+		};
+		img.src = URL.createObjectURL(blob);
+	});
+}

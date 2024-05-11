@@ -1,6 +1,6 @@
 import useDebounce from "@/hooks/use-debounce";
 import { useIndexedDB } from "@/hooks/use-indexed-db";
-import { preloadImage } from "@/lib/utils";
+import { blobToWebP, preloadImage } from "@/lib/utils";
 import { useNodesActions } from "@/stores/use-nodes-store";
 import {
 	ChangeEvent,
@@ -134,7 +134,11 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 
 		// fetch image and get blob data
 		const response = await fetch(image.src);
-		const blob = await response.blob();
+		const blob = await blobToWebP(await response.blob());
+
+		if (!blob) {
+			return;
+		}
 
 		// add image blob to indexedDB
 		await addOrUpdate(blob, node.id);
