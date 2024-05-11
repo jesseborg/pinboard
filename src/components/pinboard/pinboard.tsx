@@ -243,7 +243,7 @@ function NodeRenderer({ node, nodeTypes, onFocus }: NodeRendererProps) {
 			className="absolute origin-top-left outline-none"
 			onDoubleClick={() => handleRef.current?.onDoubleClick()}
 			// On mobile 'onFocus' triggers after holding for a while so this forces focus on pointer down
-			// onPointerDown={(e) => handleFocusNode(e.target as HTMLDivElement)}
+			onPointerDown={(e) => handleFocusNode(e.target as HTMLDivElement)}
 			onFocus={(e) => handleFocusNode(e.target)}
 		>
 			<Node handleRef={handleRef} node={node} />
