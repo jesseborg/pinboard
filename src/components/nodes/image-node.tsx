@@ -35,8 +35,6 @@ export function BaseImageNode({ node }: ImageNodeType) {
 
 	const [editing, setEditing] = useState(!node.data);
 
-	const [loading, setLoading] = useState(true);
-
 	function handleDialogClose(submit?: boolean) {
 		setEditing(false);
 
@@ -50,7 +48,6 @@ export function BaseImageNode({ node }: ImageNodeType) {
 	useEffect(() => {
 		async function getBlobData() {
 			if (!node.data) {
-				setLoading(false);
 				return;
 			}
 
@@ -63,17 +60,11 @@ export function BaseImageNode({ node }: ImageNodeType) {
 			setNode<ImageNodeProps>(node.id, {
 				data: { src: URL.createObjectURL(blob) },
 			});
-
-			setLoading(false);
 		}
 
 		getBlobData();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
-
-	if (loading) {
-		return null;
-	}
 
 	return (
 		<>
