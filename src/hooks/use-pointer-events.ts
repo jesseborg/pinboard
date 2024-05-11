@@ -52,6 +52,10 @@ export function usePointerEvents(
 				return;
 			}
 
+			if (!options.target.current?.contains(event.target as HTMLElement)) {
+				return;
+			}
+
 			// because we handle 'pointerdown' on the document and the element
 			// we don't want to track the same pointer multiple times
 			if (
@@ -76,7 +80,7 @@ export function usePointerEvents(
 				pinching,
 			});
 		},
-		[getTouches, handlers, options.types, pinching]
+		[getTouches, handlers, options.target, options.types, pinching]
 	);
 
 	const handlePointerMove = useCallback(
