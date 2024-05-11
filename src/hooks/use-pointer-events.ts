@@ -117,8 +117,6 @@ export function usePointerEvents(
 				return;
 			}
 
-			setPointerDown(false);
-
 			// Remove the event from the cache
 			const index = cache.current.findIndex(
 				({ pointerId }) => pointerId === event.pointerId
@@ -130,19 +128,21 @@ export function usePointerEvents(
 
 			cache.current.splice(index, 1);
 
-			if (cache.current.length < 2) {
-				setPinching(false);
-			}
+			const _pointerDown = cache.current.length > 0;
+			setPointerDown(_pointerDown);
+
+			const _pinching = cache.current.length >= 2;
+			setPinching(_pinching);
 
 			handlers?.onPointerUp?.({
 				event,
 				cache: cache.current,
 				touches: getTouches(),
-				pointerDown: false,
-				pinching,
+				pointerDown: _pointerDown,
+				pinching: _pinching,
 			});
 		},
-		[getTouches, handlers, options.types, pinching]
+		[getTouches, handlers, options.types]
 	);
 
 	// prettier-ignore
