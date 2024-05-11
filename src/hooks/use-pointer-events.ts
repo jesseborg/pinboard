@@ -68,19 +68,18 @@ export function usePointerEvents(
 
 			setPointerDown(true);
 
-			if (cache.current.length >= 2) {
-				setPinching(true);
-			}
+			const _pinching = cache.current.length >= 2;
+			setPinching(_pinching);
 
 			handlers?.onPointerDown?.({
 				event,
 				cache: cache.current,
 				touches: getTouches(),
 				pointerDown: true,
-				pinching,
+				pinching: _pinching,
 			});
 		},
-		[getTouches, handlers, options.target, options.types, pinching]
+		[getTouches, handlers, options.target, options.types]
 	);
 
 	const handlePointerMove = useCallback(
