@@ -43,14 +43,16 @@ export function BaseImageNode({ node }: ImageNodeType) {
 		}
 	}
 
-	// On first render, create a url from the indexeddb blob and update the node
+	// Object URLs are not persisted across sessions
+	// this will create a new URL on the first render from the IndexedDB Blob
 	useEffect(() => {
 		async function getBlobData() {
 			if (!node.data) {
 				return;
 			}
 
-			if (node.data.src.startsWith("blob:")) {
+			// This will revoke the temporary URL created after uploading an image
+			if (node.data.src?.startsWith("blob:")) {
 				URL.revokeObjectURL(node.data.src);
 			}
 
@@ -61,6 +63,7 @@ export function BaseImageNode({ node }: ImageNodeType) {
 		}
 
 		getBlobData();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
@@ -136,10 +139,13 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 		// add image blob to indexedDB
 		await addOrUpdate(blob, node.id);
 
+		// Create a temporary url, gets erased after ImageNode first render
+		const url = URL.createObjectURL(blob);
+
 		// update node data
 		setNode<ImageNodeProps>(node.id, {
 			size: { width: image.naturalWidth, height: image.naturalHeight },
-			data: { src: image.src },
+			data: { src: url },
 		});
 
 		onClose?.(true);
