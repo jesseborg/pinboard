@@ -6,7 +6,7 @@ export function UsePinchDebug({
 	origin,
 }: ReturnType<typeof usePinch>) {
 	return (
-		<div className="absolute inset-0 pointer-events-none">
+		<div className="absolute z-[9999] inset-0 pointer-events-none">
 			<svg className="w-full h-screen">
 				{touches.length > 1 && (
 					<line
