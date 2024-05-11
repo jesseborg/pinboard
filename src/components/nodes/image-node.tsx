@@ -38,7 +38,7 @@ export function BaseImageNode({ node }: ImageNodeType) {
 	function handleDialogClose(submit?: boolean) {
 		setEditing(false);
 
-		if (!submit && !node.data) {
+		if (!submit && node.data && !Object.entries(node.data).length) {
 			removeNode(node.id);
 		}
 	}
