@@ -27,12 +27,13 @@ type BaseDragEvent<T extends HTMLElement = HTMLElement> = {
 	movement: Tuple<number>;
 	/** The element being dragged */
 	target: T;
+	/** is the component currently being pinched */
+	pinching: boolean;
 };
 
 type DragEvent = BaseDragEvent & {
 	/** The current offset position snapped to the grid step */
 	gridOffset: Tuple<number>;
-	pinching: boolean;
 };
 type DragStartEvent = BaseDragEvent;
 type DragEndEvent = BaseDragEvent & {
@@ -94,7 +95,7 @@ function useDrag(
 
 	const { pointerDown } = usePointerEvents(
 		{
-			onPointerDown: ({ event }) => {
+			onPointerDown: ({ event, pinching }) => {
 				// Target needs to be an HTMLElement
 				const target = event.target as HTMLElement;
 
@@ -131,6 +132,7 @@ function useDrag(
 					initial,
 					offset,
 					initialOffset,
+					pinching,
 				});
 			},
 			onPointerMove: ({ event, pointerDown, pinching }) => {
@@ -167,7 +169,7 @@ function useDrag(
 					pinching,
 				});
 			},
-			onPointerUp: ({ event }) => {
+			onPointerUp: ({ event, pinching }) => {
 				if (!options?.target.current || !dragTarget.current) {
 					return;
 				}
@@ -190,6 +192,7 @@ function useDrag(
 					xy: [event.clientX, event.clientY],
 					gridOffset,
 					initialOffset,
+					pinching,
 				});
 			},
 		},
