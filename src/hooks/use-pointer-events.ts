@@ -52,6 +52,14 @@ export function usePointerEvents(
 				return;
 			}
 
+			// because we handle 'pointerdown' on the document and the element
+			// we don't want to track the same pointer multiple times
+			if (
+				cache.current.find(({ pointerId }) => pointerId === event.pointerId)
+			) {
+				return;
+			}
+
 			cache.current.push(event);
 
 			setPointerDown(true);
@@ -136,13 +144,15 @@ export function usePointerEvents(
 
 	// prettier-ignore
 	useEffect(() => {
-		options?.target.current?.addEventListener("pointerdown",handlePointerDown, options?.capture);
+		options?.target.current?.addEventListener("pointerdown", handlePointerDown, options?.capture);
+		document.addEventListener("pointerdown", handlePointerDown, options.capture);
 
 		document.addEventListener("pointermove", handlePointerMove, options.capture);
 		document.addEventListener("pointerup", handlePointerUp, options?.capture);
 
 		return () => {
 			options?.target.current?.removeEventListener("pointerdown",handlePointerDown,options?.capture);
+			document.removeEventListener("pointerdown", handlePointerDown, options.capture);
 
 			document.removeEventListener("pointermove",handlePointerMove,options?.capture);
 			document.removeEventListener("pointerup",handlePointerUp,options?.capture);

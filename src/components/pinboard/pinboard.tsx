@@ -110,6 +110,7 @@ function DraggablePinBoard({
 			})}
 		>
 			<PanPinch ref={ref} />
+			<NodeDragger ref={ref} />
 			<div
 				id="renderer"
 				style={{
@@ -124,6 +125,34 @@ function DraggablePinBoard({
 		</div>
 	);
 }
+
+const NodeDragger = forwardRef<HTMLDivElement>((_, ref) => {
+	const transform = usePinBoardTransform();
+	const { setNode } = useNodesActions();
+
+	useDrag(
+		({ gridOffset: [ox, oy], target, pinching }) => {
+			if (pinching) {
+				return;
+			}
+
+			const x = ox / transform.scale;
+			const y = oy / transform.scale;
+			target.style.transform = `translate(${x}px, ${y}px)`;
+			setNode(target.id, { position: { x, y } });
+		},
+		{
+			target: ref as React.RefObject<HTMLDivElement>,
+			selectors: "[data-draggable=true]",
+			offset: [transform.x, transform.y],
+			grid: {
+				step: [10 * transform.scale, 10 * transform.scale],
+			},
+		}
+	);
+
+	return null;
+});
 
 const PanPinch = forwardRef<HTMLDivElement>((_, ref) => {
 	const { setTransform } = usePinBoardActions();
@@ -230,27 +259,6 @@ function NodesContainer({ nodes, nodeTypes }: PinBoardProps) {
 	const { deleteById } = useIndexedDB<Blob>("images");
 
 	const ref = useRef<HTMLDivElement>(null);
-
-	useDrag(
-		({ gridOffset: [ox, oy], target, pinching }) => {
-			if (pinching) {
-				return;
-			}
-
-			const x = ox / transform.scale;
-			const y = oy / transform.scale;
-			target.style.transform = `translate(${x}px, ${y}px)`;
-			setNode(target.id, { position: { x, y } });
-		},
-		{
-			target: ref,
-			selectors: "[data-draggable=true]",
-			offset: [transform.x, transform.y],
-			grid: {
-				step: [10 * transform.scale, 10 * transform.scale],
-			},
-		}
-	);
 
 	useKeyDown(
 		document.body,
