@@ -39,7 +39,11 @@ export function ToolBar() {
 							</p>
 						}
 					>
-						<Button intent="blank" onClick={() => addNode("note")}>
+						<Button
+							title="Add Note Node"
+							intent="blank"
+							onClick={() => addNode("note")}
+						>
 							<NoteIcon />
 						</Button>
 					</ToolTip>
@@ -50,7 +54,11 @@ export function ToolBar() {
 							</p>
 						}
 					>
-						<Button intent="blank" onClick={() => addNode("image")}>
+						<Button
+							title="Add Image Node"
+							intent="blank"
+							onClick={() => addNode("image")}
+						>
 							<ImageIcon />
 						</Button>
 					</ToolTip>

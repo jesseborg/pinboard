@@ -46,6 +46,8 @@ export function NameContainer() {
 		<div className="absolute left-1/2 -translate-x-1/2 bg-red-500 top-6 z-50">
 			<input
 				ref={inputRef}
+				id="name-container"
+				title="Pinboard Name"
 				autoComplete="off"
 				autoCapitalize="off"
 				autoCorrect="off"

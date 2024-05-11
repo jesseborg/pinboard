@@ -101,6 +101,7 @@ export function BaseNoteNode({ node, handleRef }: NoteNodeType) {
 			className="text-sm min-w-[250px]"
 		>
 			<textarea
+				id={`note_${node.id}`}
 				ref={textAreaRef}
 				tabIndex={-1}
 				autoComplete="off"
