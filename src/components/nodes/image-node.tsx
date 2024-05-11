@@ -72,19 +72,27 @@ export function BaseImageNode({ node }: ImageNodeType) {
 				<Image node={node} />
 			</BaseNode>
 
-			{/* Alt text tag */}
-			{node.data?.showAlt && node.data?.alt && (
-				<div style={{ maxWidth: node.size.width }} className="px-2">
-					<p className="bg-black max-w-full text-center w-fit relative text-white px-4 mx-auto py-2 z-50 break-words -mt-4">
-						{node.data.alt}
-					</p>
-				</div>
-			)}
+			<Tag node={node} />
+
 			{editing && <EditDialog node={node} onClose={handleDialogClose} />}
 		</>
 	);
 }
 export const ImageNode = memo(BaseImageNode);
+
+function Tag({ node }: { node: ImageNodeProps }) {
+	if (!node.data?.showAlt || !node.data?.alt || !node.size) {
+		return null;
+	}
+
+	return (
+		<div className="px-2" style={{ maxWidth: node.size.width }}>
+			<p className="bg-black max-w-full text-center w-fit relative text-white px-4 mx-auto py-2 z-50 break-words -mt-4">
+				{node.data?.alt}
+			</p>
+		</div>
+	);
+}
 
 function Image({ node }: { node: ImageNodeProps }) {
 	if (!node.data || !node.size) {
@@ -227,7 +235,7 @@ function EditDialog({ node, onClose }: EditDialogProps) {
 												id="showAlt"
 												type="checkbox"
 												value="showAlt"
-												checked={node.data?.showAlt}
+												defaultChecked={node.data?.showAlt}
 												onChange={handleCheckboxChange}
 											/>
 										</span>
